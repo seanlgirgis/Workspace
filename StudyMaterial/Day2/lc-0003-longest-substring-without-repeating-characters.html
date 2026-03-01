@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Longest Substring</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .step {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #bdc3c7;
+        }
+
+        .str-box {
+            display: inline-block;
+            padding: 10px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.2em;
+            position: relative;
+        }
+
+        .str-box.window {
+            border-top: 3px solid #2980b9;
+            border-bottom: 3px solid #2980b9;
+            background-color: #eaf2f8;
+        }
+
+        .str-box.L {
+            border-left: 3px solid #e74c3c;
+            padding-left: 8px;
+        }
+
+        .str-box.R {
+            border-right: 3px solid #27ae60;
+            padding-right: 8px;
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .pointer.left-ptr {
+            color: #e74c3c;
+            bottom: -20px;
+            left: 0;
+        }
+
+        .pointer.right-ptr {
+            color: #27ae60;
+            top: -20px;
+            right: 0;
+        }
+
+        .set-box {
+            margin-top: 30px;
+            display: inline-block;
+            padding: 10px;
+            background: #ecf0f1;
+            border-radius: 5px;
+            font-family: monospace;
+            border: 1px dashed #7f8c8d;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Longest Substring Without Repeats</h1>
+    <p>String: <code>"abcabc"</code></p>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> Expand <code>R</code> to capture territory. If <code>R</code> hits a letter
+        already in our Set, crunch <code>L</code> forward to throw away old letters until the duplicate is gone.
+    </div>
+
+    <div class="diagram-container">
+        <div class="step">
+            <h3>Step 1: Grow Window</h3>
+            <p>Expand R (Right). Add 'a', 'b', then 'c'. Max Length = 3.</p>
+            <div style="margin-top: 25px; margin-bottom: 25px;">
+                <span class="str-box window L"><span class="pointer left-ptr">L</span>a</span><span
+                    class="str-box window">b</span><span class="str-box window R"><span
+                        class="pointer right-ptr">R</span>c</span><span class="str-box">a</span><span
+                    class="str-box">b</span><span class="str-box">c</span>
+            </div>
+            <div class="set-box">Set: { 'a', 'b', 'c' }</div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Collision!</h3>
+            <p>R moves to index 3 ('a'). This is already in the set! We must shrink.</p>
+            <div style="margin-top: 25px; margin-bottom: 25px;">
+                <span class="str-box window L"><span class="pointer left-ptr">L</span>a</span><span
+                    class="str-box window">b</span><span class="str-box window">c</span><span class="str-box window R"
+                    style="background:#f9ebea; border-right-color:#c0392b;"><span
+                        class="pointer right-ptr">R</span>a</span><span class="str-box">b</span><span
+                    class="str-box">c</span>
+            </div>
+            <p style="color:#c0392b; font-weight:bold;">Cannot add! 'a' is a duplicate.</p>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Crunch L Forward</h3>
+            <p>Move L forward by 1. Remove the old 'a' from the Set. Now the window is valid again.</p>
+            <div style="margin-top: 25px; margin-bottom: 25px;">
+                <span class="str-box">a</span><span class="str-box window L"><span
+                        class="pointer left-ptr">L</span>b</span><span class="str-box window">c</span><span
+                    class="str-box window R"><span class="pointer right-ptr">R</span>a</span><span
+                    class="str-box">b</span><span class="str-box">c</span>
+            </div>
+            <div class="set-box">Set: { 'b', 'c', 'a' }</div>
+        </div>
+    </div>
+</body>
+
+</html>

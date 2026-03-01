@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Car Fleet</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .road-map {
+            display: flex;
+            border-bottom: 4px solid #34495e;
+            padding-bottom: 30px;
+            margin-top: 50px;
+            position: relative;
+        }
+
+        .car-node {
+            position: absolute;
+            background: #e74c3c;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-weight: bold;
+            font-family: monospace;
+            transform: translateX(-50%);
+            bottom: 10px;
+        }
+
+        .target-node {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: #27ae60;
+            color: white;
+            padding: 10px;
+            font-weight: bold;
+        }
+
+        .calc-box {
+            margin-top: 50px;
+            background: #ecf0f1;
+            padding: 20px;
+        }
+
+        .fleet-badge {
+            display: inline-block;
+            background: #8e44ad;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Car Fleet</h1>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> Process cars from the target backwards. If my theoretical arrival time is
+        LESS THAN the car in front of me, I will inevitably crash into it. We merge into one fleet, and I adopt the
+        slower arrival time of the car blocking me.
+    </div>
+
+    <h2>Tracing Target = 12</h2>
+
+    <div class="diagram-container">
+
+        <div class="road-map">
+            <div class="car-node" style="left: 0%;">Pos: 0<br>Spd: 1</div>
+            <div class="car-node" style="left: 25%;">Pos: 3<br>Spd: 3</div>
+            <div class="car-node" style="left: 41%;">Pos: 5<br>Spd: 1</div>
+            <div class="car-node" style="left: 66%;">Pos: 8<br>Spd: 4</div>
+            <div class="car-node" style="left: 83%; background:#f39c12;">Pos: 10<br>Spd: 2</div>
+            <div class="target-node">TARGET 12</div>
+        </div>
+
+        <div class="calc-box">
+            <h3>Calculations (Processed Right to Left)</h3>
+            <p><strong>1. Pos 10:</strong> (12 - 10) / 2 = <strong>1.0 hours</strong>. <br><em>(No cars ahead. It
+                    becomes Fleet 1, arriving at T=1.0)</em></p>
+
+            <hr>
+            <p><strong>2. Pos 8:</strong> (12 - 8) / 4 = <strong>1.0 hours</strong>.<br>
+                <em>Does 1.0 &le; 1.0 (Fleet 1 time)? Yes. Car 8 crashes into Car 10!</em> <span
+                    class="fleet-badge">Merges into Fleet 1</span>
+            </p>
+
+            <hr>
+            <p><strong>3. Pos 5:</strong> (12 - 5) / 1 = <strong>7.0 hours</strong>.<br>
+                <em>Does 7.0 &le; 1.0 (Fleet 1 time)? No. It's too slow. Forms a new fleet.</em> <span
+                    class="fleet-badge">Fleet 2 Formed (Time: 7.0)</span>
+            </p>
+
+            <hr>
+            <p><strong>4. Pos 3:</strong> (12 - 3) / 3 = <strong>3.0 hours</strong>.<br>
+                <em>Does 3.0 &le; 7.0 (Fleet 2 time)? Yes! It's fast enough to crash into Car 5!</em> <span
+                    class="fleet-badge">Merges into Fleet 2</span>
+            </p>
+
+            <hr>
+            <p><strong>5. Pos 0:</strong> (12 - 0) / 1 = <strong>12.0 hours</strong>.<br>
+                <em>Does 12.0 &le; 7.0 (Fleet 2 time)? No. Too slow. Forms new fleet.</em> <span
+                    class="fleet-badge">Fleet 3 Formed</span>
+            </p>
+        </div>
+
+        <h3 style="color: #27ae60; text-align: center; margin-top: 30px;">Total Fleets Arriving: 3</h3>
+
+    </div>
+
+</body>
+
+</html>

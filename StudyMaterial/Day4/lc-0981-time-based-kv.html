@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #981 — Time Based Key-Value Store — Binary Search</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #981 — Time Based Key-Value Store <span class="badge">medium</span></h1>
+<p class="subtitle">Binary Search Pattern &nbsp;|&nbsp; Day 4 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 981: Time Based Key-Value Store</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #9C27B0; background-color: #f3e5f5; color: #4a148c; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> A regular dictionary gives us O(1) key lookups. If we store a LIST of <code>(timestamp, value)</code> pairs for each key, and we know timestamps are strictly strictly increasing (append-only), that list is naturally sorted. This means we can use Binary Search instead of scanning the list backward.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">For a single key with $k$ historical values, finding the floor of a given timestamp $T$ ($t \le T$):</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Linear search (backward):</strong> $O(k)$ worst case</li>
+<li><strong>Binary Search (bisect_right):</strong> $O(\log k)$ worst case</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">If we have $N$ total <code>set</code> operations over $M$ keys, average list length is $N/M$. The time to retrieve is reduced from $T \propto N/M$ to $T \propto \log(N/M)$.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Design a time-based key-value data structure that can store multiple values for the same key at different time stamps and retrieve the key's value at a certain timestamp.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Implement the <code>TimeMap</code> class:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li><code>TimeMap()</code> Initializes the object of the data structure.</li>
+<li><code>void set(String key, String value, int timestamp)</code> Stores the key <code>key</code> with the value <code>value</code> at the given time <code>timestamp</code>.</li>
+<li><code>String get(String key, int timestamp)</code> Returns a value such that <code>set</code> was called previously, with <code>timestamp_prev <= timestamp</code>. If there are multiple such values, it returns the value associated with the largest <code>timestamp_prev</code>. If there are no values, it returns <code>""</code>.</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Note:</strong> All timestamps <code>timestamp</code> of <code>set</code> are strictly increasing.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input
+["TimeMap", "set", "get", "get", "set", "get", "get"]
+[[], ["foo", "bar", 1], ["foo", 1], ["foo", 3], ["foo", "bar2", 4], ["foo", 4], ["foo", 5]]
+Output
+[null, null, "bar", "bar", null, "bar2", "bar2"]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 <= key.length, value.length <= 100 | 1 <= timestamp <= 10^7 | All timestamps in <code>set</code> are strictly increasing</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Dictionary of Lists</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"The master index is a dict pointing to a timeline. Because events only happen forwards in time, every timeline is automatically sorted. I binary search the timeline."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Dict lookup O(1) + Binary search on list O(log K)</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Git History</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Each key is a file, the list is its commit history. Finding a value at time T means finding the commit immediately before or exactly at T."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Append-only data structure guarantees monotonic ordering property</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>from collections import defaultdict
+import bisect
+
+class TimeMap:
+    def __init__(self):
+        # Store key -&gt; list of (timestamp, value)
+        self.store = defaultdict(list)
+
+    def set(self, key: str, value: str, timestamp: int) -&gt; None:
+        # O(1) append. List remains sorted by timestamp because of problem constraints
+        self.store[key].append((timestamp, value))
+
+    def get(self, key: str, timestamp: int) -&gt; str:
+        # O(1) dict lookup
+        history = self.store.get(key, [])
+        if not history:
+            return ""
+        
+        # Use bisect_right to find the insertion point.
+        # We search with a dummy value chr(127) which is &gt; all valid ASCII chars.
+        # This guarantees we insert after an exact timestamp match.
+        idx = bisect.bisect_right(history, (timestamp, chr(127)))
+        
+        # If idx == 0, it means the required timestamp is SMALLER than all recorded ones
+        if idx == 0:
+            return ""
+        
+        # Return the value immediately left of the insertion point
+        return history[idx - 1][1]
+
+
+tm = TimeMap()
+tm.set("foo", "bar", 1)
+tm.set("foo", "bar2", 4)
+print("Optimal:", tm.get("foo", 4))   # Expected: "bar2"
+print("Optimal:", tm.get("foo", 3))   # Expected: "bar"
+print("Optimal:", tm.get("foo", 5))   # Expected: "bar2"
+print("Optimal:", tm.get("foo", 0))   # Expected: "" (before first timestamp)</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why is this highly relevant to data engineering?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Time-series lookups are everywhere in data systems — "give me the metric value at time T" or "what was the most recent configuration before this deployment?" Monitoring systems (APM tools), SLA calculations, capacity trending, audit trails — all require floor queries on timestamps. This problem is the algorithmic core of every such lookup.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: What is <code>bisect.bisect_right</code> and how does it work?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> <code>bisect_right(array, value)</code> returns the rightmost index where <code>value</code> could be inserted to keep the array sorted. All elements at <code>[0, result-1]</code> are ≤ <code>value</code>. Elements at <code>[result, end]</code> are > <code>value</code>. We use <code>bisect_right</code> rather than <code>bisect_left</code> because we want all timestamps equal to the query to count as valid (≤ not <).</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> <code>set()</code> = O(1) — just an append. <code>get()</code> = O(log n) where n is the number of <code>set()</code> calls for that key — binary search on the sorted timestamp list. Overall for k operations: O(k) for set calls, O(k log k) worst case for get calls.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: What if timestamps in set() were NOT guaranteed to be increasing?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> We'd need to sort the list on each <code>set()</code> call — O(n log n) per insert, making it worse than brute force for frequent writes. Or use a sorted container like <code>SortedList</code> from the <code>sortedcontainers</code> library — O(log n) insert and O(log n) search. The problem's constraint of increasing timestamps is the key gift.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) Key doesn't exist — return "". (2) Query timestamp before all stored timestamps — <code>bisect_right</code> returns 0, <code>idx = -1 < 0</code>, return "". (3) Exact timestamp match — <code>bisect_right</code> puts exact matches before the insertion point for <code>(ts, chr(127))</code>, so <code>idx</code> points to the exact match correctly. (4) Multiple values at different timestamps for same key — sorted order ensures we return the most recent ≤ query.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #d94f8a;padding:18px;border-radius:8px;"><h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> Citi's APM infrastructure stored per-server metric snapshots every 60 seconds. Post-incident analysis required "what was the CPU for server SRV-1042 at 14:37:00?" — a floor query on the sorted timestamp list for that server.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Scenario:</strong> The monitoring database had 6,000 servers × 1,440 minutes = 8.64 million timestamp-value pairs per day. Ad-hoc point-in-time queries for specific servers during incident investigation needed to return in under 1 second.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How this pattern applied:</strong> Each server's readings were stored chronologically — automatically sorted by timestamp. A binary search on the server's timestamp list (bisect_right) returned the floor value in O(log 1440) ≈ 11 comparisons. This is exactly the TimeMap.get() operation.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Impact:</strong> Incident triage queries that previously required a <code>WHERE timestamp <= '14:37' ORDER BY timestamp DESC LIMIT 1</code> full-table-scan on 8.64M rows ran in microseconds against the in-memory sorted structure. This was critical for the 5-minute SLA on incident reports — investigators got exact point-in-time readings instantly.</p></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Binary Search on Sorted Timestamps</strong> — Exploit monotonically increasing timestamps for O(log n) floor queries</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Time-series data with monotonically increasing timestamps</li>
+<li>✅ "Most recent value at or before time T" queries</li>
+<li>✅ Version control, audit logs, sensor readings, monitoring data</li>
+<li>❌ <strong>Don't use when:</strong> Timestamps are not guaranteed sorted — need SortedList or sort on insert</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time (get)</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (linear)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Binary Search)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(\log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can explain why the "increasing timestamp" constraint enables binary search</li>
+<li style="margin:4px 0;">&#9744; Can explain bisect_right and the chr(127) sentinel trick</li>
+<li style="margin:4px 0;">&#9744; Can write the solution from memory in 5 minutes</li>
+<li style="margin:4px 0;">&#9744; Can explain floor query concept and where it appears in real systems</li>
+<li style="margin:4px 0;">&#9744; Can connect to monitoring/APM use case with specific numbers</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

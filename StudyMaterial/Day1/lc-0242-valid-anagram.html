@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Valid Anagram</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .step {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .char-box {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            border: 1px solid #7f8c8d;
+            margin: 0 2px;
+            font-weight: bold;
+            background: #ecf0f1;
+            border-radius: 3px;
+        }
+
+        .tally-table {
+            border-collapse: collapse;
+            margin-top: 10px;
+            min-width: 200px;
+        }
+
+        .tally-table th,
+        .tally-table td {
+            border: 1px solid #bdc3c7;
+            padding: 8px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .tally-table th {
+            background-color: #34495e;
+            color: white;
+        }
+
+        .zero-state {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        code {
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Valid Anagram (Frequency Tally)</h1>
+    <p>String S: <code>"rat"</code> | String T: <code>"car"</code></p>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> Don't sort. Create an array of 26 zeros. For each letter in String A, add 1.
+        For each letter in String B, subtract 1. If the final array is all zeros, it's an anagram.
+    </div>
+
+    <div class="diagram-container">
+        <div class="step">
+            <h3>Initial State (Array of 26 zeros)</h3>
+            <p>Representing letters a-z:<br>
+                <code>[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0... ]</code>
+            </p>
+        </div>
+
+        <div class="step">
+            <h3>Process "rat" (Add 1)</h3>
+            <div>
+                <span class="char-box">+r</span> <span class="char-box">+a</span> <span class="char-box">+t</span>
+            </div>
+            <table class="tally-table">
+                <tr>
+                    <th>a</th>
+                    <th>c</th>
+                    <th>r</th>
+                    <th>t</th>
+                </tr>
+                <tr>
+                    <td>+1</td>
+                    <td>0</td>
+                    <td>+1</td>
+                    <td>+1</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="step">
+            <h3>Process "car" (Subtract 1)</h3>
+            <div>
+                <span class="char-box">-c</span> <span class="char-box">-a</span> <span class="char-box">-r</span>
+            </div>
+            <table class="tally-table">
+                <tr>
+                    <th>a</th>
+                    <th>c</th>
+                    <th>r</th>
+                    <th>t</th>
+                </tr>
+                <tr>
+                    <td class="zero-state">0</td>
+                    <td style="color:red;font-weight:bold">-1</td>
+                    <td class="zero-state">0</td>
+                    <td style="font-weight:bold">+1</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="step">
+            <h3>Final Check</h3>
+            <p>Are all numbers zero? <strong>NO.</strong> (c is -1, t is 1).</p>
+            <p><strong>Return False.</strong> Not an anagram.</p>
+        </div>
+    </div>
+</body>
+
+</html>

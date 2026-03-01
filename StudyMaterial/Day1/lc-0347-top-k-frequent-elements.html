@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Top K Frequent Elements</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        code {
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+
+        .bucket-row {
+            display: flex;
+            align-items: stretch;
+            margin-top: 20px;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 5px;
+        }
+
+        .bucket {
+            width: 80px;
+            text-align: center;
+            margin: 0 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .bucket-index {
+            font-weight: bold;
+            padding-top: 5px;
+            border-top: 1px solid #95a5a6;
+            margin-top: 5px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .bucket-items {
+            min-height: 60px;
+            background: #ecf0f1;
+            border-radius: 4px 4px 0 0;
+            border: 1px dashed #bdc3c7;
+            border-bottom: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 5px;
+        }
+
+        .item {
+            background: #3498db;
+            color: white;
+            border-radius: 3px;
+            padding: 2px;
+            margin-top: 2px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .hash-table {
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .hash-table th,
+        .hash-table td {
+            border: 1px solid #bdc3c7;
+            padding: 5px 15px;
+            text-align: center;
+        }
+
+        .hash-table th {
+            background-color: #ecf0f1;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Top K Frequent Elements (Bucket Sort)</h1>
+    <p>Array: <code>[1, 1, 1, 2, 2, 3]</code> | K = <code>2</code></p>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> Don't sort the counts. Create an array where the index is the frequency. Put
+        the numbers inside the correct bucket. Then read the array backwards. It takes O(N) time.
+    </div>
+
+    <div class="diagram-container">
+        <h3>Step 1: Count Frequencies (Tally Sheet)</h3>
+        <table class="hash-table">
+            <tr>
+                <th>Number (Key)</th>
+                <th>Count (Value)</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>3</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>1</td>
+            </tr>
+        </table>
+        <p><em>N is 6, so we create 7 buckets (indices 0 through 6).</em></p>
+
+        <h3>Step 2: Place numbers into buckets matching their Count</h3>
+        <div class="bucket-row">
+            <div class="bucket">
+                <div class="bucket-items"></div>
+                <div class="bucket-index">0</div>
+            </div>
+            <div class="bucket">
+                <div class="bucket-items">
+                    <div class="item">3</div>
+                </div>
+                <div class="bucket-index">1</div>
+            </div>
+            <div class="bucket">
+                <div class="bucket-items">
+                    <div class="item">2</div>
+                </div>
+                <div class="bucket-index">2</div>
+            </div>
+            <div class="bucket">
+                <div class="bucket-items">
+                    <div class="item">1</div>
+                </div>
+                <div class="bucket-index">3</div>
+            </div>
+            <div class="bucket">
+                <div class="bucket-items"></div>
+                <div class="bucket-index">4</div>
+            </div>
+            <div class="bucket">
+                <div class="bucket-items"></div>
+                <div class="bucket-index">5</div>
+            </div>
+            <div class="bucket">
+                <div class="bucket-items"></div>
+                <div class="bucket-index">6</div>
+            </div>
+        </div>
+
+        <h3>Step 3: Scan Backwards (Start from Index 6)</h3>
+        <ul style="line-height: 1.8;">
+            <li>Index 6: Empty</li>
+            <li>Index 5: Empty</li>
+            <li>Index 4: Empty</li>
+            <li>Index 3: Found <code>1</code>. Add to results. <strong>Res = [1]</strong>. Have we found k=2 items yet?
+                No.</li>
+            <li>Index 2: Found <code>2</code>. Add to results. <strong>Res = [1, 2]</strong>. Have we found k=2 items
+                yet? <strong>YES.</strong></li>
+        </ul>
+        <p><strong>Stop and Return: <code>[1, 2]</code>.</strong></p>
+    </div>
+</body>
+
+</html>

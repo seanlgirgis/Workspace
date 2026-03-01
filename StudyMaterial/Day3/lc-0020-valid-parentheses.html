@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Valid Parentheses</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+        }
+
+        .string-processing {
+            flex: 1;
+            margin-right: 2rem;
+        }
+
+        .stack-vis {
+            width: 150px;
+            border-left: 5px solid #34495e;
+            border-right: 5px solid #34495e;
+            border-bottom: 5px solid #34495e;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            padding-bottom: 5px;
+            background: #ecf0f1;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .stack-item {
+            background: #2980b9;
+            color: white;
+            width: 80%;
+            text-align: center;
+            padding: 10px;
+            margin-top: 5px;
+            font-weight: bold;
+            border-radius: 3px;
+            font-size: 1.2em;
+        }
+
+        .code-char {
+            font-family: monospace;
+            font-size: 1.5em;
+            padding: 5px;
+            border: 1px solid #ccc;
+            display: inline-block;
+            margin: 2px;
+        }
+
+        .active-char {
+            background-color: #f1c40f;
+            border-color: #f39c12;
+            font-weight: bold;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+
+        .action {
+            font-weight: bold;
+            color: #e74c3c;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Valid Parentheses</h1>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> The last thing you opened MUST be the first thing you close. Push openers
+        onto a Stack. When you see a closer, pop the top of the stack and ensure they are a perfect match pair.
+    </div>
+
+    <h2>Tracing: <code>( [ ] )</code></h2>
+
+    <div class="diagram-container">
+        <div class="string-processing">
+            <h3>Step 1 & 2: Push Openers</h3>
+            <p>Read <code>(</code> : Push to stack.<br>Read <code>[</code> : Push to stack.</p>
+            <div>
+                <span class="code-char">(</span><span class="code-char">[</span><span class="code-char">]</span><span
+                    class="code-char">)</span>
+            </div>
+        </div>
+        <div>
+            <h4 style="text-align: center; margin-top:0;">The Stack</h4>
+            <div class="stack-vis">
+                <div class="stack-item">[</div>
+                <div class="stack-item">(</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <div class="string-processing">
+            <h3>Step 3: Evaluate Closer</h3>
+            <p>Read <code>]</code>. It is a closer! We must POP the top item from the stack.</p>
+            <p>Does the popped item <code>[</code> pair perfectly with <code>]</code>? <strong>YES!</strong> (Valid so
+                far).</p>
+            <div>
+                <span class="code-char">(</span><span class="code-char">[</span><span
+                    class="code-char active-char">]</span><span class="code-char">)</span>
+            </div>
+            <div class="action">&larr; Popped '[' off the stack.</div>
+        </div>
+        <div>
+            <h4 style="text-align: center; margin-top:0;">The Stack</h4>
+            <div class="stack-vis" style="position: relative;">
+                <div class="stack-item" style="opacity: 0.3; position:absolute; top: -40px;">[</div>
+                <div class="stack-item">(</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="diagram-container">
+        <div class="string-processing">
+            <h3>Step 4: Final Closer & Return</h3>
+            <p>Read <code>)</code>. It is a closer! POP the top item.</p>
+            <p>Does <code>(</code> pair with <code>)</code>? <strong>YES!</strong></p>
+            <p>String is fully processed. Is the Stack empty? <strong>YES!</strong> Return True.</p>
+            <div>
+                <span class="code-char">(</span><span class="code-char">[</span><span class="code-char">]</span><span
+                    class="code-char active-char">)</span>
+            </div>
+            <div class="action">&larr; Popped '(' off the stack.</div>
+        </div>
+        <div>
+            <h4 style="text-align: center; margin-top:0;">The Stack</h4>
+            <div class="stack-vis">
+                <div style="color: #95a5a6; font-style: italic; align-self: center; margin-bottom: 50px;">(Empty)</div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

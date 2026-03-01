@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Day 7 — Interview Prep Cheat Sheet</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh; padding: 30px 20px; color: #e0e0e0;
+}
+.container { max-width: 1200px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2em; font-weight: 300;
+     letter-spacing: -1px; margin-bottom: 6px; }
+.subtitle { color: rgba(255,255,255,0.7); text-align: center; margin-bottom: 30px; font-size: 0.95em; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+@media(max-width:900px) { .grid,.grid3 { grid-template-columns: 1fr; } }
+.card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 20px;
+  backdrop-filter: blur(10px);
+}
+.card h2 { font-size: 1em; font-weight: 600; margin-bottom: 14px;
+           text-transform: uppercase; letter-spacing: 1px; }
+.card.red h2    { color: #ff6b6b; border-bottom: 2px solid #ff6b6b; padding-bottom: 8px; }
+.card.blue h2   { color: #74b9ff; border-bottom: 2px solid #74b9ff; padding-bottom: 8px; }
+.card.green h2  { color: #55efc4; border-bottom: 2px solid #55efc4; padding-bottom: 8px; }
+.card.yellow h2 { color: #fdcb6e; border-bottom: 2px solid #fdcb6e; padding-bottom: 8px; }
+.card.purple h2 { color: #a29bfe; border-bottom: 2px solid #a29bfe; padding-bottom: 8px; }
+.card.orange h2 { color: #fd79a8; border-bottom: 2px solid #fd79a8; padding-bottom: 8px; }
+.card.teal h2   { color: #81ecec; border-bottom: 2px solid #81ecec; padding-bottom: 8px; }
+pre {
+  background: rgba(0,0,0,0.4); border-radius: 6px;
+  padding: 10px 12px; font-size: 0.78em; line-height: 1.5;
+  overflow-x: auto; color: #dfe6e9; margin: 8px 0;
+  border-left: 3px solid rgba(255,255,255,0.15);
+}
+.tip { background: rgba(255,255,255,0.07); border-radius: 5px;
+       padding: 8px 10px; margin: 6px 0; font-size: 0.82em;
+       line-height: 1.6; color: #dfe6e9; }
+.tip strong { color: #fdcb6e; }
+.tip .label { font-weight: 700; font-size: 0.75em; text-transform: uppercase;
+              letter-spacing: 0.5px; margin-bottom: 3px; display: block; }
+.label.red    { color: #ff6b6b; }
+.label.blue   { color: #74b9ff; }
+.label.green  { color: #55efc4; }
+.label.yellow { color: #fdcb6e; }
+.label.purple { color: #a29bfe; }
+table { width: 100%; border-collapse: collapse; font-size: 0.8em; margin-top: 8px; }
+th { color: rgba(255,255,255,0.5); font-weight: 600; text-align: left;
+     padding: 5px 8px; font-size: 0.75em; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 5px 8px; border-top: 1px solid rgba(255,255,255,0.07); color: #b2bec3; vertical-align: top; }
+td strong { color: #dfe6e9; }
+.full { grid-column: 1 / -1; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Day 7 — Interview Prep Cheat Sheet</h1>
+<p class="subtitle">All 6 days condensed &nbsp;|&nbsp; Read once before the mock interview &nbsp;|&nbsp; Then close it and perform</p>
+
+
+<!-- ── Row 1: LeetCode Patterns ─────────────────────────────────────────── -->
+<div class="grid3">
+
+<div class="card red">
+<h2>📊 Pattern Recognition</h2>
+<div class="tip"><span class="label red">HashMap / Array</span>Complement lookup, frequency count, prefix sum</div>
+<div class="tip"><span class="label blue">Sliding Window</span>Contiguous subarray with a constraint — expand right, shrink left when violated</div>
+<div class="tip"><span class="label green">Stack</span>Monotonic stack for "next greater element", matching brackets</div>
+<div class="tip"><span class="label yellow">Binary Search</span>Sorted array → halve search space. Template: <code>left <= right</code>, <code>mid = left + (right-left)//2</code></div>
+<div class="tip"><span class="label purple">Heap</span>Top K → min-heap of size K. <code>heapq</code> is min-heap. Negate for max.</div>
+<div class="tip"><span class="label red">Intervals</span>Sort by start (merge) or by end (greedy remove). Track <code>last_end</code>.</div>
+</div>
+
+<div class="card blue">
+<h2>⚡ Complexity Cheat</h2>
+<table>
+<tr><th>Pattern</th><th>Time</th><th>Space</th></tr>
+<tr><td><strong>HashMap lookup</strong></td><td>O(1) avg</td><td>O(n)</td></tr>
+<tr><td><strong>Sliding window</strong></td><td>O(n)</td><td>O(1)–O(k)</td></tr>
+<tr><td><strong>Monotonic stack</strong></td><td>O(n)</td><td>O(n)</td></tr>
+<tr><td><strong>Binary search</strong></td><td>O(log n)</td><td>O(1)</td></tr>
+<tr><td><strong>Heap push/pop</strong></td><td>O(log k)</td><td>O(k)</td></tr>
+<tr><td><strong>Sort</strong></td><td>O(n log n)</td><td>O(1)–O(n)</td></tr>
+<tr><td><strong>Prefix sum build</strong></td><td>O(n)</td><td>O(n)</td></tr>
+<tr><td><strong>Interval merge</strong></td><td>O(n log n)</td><td>O(n)</td></tr>
+</table>
+</div>
+
+<div class="card green">
+<h2>🐍 Python Gotchas</h2>
+<div class="tip"><span class="label green">Binary search midpoint</span><code>mid = left + (right - left) // 2</code> — overflow-safe (matters in C/Java)</div>
+<div class="tip"><span class="label green">Heap in Python</span><code>heapq</code> = min-heap. For max-heap: push <code>-val</code>. For tuples: push <code>(priority, val)</code></div>
+<div class="tip"><span class="label green">Counter</span><code>from collections import Counter; Counter(s) == Counter(t)</code> — anagram in one line</div>
+<div class="tip"><span class="label green">defaultdict</span><code>from collections import defaultdict; d = defaultdict(list)</code> — no KeyError</div>
+<div class="tip"><span class="label green">Prefix sum pattern</span><code>prefix = {0: -1}</code> → initialize before loop for edge case (subarray from index 0)</div>
+<div class="tip"><span class="label green">Interval sort</span>Sort by start: <code>intervals.sort()</code>. By end: <code>.sort(key=lambda x: x[1])</code></div>
+</div>
+
+</div>
+
+
+<!-- ── Row 2: SQL + System Design ─────────────────────────────────────────── -->
+<div class="grid">
+
+<div class="card yellow">
+<h2>🗄️ SQL Analytical Patterns</h2>
+<div class="tip"><span class="label yellow">YoY Growth</span>
+<pre>LAG(revenue, 12) OVER (ORDER BY yr, mo)
+-- or self-join on same month, prior year</pre></div>
+<div class="tip"><span class="label yellow">7-day Rolling Avg</span>
+<pre>AVG(cpu) OVER (ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)</pre></div>
+<div class="tip"><span class="label yellow">Top N per group</span>
+<pre>RANK() OVER (PARTITION BY env ORDER BY cpu DESC) AS rk
+WHERE rk &lt;= 3</pre></div>
+<div class="tip"><span class="label yellow">Funnel / conditional agg</span>
+<pre>COUNT(DISTINCT CASE WHEN event = 'view' THEN user_id END) AS views</pre></div>
+<div class="tip"><span class="label yellow">SCD Type 2 point-in-time</span>
+<pre>WHERE effective_date &lt;= :incident_date
+  AND (expiry_date IS NULL OR expiry_date &gt;= :incident_date)</pre></div>
+<div class="tip"><span class="label yellow">Optimization</span>Composite index (most selective col first) · Partition pruning · EXPLAIN ANALYZE · ANALYZE for stats</div>
+</div>
+
+<div class="card purple">
+<h2>🏗️ System Design: Data Platform</h2>
+<pre>APM Agents → Kafka → Flink (real-time alert &lt;60s)
+                   ↘ Spark ETL → S3 Parquet
+                                 → Glue Catalog
+                                 → Athena (ad-hoc)
+                                 → Grafana</pre>
+<div class="tip"><span class="label purple">Kafka vs Direct S3</span>Kafka = replay buffer. If consumer fails → restart from offset. Direct S3 = no replay.</div>
+<div class="tip"><span class="label purple">Athena vs Redshift</span>Athena = serverless $5/TB, good for ad-hoc. Redshift = provisioned, faster for repeated BI. Rule: query_freq × cost vs cluster_cost/month</div>
+<div class="tip"><span class="label purple">Partitioning</span><code>date=YYYY-MM-DD/env=prod/</code> → monthly queries scan 30 of 365 partitions = 10x cost saving</div>
+<div class="tip"><span class="label purple">Messages/sec math</span>10K servers × 10 metrics × 1/60 = ~1,667 msg/sec. Kafka: easy.</div>
+<div class="tip"><span class="label purple">Stateful alerting</span>5-min window → Flink tumbling window or Kafka Streams KTable with time-based eviction</div>
+<div class="tip"><span class="label purple">Fault tolerance</span>Consumer group → partition rebalance. Redis SET for dedup. PagerDuty HA.</div>
+</div>
+
+</div>
+
+
+<!-- ── Row 3: Python DE + Citi Stories ───────────────────────────────────── -->
+<div class="grid">
+
+<div class="card orange">
+<h2>⚙️ Python Data Engineering</h2>
+<div class="tip"><span class="label red">GIL</span>CPU-bound → multiprocessing (not threads). I/O-bound → threading OK. NumPy releases GIL for C ops. PySpark = JVM (no GIL).</div>
+<div class="tip"><span class="label red">map vs comprehension</span>map = lazy iterator. List comp = eager + more readable. Use map only when chaining with itertools or lazy eval matters.</div>
+<div class="tip"><span class="label red">repartition vs coalesce</span>repartition(n) = full shuffle, can increase. coalesce(n) = no shuffle, can only decrease. Use coalesce before .write() to reduce S3 file count.</div>
+<div class="tip"><span class="label red">PySpark UDF anti-pattern</span>Python UDF = JVM→Python serialization per row = 10x slower. Replace with <code>F.when().otherwise()</code>. Citi: 45 min → 4 min.</div>
+<div class="tip"><span class="label red">Debug slow Spark job</span>1) Spark UI → find red stage · 2) shuffle size · 3) data skew · 4) Python UDFs · 5) shuffle.partitions · 6) CSV vs Parquet</div>
+<div class="tip"><span class="label red">Idempotency</span>DELETE+INSERT per date partition, or UPSERT (ON CONFLICT), or S3 partition overwrite. Required for Airflow retry safety.</div>
+<div class="tip"><span class="label red">ETL template</span>argparse → setup_logging → try: extract/transform/load → except: log + sys.exit(1)</div>
+</div>
+
+<div class="card teal">
+<h2>💼 Citi Narratives (Own These)</h2>
+<div class="tip"><span class="label green">Alert Fatigue → Trend-Based</span>400 alerts/day, 70% false positive. Built 14-day rolling baseline in SQL. Changed to deviation-based alerts. Result: 70% reduction, caught more real incidents.</div>
+<div class="tip"><span class="label green">NumPy Vectorization</span>6M-cell capacity matrix (6K servers × 1K timestamps). Python loop: 180s. NumPy: 1.2s. 150x speedup. No algorithm change.</div>
+<div class="tip"><span class="label green">Capacity Planning Win</span>4-step loop: baseline 90-day APM → linear trend → 70% ceiling alert → Jira at &lt;35 days. First catch: 47 days lead time. Zero capacity outages in 12 months.</div>
+<div class="tip"><span class="label green">PySpark UDF Removal</span>45 min → 4 min. Spark UI showed UDF as red stage. Replaced with F.when chain. Same result, no serialization overhead.</div>
+<div class="tip"><span class="label green">SQL Index Fix</span>fact_monitoring 500M rows, 45s query. EXPLAIN ANALYZE: Seq Scan + stale stats. Fix: composite index + ANALYZE + partition pruning. Result: 0.3s.</div>
+<div class="tip"><span class="label green">SCD Type 2</span>Servers moved teams during restructures. Incident attribution was wrong. SCD Type 2: point-in-time ownership queries. Fixed 12% of incident attributions.</div>
+<div class="tip"><span class="label green">Data Platform</span>4 APM tools → 1 platform. Kafka → Spark → S3 → Glue → Athena. Monthly report: 2 analyst-days → 2 hours.</div>
+</div>
+
+</div>
+
+
+<!-- ── Row 4: STAR format + Interview mindset ─────────────────────────────── -->
+<div class="grid">
+
+<div class="card red">
+<h2>🌟 STAR Behavioral Framework</h2>
+<table>
+<tr><th>Element</th><th>What to cover</th><th>Time</th></tr>
+<tr><td><strong>Situation</strong></td><td>Context — what was the environment, the team, the scale?</td><td>15s</td></tr>
+<tr><td><strong>Task</strong></td><td>Your specific responsibility — what were YOU asked to solve?</td><td>15s</td></tr>
+<tr><td><strong>Action</strong></td><td>What YOU specifically did — tools, decisions, trade-offs</td><td>60s</td></tr>
+<tr><td><strong>Result</strong></td><td>Quantified outcome — time saved, error reduction, revenue, reliability</td><td>30s</td></tr>
+</table>
+<div class="tip" style="margin-top:10px;"><strong>Common failure:</strong> Too much Situation, too little Action. The interviewer wants to know what YOU did, not what the team did. Use "I" not "we" for actions.</div>
+<div class="tip"><strong>The number rule:</strong> Every story needs at least one number. "Alert volume dropped 70%." "Query time went from 45 seconds to 0.3 seconds." "Zero capacity outages."</div>
+</div>
+
+<div class="card blue">
+<h2>🧠 Interview Mindset Checklist</h2>
+<div class="tip"><strong>Coding:</strong> Say the pattern name FIRST. "This is a prefix sum problem." Then code. Don't code first and explain later.</div>
+<div class="tip"><strong>Complexity:</strong> Always state time AND space before the interviewer asks. "O(n) time, O(1) space because we use a fixed-size counter."</div>
+<div class="tip"><strong>SQL:</strong> Write the WHERE before the HAVING. Filter early. Use CTEs for readability — not subqueries nested 3 levels deep.</div>
+<div class="tip"><strong>System design:</strong> Start with requirements. State them back. "10K servers, 60s alerting SLA, 3 years historical. Is that right?" Then design.</div>
+<div class="tip"><strong>When stuck:</strong> Think out loud. "My first instinct is brute force O(n²). I think I can improve this with a hashmap..." Don't go silent.</div>
+<div class="tip"><strong>The Citi card:</strong> In EVERY relevant answer, tie back to Citi. "I've actually implemented this — at Citi, the capacity matrix was 6M cells and we used exactly this pattern."</div>
+<div class="tip"><strong>Follow-up questions:</strong> They test depth, not tricks. Answer directly. "Yes, you'd use <code>bisect</code> from the standard library — O(log n) lookup in a sorted list."</div>
+</div>
+
+</div>
+
+<p style="text-align:center;color:rgba(255,255,255,0.35);font-size:0.8em;margin-top:20px;">
+"Simplicity and clarity is Gold." — Sean's Study Mantra &nbsp;|&nbsp; Day 7 Prep Sheet &nbsp;|&nbsp; Generated by Claude Code
+</p>
+
+</div>
+</body>
+</html>

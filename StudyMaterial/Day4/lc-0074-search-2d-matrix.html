@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #74 — Search a 2D Matrix — Binary Search</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #74 — Search a 2D Matrix <span class="badge">medium</span></h1>
+<p class="subtitle">Binary Search Pattern &nbsp;|&nbsp; Day 4 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 74: Search a 2D Matrix</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #9C27B0; background-color: #f3e5f5; color: #4a148c; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> This matrix is one sorted array folded into a 2D grid. If you unfold it back into 1D, standard binary search applies. The key is the index conversion: row = mid // cols, col = mid % cols.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">A matrix with <code>rows × cols</code> elements has indices 0 to <code>rows*cols - 1</code> in 1D. Element at 1D index <code>i</code> sits at <code>matrix[i // cols][i % cols]</code> in 2D. Binary search runs on the 1D index space.</p>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{1D index} \rightarrow \text{row} = \lfloor i / \text{cols} \rfloor, \quad \text{col} = i \bmod \text{cols}$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Write an efficient algorithm that searches for a value <code>target</code> in an <code>m × n</code> integer matrix where each row is sorted ascending and the first integer of each row is greater than the last integer of the previous row.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3
+Output: true</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 2:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 13
+Output: false</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> m, n ∈ [1, 100] | -10⁴ ≤ matrix[i][j], target ≤ 10⁴</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Unfolded Array</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Imagine cutting the matrix row by row and laying the rows end-to-end — you get a sorted array. Binary search that array, then fold the index back into 2D coordinates."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">mid // cols = row, mid % cols = col — the fold/unfold math</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>1D Abstraction</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"I don't see rows and columns. I see positions 0 to m*n-1. The 2D structure is just a display format."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Binary search on integer range [0, rows*cols-1], translate at access time</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def searchMatrix(matrix, target):
+    """
+    Optimal: Binary Search on 1D flattened index
+    Time: O(log(m * n)) | Space: O(1)
+    """
+    rows, cols = len(matrix), len(matrix[0])
+    left, right = 0, rows * cols - 1
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2
+        row, col = mid // cols, mid % cols   # key: unfold 1D index to 2D coordinates
+        val = matrix[row][col]
+
+        if val == target:
+            return True
+        elif val &lt; target:
+            left = mid + 1
+        else:
+            right = mid - 1
+
+    return False
+
+
+print("Optimal:", searchMatrix([[1,3,5,7],[10,11,16,20],[23,30,34,60]], 3))   # True
+print("Optimal:", searchMatrix([[1,3,5,7],[10,11,16,20],[23,30,34,60]], 13))  # False</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: How do you convert a 1D index to 2D matrix coordinates?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> For a matrix with <code>cols</code> columns: <code>row = index // cols</code>, <code>col = index % cols</code>. This is integer division for the row, modulo for the column. Example: in a 4-column matrix, 1D index 7 → row = 7 // 4 = 1, col = 7 % 4 = 3 → matrix[1][3].</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: What if the matrix rows are sorted but the first element of each row is NOT greater than the last of the previous row?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Then the matrix is not a contiguous sorted sequence — we can't use 1D binary search. Instead, use the staircase search: start at top-right corner (largest in row 1, smallest in last column). If target < current, move left. If target > current, move down. O(m + n) time.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> $O(\log(m \times n))$. The search space has <code>m * n</code> elements. Each step eliminates half. So the number of steps is log₂(m × n). The 2D index conversion (// and %) is O(1), so it doesn't change the asymptotic complexity.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: Could you binary search each row individually instead?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes — binary search each of the <code>m</code> rows for target: O(m log n). This is worse than O(log(m<em>n)) = O(log m + log n) which equals O(log(m</em>n)). The full-matrix binary search is strictly better because it uses the <em>inter-row</em> sorted property, not just within-row sorting.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) 1×1 matrix — <code>left=right=0</code>, checks the single element. (2) Single row — same as 1D binary search. (3) Single column — <code>cols=1</code>, every <code>mid // 1 = mid</code> gives row correctly, <code>mid % 1 = 0</code> gives col 0 correctly. All edge cases are handled by the general formula.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #d94f8a;padding:18px;border-radius:8px;"><h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> Capacity reporting at Citi — daily metric snapshots stored as a 2D structure: rows = servers (6,000), columns = time slots (24 hourly readings). Finding whether a specific (server, hour) reading exceeded a threshold.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Scenario:</strong> Given a sorted report matrix (sorted by server_id, then by hour within each row), determine if a specific utilization value exists without scanning all 144,000 cells.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How this pattern applied:</strong> The report matrix satisfied the contiguous-sorted property — server IDs increase row by row, and within each row, hourly readings increase. Binary search on the flattened index found any value in O(log 144,000) ≈ 17 comparisons instead of up to 144,000.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Impact:</strong> Threshold-existence queries on the daily capacity matrix went from full-table scans to sub-millisecond lookups. This enabled interactive capacity dashboards — analysts could ask "did any server hit 90% CPU at any hour yesterday?" and get an answer in real time.</p></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Binary Search on Flattened Index</strong> — Treat a 2D matrix as a 1D sorted array; translate indices at access time</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Matrix where each row is sorted AND row[i][0] > row[i-1][-1] (contiguous sorted)</li>
+<li>✅ Need O(log(m×n)) instead of O(m×n)</li>
+<li>❌ <strong>Don't use when:</strong> Matrix is sorted within rows but not between rows — use staircase search instead</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (nested loop)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(m \times n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Binary Search on 1D)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(\log(m \times n))$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can explain why this matrix enables 1D binary search</li>
+<li style="margin:4px 0;">&#9744; Can write the index translation formula from memory</li>
+<li style="margin:4px 0;">&#9744; Can explain the staircase alternative and when to use it</li>
+<li style="margin:4px 0;">&#9744; Can state time and space complexity with justification</li>
+<li style="margin:4px 0;">&#9744; Can connect to the Citi capacity matrix use case</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

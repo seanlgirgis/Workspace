@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #435 — Non-overlapping Intervals — Intervals</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #435 — Non-overlapping Intervals <span class="badge">medium</span></h1>
+<p class="subtitle">Intervals Pattern &nbsp;|&nbsp; Day 6 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 435: Non-overlapping Intervals</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #4CAF50; background-color: #e8f5e9; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> To minimize removals = maximize intervals we can keep. Greedy rule: when two intervals overlap, always keep the one that ends earlier — it leaves the most room for future intervals. Sort by END time and apply this greedy choice.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Minimum removals = n - maximum non-overlapping intervals we can keep.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Greedy: always select the interval with the earliest end time from the remaining non-overlapping candidates.</p>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{min removals} = n - \text{count of non-overlapping intervals (greedy)}$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Find the minimum number of intervals to remove to make the remaining intervals non-overlapping.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [[1,2],[2,3],[3,4],[1,3]]
+Output: 1   (remove [1,3])</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 2:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [[1,2],[1,2],[1,2]]
+Output: 2   (keep one, remove two)</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 ≤ intervals.length ≤ 10⁵ | -5×10⁴ ≤ start_i < end_i ≤ 5×10⁴</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Activity Selection</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"I can only do one activity at a time. To fit the MOST activities in a day, always pick the activity that finishes earliest — it frees up time for the next one soonest."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Sort by end time. Keep intervals that start ≥ last_end. Count removals = n - kept.</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Conference Room Optimizer</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"One conference room, many meetings. Cancel the minimum meetings so the rest don't conflict. Always cancel the meeting that ends later when two conflict — the shorter meeting leaves more room."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">When two intervals overlap, the one ending later is removed (or equivalently: the one ending earlier is kept).</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: $O(2^n)$ vs. $O(n \log n)$</h3>
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #f0f7ff; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Greedy correctness: when two intervals overlap, keeping the one that ends earlier is always optimal — it cannot reduce the number of future intervals we can keep (it ends sooner, freeing up more timeline). This greedy choice is provably optimal for the Activity Selection Problem.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">📉 Why Brute Force Fails: The $O(2^n)$ Trap</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">2^n subsets for n = 50 intervals: ~10¹⁵ subsets. Infeasible.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Input Type</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Brute Force Performance</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Reason</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>n = 20</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">~1 million subsets</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Exponential growth</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>n = 50</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">~10¹⁵ subsets</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Completely infeasible</td>
+</tr>
+</tbody></table>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🚀 The Optimal Approach: $O(n \log n)$</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Sort by END time. Greedily keep intervals. For each interval:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>If <code>start >= last_end</code>: no overlap — keep it, update <code>last_end = end</code></li>
+<li>If <code>start < last_end</code>: overlap — remove it (increment counter)</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Key Lifecycle Rule</h4>
+<ol style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Sort by END time</strong> (not start time — this is the key difference from Merge Intervals)</li>
+<li><strong>Greedily keep</strong> intervals that start after the last kept interval's end</li>
+<li><strong>Count removals</strong> = number of skipped intervals</li>
+</ul>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">✅ Mathematical Proof (Greedy Correctness)</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Suppose optimal solution keeps interval A (ends late) over interval B (ends early, overlaps A). Swap A for B — B ends earlier, so it cannot conflict with more future intervals than A does. Therefore swapping never makes the solution worse. The greedy choice (keep earliest-ending) is optimal. ∎</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Summary:</strong> Sort by END (not start). Keep intervals that don't overlap the last kept. Count removals. The greedy proof shows that keeping the earliest-ending interval is always optimal.</p>
+</div>
+</div></div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def eraseOverlapIntervals(intervals: list[list[int]]) -&gt; int:
+    """
+    Optimal: Greedy — sort by end time, keep earliest-ending
+    Time: O(n log n) | Space: O(1)
+    """
+    intervals.sort(key=lambda x: x[1])   # sort by END time (not start!)
+    removals = 0
+    last_end = float('-inf')
+
+    for start, end in intervals:
+        if start &gt;= last_end:    # no overlap — keep this interval
+            last_end = end
+        else:
+            removals += 1        # overlap — remove (we implicitly keep the earlier-ending one)
+
+    return removals
+
+
+print("Optimal:", eraseOverlapIntervals([[1,2],[2,3],[3,4],[1,3]]))   # Expected: 1
+print("Optimal:", eraseOverlapIntervals([[1,2],[1,2],[1,2]]))          # Expected: 2
+print("Optimal:", eraseOverlapIntervals([[1,2],[2,3]]))                # Expected: 0</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why sort by end time instead of start time?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Greedy correctness — we want to maximize the number of intervals we can keep. The interval that ends earliest leaves the most remaining timeline for future intervals. Sorting by end time ensures that when we scan left to right, we encounter the earliest-ending interval first and greedily keep it. Sorting by start time does NOT have this property.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Is this the Activity Selection Problem?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes — exactly. The Activity Selection Problem asks: given activities with start and end times, select the maximum number of non-conflicting activities. The greedy solution is identical: sort by end time, greedily select each activity that starts after the previous one ends. LC #435 is the complement: min removals = n - max kept activities.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> O(n log n) — dominated by the sort. The greedy scan is O(n) — each interval is visited exactly once, and <code>last_end</code> and <code>removals</code> are updated in O(1). Overall: O(n log n + n) = O(n log n).</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: How does this differ from Merge Intervals (LC #56) sorting?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> LC #56 sorts by START time — we need adjacent overlapping intervals to be adjacent in sorted order for the merge to work. LC #435 sorts by END time — we need to greedily select intervals that end earliest. Two different interval problems, two different sort keys. Start = merge. End = greedy removal/selection.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) No overlapping — removals = 0. Last_end updates each iteration, start ≥ last_end always true. (2) All same interval — all overlap except first; removals = n-1. (3) Touching intervals (end = next start) — <code>start >= last_end</code> with <code>>=</code> correctly treats touching as non-overlapping (problem uses open/closed convention — verify). (4) Single interval — for loop runs once, no removals.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #8a5cc4;padding:18px;border-radius:8px;"></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Greedy — Sort by End</strong> — Always keep the interval that ends earliest; minimizes future conflicts</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Minimize removals to make intervals non-overlapping</li>
+<li>✅ Maximize number of non-conflicting activities (Activity Selection)</li>
+<li>✅ Scheduling problems where "fewest conflicts" is the goal</li>
+<li>❌ <strong>Don't use when:</strong> You need to merge overlapping intervals — use LC #56 (sort by start)</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (all subsets)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(2^n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Greedy, sort by end)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n \log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can explain why sort by END (not start) for this problem</li>
+<li style="margin:4px 0;">&#9744; Can state the greedy correctness proof (exchange argument)</li>
+<li style="margin:4px 0;">&#9744; Can write the solution in 3 minutes from memory</li>
+<li style="margin:4px 0;">&#9744; Can relate to Activity Selection Problem by name</li>
+<li style="margin:4px 0;">&#9744; Can contrast with LC #56 sorting approach</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Minimum Window Substring</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .step {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #bdc3c7;
+        }
+
+        .str-box {
+            display: inline-block;
+            padding: 10px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+            font-family: monospace;
+            font-size: 1.2em;
+            position: relative;
+        }
+
+        .str-box.window {
+            border-top: 3px solid #2980b9;
+            border-bottom: 3px solid #2980b9;
+            background-color: #eaf2f8;
+        }
+
+        .str-box.L {
+            border-left: 3px solid #e74c3c;
+            padding-left: 8px;
+        }
+
+        .str-box.R {
+            border-right: 3px solid #27ae60;
+            padding-right: 8px;
+        }
+
+        .pointer {
+            position: absolute;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .pointer.left-ptr {
+            color: #e74c3c;
+            bottom: -20px;
+            left: 0;
+        }
+
+        .pointer.right-ptr {
+            color: #27ae60;
+            top: -20px;
+            right: 0;
+        }
+
+        .req-box {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .have-need {
+            background: #34495e;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-right: 20px;
+        }
+
+        .hash-maps {
+            display: flex;
+            gap: 20px;
+        }
+
+        .hash-table {
+            border-collapse: collapse;
+        }
+
+        .hash-table th,
+        .hash-table td {
+            border: 1px solid #bdc3c7;
+            padding: 5px 15px;
+            text-align: center;
+        }
+
+        .hash-table th {
+            background-color: #ecf0f1;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+
+        .highlight {
+            background-color: #f1c40f;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Minimum Window Substring</h1>
+    <p>String: <code>"ADOBECODEBANC"</code> | Target: <code>"ABC"</code></p>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> Don't verify the whole dictionary every time. Use an exact match counter. If
+        you need 3 distinct letters, wait until <code>Have == 3</code>. When it's valid, shrink the left side until it
+        breaks.
+    </div>
+
+    <div class="diagram-container">
+        <div class="step">
+            <h3>Phase 1: Expand Until Valid</h3>
+            <p>R moved all the way to index 5 to capture 'C'.</p>
+            <div class="req-box">
+                <div class="have-need" style="background:#27ae60;">
+                    HAVE: 3 | NEED: 3<br>
+                    <small>VALID WINDOW!</small>
+                </div>
+                <div class="hash-maps">
+                    <table class="hash-table">
+                        <tr>
+                            <th colspan="2">Window Contains</th>
+                        </tr>
+                        <tr>
+                            <td>A</td>
+                            <td class="highlight">1</td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td class="highlight">1</td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td class="highlight">1</td>
+                        </tr>
+                        <tr>
+                            <td>D,O,E</td>
+                            <td>1</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div style="margin-top: 25px;">
+                <span class="str-box window L"><span class="pointer left-ptr">L</span>A</span><span
+                    class="str-box window">D</span><span class="str-box window">O</span><span
+                    class="str-box window">B</span><span class="str-box window">E</span><span
+                    class="str-box window R"><span class="pointer right-ptr">R</span>C</span>
+            </div>
+            <p>Record Length: <strong>6</strong> ("ADOBEC")</p>
+        </div>
+
+        <div class="step">
+            <h3>Phase 2: Shrink to Optimize</h3>
+            <p>We are valid, so crunch L forward. We drop 'A'.</p>
+            <div class="req-box">
+                <div class="have-need" style="background:#e74c3c;">
+                    HAVE: 2 | NEED: 3<br>
+                    <small>INVALID</small>
+                </div>
+                <div class="hash-maps">
+                    <table class="hash-table">
+                        <tr>
+                            <th colspan="2">Window Contains</th>
+                        </tr>
+                        <tr>
+                            <td style="color:#e74c3c;">A</td>
+                            <td style="color:#e74c3c;font-weight:bold;">0</td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td class="highlight">1</td>
+                        </tr>
+                        <tr>
+                            <td>C</td>
+                            <td class="highlight">1</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div style="margin-top: 25px;">
+                <span class="str-box" style="opacity: 0.5;">A</span><span class="str-box window L"><span
+                        class="pointer left-ptr">L</span>D</span><span class="str-box window">O</span><span
+                    class="str-box window">B</span><span class="str-box window">E</span><span
+                    class="str-box window R"><span class="pointer right-ptr">R</span>C</span>
+            </div>
+            <p>Since it's invalid, Phase 2 is over. We resume expanding R until we find another 'A'!</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Largest Rectangle in Histogram</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .histogram-row {
+            display: flex;
+            align-items: flex-end;
+            height: 150px;
+            border-bottom: 2px solid #34495e;
+            padding-bottom: 5px;
+            gap: 5px;
+            margin-bottom: 30px;
+        }
+
+        .bar {
+            width: 50px;
+            background: #3498db;
+            text-align: center;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .active-rect {
+            background: rgba(231, 76, 60, 0.7) !important;
+            outline: 3px solid #c0392b;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+
+        .code-caption {
+            font-family: monospace;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            display: block;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Largest Rectangle</h1>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> Rectangles expand RIGHTWARD instantly, but they also magically expand
+        LEFTWARD by "inheriting" the starting index of taller bars popped from the stack.
+    </div>
+
+    <h2>Tracing: <code>[2, 1, 5, 6, 2, 3]</code></h2>
+
+    <div class="diagram-container">
+        <h3>Step 1: Pushing 5 and 6</h3>
+        <span class="code-caption">Stack: [(Idx:2, Ht:5), (Idx:3, Ht:6)]</span>
+        <div class="histogram-row">
+            <div class="bar" style="height: 40px; opacity:0.3;">2</div>
+            <div class="bar" style="height: 20px; opacity:0.3;">1</div>
+            <div class="bar" style="height: 100px;">5</div>
+            <div class="bar" style="height: 120px;">6</div>
+        </div>
+        <p>Because the skyline is strictly increasing <code>(5 -> 6)</code>, we do nothing but push them onto the stack.
+        </p>
+    </div>
+
+    <div class="diagram-container">
+        <h3>Step 2: The Height Drop (2 arrives at Index 4)</h3>
+        <span class="code-caption">Current Bar: Height 2 at Index 4 (2 < 6! POP triggers)</span>
+                <div class="histogram-row">
+                    <div class="bar" style="height: 40px; opacity:0.3;">2</div>
+                    <div class="bar" style="height: 20px; opacity:0.3;">1</div>
+                    <div class="bar" style="height: 100px;">5</div>
+                    <div class="bar active-rect" style="height: 120px; background: #e74c3c;">6</div>
+                    <div class="bar" style="height: 40px; background: #f1c40f; color:#333;">2</div>
+                </div>
+                <p><strong>Action 1:</strong> Pop the 6. Calculate Area: Height 6 &times; Width (4 - 3) = <strong>Area
+                        6</strong>.</p>
+                <p><strong>Action 2:</strong> Is 2 < 5? Yes! POP the 5. Calculate Area: Height 5 &times; Width (4 -
+                        2)=<strong>Area 10</strong>.</p>
+    </div>
+
+    <div class="diagram-container">
+        <h3>Step 3: Expansion Backwards</h3>
+        <span class="code-caption">Pushing the 2. Instead of starting at index 4, it inherits index 2!</span>
+        <div class="histogram-row">
+            <div class="bar" style="height: 40px; opacity:0.3;">2</div>
+            <div class="bar" style="height: 20px; opacity:0.3;">1</div>
+
+            <div class="bar active-rect" style="height: 40px;">2</div>
+            <div class="bar active-rect" style="height: 40px;">2</div>
+            <div class="bar active-rect" style="height: 40px;">2</div>
+
+            <div class="bar" style="height: 60px;">3</div>
+        </div>
+        <p>Because we popped indices 3 and 2, we know those spots were occupied by TALLER buildings. Therefore, our
+            height-2 building can safely expand backwards into that space. We push <code>(Idx: 2, Ht: 2)</code>.</p>
+    </div>
+
+</body>
+
+</html>

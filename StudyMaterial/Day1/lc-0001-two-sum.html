@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Two Sum</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .step {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .array-box {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border: 2px solid #3498db;
+            margin: 0 5px;
+            font-weight: bold;
+            border-radius: 4px;
+            background: #e8f4f8;
+        }
+
+        .array-box.active {
+            background: #f39c12;
+            color: white;
+            border-color: #e67e22;
+        }
+
+        .hash-table {
+            display: inline-table;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .hash-table th,
+        .hash-table td {
+            border: 1px solid #bdc3c7;
+            padding: 5px 15px;
+            text-align: left;
+        }
+
+        .hash-table th {
+            background-color: #ecf0f1;
+        }
+
+        code {
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Two Sum (Hash Map Ledger)</h1>
+    <p>Target: <strong>9</strong> | Array: <code>[2, 7, 11, 15]</code></p>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> Don't look for pairs. Look for the <em>complement</em> (target - current) in
+        a reverse-lookup hash map representing everything you've already seen.
+    </div>
+
+    <div class="diagram-container">
+        <div class="step">
+            <h3>Step 1: Inspect Index 0 (Value = 2)</h3>
+            <div>
+                <span class="array-box active">2</span><span class="array-box">7</span><span
+                    class="array-box">11</span><span class="array-box">15</span>
+            </div>
+            <p>Target (9) - Current (2) = <strong>Need 7</strong>.<br>Is 7 in the ledger? No.<br>Add 2 to ledger at
+                index 0.</p>
+            <table class="hash-table">
+                <tr>
+                    <th>Value (Key)</th>
+                    <th>Index (Val)</th>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>0</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Inspect Index 1 (Value = 7)</h3>
+            <div>
+                <span class="array-box">2</span><span class="array-box active">7</span><span
+                    class="array-box">11</span><span class="array-box">15</span>
+            </div>
+            <p>Target (9) - Current (7) = <strong>Need 2</strong>.<br>Is 2 in the ledger? <strong>YES!</strong> It is at
+                index 0.</p>
+            <p>We found our pair! Return <code>[0, 1]</code>.</p>
+            <table class="hash-table">
+                <tr>
+                    <th>Value (Key)</th>
+                    <th>Index (Val)</th>
+                </tr>
+                <tr>
+                    <td style="background-color:#ffeeba">2</td>
+                    <td style="background-color:#ffeeba">0</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

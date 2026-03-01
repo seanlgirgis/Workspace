@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #56 — Merge Intervals — Intervals</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #56 — Merge Intervals <span class="badge">medium</span></h1>
+<p class="subtitle">Intervals Pattern &nbsp;|&nbsp; Day 6 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 56: Merge Intervals</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #e3f2fd; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Sort by start time. Then a single pass is sufficient: if the current interval's start is ≤ the last merged interval's end, they overlap — extend the last merged interval's end to max(both ends). If not, they don't overlap — add current as a new merged interval.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">After sorting by start, two adjacent intervals overlap if and only if <code>intervals[i][0] <= merged[-1][1]</code>. When they overlap, the merged end is <code>max(merged[-1][1], intervals[i][1])</code>.</p>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{overlap condition: } start_i \leq end_{last} \Rightarrow end_{merged} = \max(end_{last}, end_i)$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given an array of intervals where <code>intervals[i] = [start_i, end_i]</code>, merge all overlapping intervals and return the resulting array of non-overlapping intervals.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [[1,3],[2,6],[8,10],[15,18]]
+Output: [[1,6],[8,10],[15,18]]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 2:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [[1,4],[4,5]]
+Output: [[1,5]]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 ≤ intervals.length ≤ 10⁴ | 0 ≤ start_i ≤ end_i ≤ 10⁴</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Timeline Painter</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"I'm painting a timeline. Each interval is a stroke. Sort strokes by start. If the next stroke starts before my current stroke ends, extend my current stroke. If it starts after, finish the current stroke and start a new one."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Track `last_end`. Extend if `start <= last_end`. Otherwise append new interval.</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Booking Consolidator</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Consolidate overlapping hotel bookings into continuous stays. Sort by check-in. If next guest checks in before current guest checks out, merge into one stay (checkout = latest of both)."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Sort by start + max(ends) merging = contiguous stay consolidation</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: $O(n^2)$ vs. $O(n \log n)$</h3>
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #f0f7ff; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> After sorting by start time, overlapping intervals are always adjacent. We never need to check non-adjacent pairs. A single linear pass from left to right processes each interval exactly once — O(n) after the O(n log n) sort.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">📉 Why Brute Force Fails: The $O(n^2)$ Trap</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Pairwise comparison: for n = 10,000 intervals, that's 50 million pair checks. Each merge requires another scan from the beginning.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Input Type</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Brute Force Performance</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Reason</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>All overlapping</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²) merges</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Each merge triggers full rescan</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Already sorted</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²) pair checks</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Still checks all pairs</td>
+</tr>
+</tbody></table>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🚀 The Optimal Approach: $O(n \log n)$</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Sort by start time. Maintain a <code>merged</code> result list. For each interval:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>If it overlaps with the last merged (start ≤ last_end), extend last merged's end</li>
+<li>Otherwise, append as a new merged interval</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Key Lifecycle Rule</h4>
+<ol style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Sort by start time</strong> — ensures overlapping intervals are adjacent</li>
+<li><strong>Initialize merged</strong> with the first interval</li>
+<li><strong>For each subsequent interval:</strong> extend if overlap, append if not</li>
+</ul>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">✅ Mathematical Proof</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">After sorting, if intervals i and j overlap (i < j), there is no non-overlapping interval k between them (otherwise j's start > k's end > i's end, contradiction). So all overlapping intervals form contiguous groups — a single pass processes each group.</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Summary:</strong> Sorting transforms a 2D comparison problem into a 1D scan. After sorting by start, all overlapping intervals are adjacent — one pass with max(ends) merging is sufficient.</p>
+</div>
+</div></div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def merge(intervals: list[list[int]]) -&gt; list[list[int]]:
+    """
+    Optimal: Sort by start, single linear merge pass
+    Time: O(n log n) | Space: O(n) for output
+    """
+    intervals.sort(key=lambda x: x[0])   # sort by start time
+    merged = [intervals[0]]
+
+    for start, end in intervals[1:]:
+        last_end = merged[-1][1]
+        if start &lt;= last_end:           # overlap — extend
+            merged[-1][1] = max(last_end, end)   # critical: max, not just end
+        else:                           # no overlap — new interval
+            merged.append([start, end])
+
+    return merged
+
+
+print("Optimal:", merge([[1,3],[2,6],[8,10],[15,18]]))   # Expected: [[1,6],[8,10],[15,18]]
+print("Optimal:", merge([[1,4],[4,5]]))                   # Expected: [[1,5]]
+print("Optimal:", merge([[1,4],[2,3]]))                   # Expected: [[1,4]] (containment)</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: What is the time complexity and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> O(n log n) — dominated by the sort. The subsequent linear scan is O(n). For n = 10,000 intervals: sort takes ~130,000 comparisons, scan takes 10,000. Total = O(n log n).</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Why <code>max(last_end, end)</code> and not just <code>end</code>?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> One interval can completely contain another — e.g., [1,10] followed by [2,5] in sorted order. Without max, processing [2,5] after [1,10] would shrink the merged end to 5, losing the [5,10] portion. <code>max(last_end, end)</code> preserves the farthest endpoint seen.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> O(n log n). The sort is O(n log n) — this dominates. The merge pass is O(n) — each interval is processed exactly once. Overall: O(n log n + n) = O(n log n).</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: How would you solve this if intervals were already sorted?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Skip the sort, go straight to the merge pass: O(n). Initialize merged = [intervals[0]], then the same extend/append logic. The sort is the only thing that makes the naive O(n²) problem solvable in O(n) — if it's free, we get O(n).</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) Single interval — for loop never executes, merged = [[start, end]], returned directly. (2) All overlapping — all intervals merge into one. (3) No overlapping (already disjoint) — each interval appended as-is, output = sorted input. (4) One interval containing another — [1,10] then [2,5]: max(10, 5) = 10, correctly extends. (5) Adjacent touching — [1,4],[4,5]: start=4 ≤ last_end=4, merged. Problem says [4,5] as example.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #8a5cc4;padding:18px;border-radius:8px;"></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Sort + Linear Merge</strong> — Sort by start time; one pass with max(ends) merging handles all overlap cases</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Merging overlapping time ranges, windows, bookings, events</li>
+<li>✅ Computing total covered time without double-counting</li>
+<li>✅ Preprocessing for other interval operations (insert interval, etc.)</li>
+<li>❌ <strong>Don't use when:</strong> Intervals are streaming (need different approach — interval tree or sorted container)</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (pairwise)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n^2)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Sort + Scan)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n \log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can state the overlap condition from memory: <code>a ≤ d AND c ≤ b</code></li>
+<li style="margin:4px 0;">&#9744; Can explain why max(ends) is needed (containment case)</li>
+<li style="margin:4px 0;">&#9744; Can write the solution from memory in 4 minutes</li>
+<li style="margin:4px 0;">&#9744; Can reduce to O(n) when input is pre-sorted</li>
+<li style="margin:4px 0;">&#9744; Can connect to maintenance window / downtime reporting use case</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Longest Repeating Character Replacement</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .equation {
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            background: #eaf2f8;
+            border: 2px dashed #2980b9;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .window-state {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        .str-display {
+            font-family: monospace;
+            font-size: 1.5em;
+            letter-spacing: 5px;
+            background: #fdfefe;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .highlight-win {
+            background-color: #fcf3cf;
+            display: inline-block;
+            border-bottom: 3px solid #f1c40f;
+        }
+
+        .stats {
+            font-family: monospace;
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+
+        .k-box {
+            background: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: inline-block;
+            text-align: center;
+            line-height: 25px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Repeating Character Replacement</h1>
+    <p>String: <code>"AABABBA"</code> | Max Replacements (K): <code>1</code></p>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> The number of elements in the window that MUST be replaced is:
+        <code>Size of Window - Frequency of Most Common Element</code>. If that number exceeds <code>k</code>, the
+        window is invalid.
+    </div>
+
+    <div class="diagram-container">
+        <div class="equation">
+            Window Size - Max Frequency &le; k
+        </div>
+
+        <div class="window-state">
+            <div>
+                <h3>Step 1: Grow the Window</h3>
+                <div class="str-display">
+                    <span class="highlight-win">AABA</span>BBA
+                </div>
+                <p>Window: <strong>AABA</strong></p>
+            </div>
+            <div class="stats">
+                L=0, R=3 (Size: 4)<br>
+                Counts: A=3, B=1<br>
+                Max_Freq: 3 (Leader is 'A')<br>
+                4 - 3 = 1 &le; 1 (Valid!)<br>
+                <strong>max_len = 4</strong>
+            </div>
+        </div>
+
+        <div class="window-state">
+            <div>
+                <h3>Step 2: Add 'B' (Index 4)</h3>
+                <div class="str-display">
+                    <span class="highlight-win"
+                        style="border-bottom-color:#e74c3c; background-color:#f9ebea;">AABAB</span>BA
+                </div>
+                <p>Window: <strong>AABAB</strong></p>
+            </div>
+            <div class="stats" style="background:#c0392b;">
+                L=0, R=4 (Size: 5)<br>
+                Counts: A=3, B=2<br>
+                Max_Freq: 3<br>
+                5 - 3 = 2 &gt; 1 (INVALID!)
+            </div>
+        </div>
+
+        <div class="window-state">
+            <div>
+                <h3>Step 3: Shift Window Right</h3>
+                <p>Because it's invalid, increment L. Note the window physically shifts rightward but stays size 4.</p>
+                <div class="str-display">
+                    A<span class="highlight-win">ABAB</span>BA
+                </div>
+                <p>Window: <strong>ABAB</strong></p>
+            </div>
+            <div class="stats">
+                L=1, R=4 (Size: 4)<br>
+                Counts: A=2, B=2<br>
+                Max_Freq: 3 (Historical record kept)<br>
+                4 - 3 = 1 &le; 1 (Valid!)<br>
+                <strong>max_len = 4</strong>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #704 — Binary Search — Binary Search</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #704 — Binary Search <span class="badge">easy</span></h1>
+<p class="subtitle">Binary Search Pattern &nbsp;|&nbsp; Day 4 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 704: Binary Search</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #e3f2fd; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> The array is sorted. Every comparison eliminates HALF the remaining candidates. Binary search is O(log n) because you halve the problem space at every step — 1 billion elements requires at most 30 comparisons.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Binary search works on any <strong>monotonic condition</strong>: a predicate that is False for the first part of the array and True for the rest (or vice versa). We exploit this to eliminate half the search space with each comparison.</p>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$T(n) = T(n/2) + O(1) \Rightarrow O(\log n)$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given a sorted array of integers <code>nums</code> and an integer <code>target</code>, return the index of <code>target</code> or <code>-1</code> if not found. You must write an algorithm with O(log n) runtime complexity.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  nums = [-1,0,3,5,9,12], target = 9
+Output: 4</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 2:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  nums = [-1,0,3,5,9,12], target = 2
+Output: -1</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 ≤ nums.length ≤ 10⁴ | -10⁴ < nums[i], target < 10⁴ | All integers are unique | nums is sorted ascending</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Phone Book</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"I need page 500 in a 1000-page book. I open to 500 — if it's there, done. If the name I want comes after, I ignore the left half entirely."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Sorted order + midpoint comparison → eliminate half the pages with each flip</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Guess the Number</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Guess 1-100. I say 'too low' or 'too high'. Optimal play: always guess the midpoint. 7 guesses to cover 100 numbers."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Binary feedback → geometric convergence → log₂(n) steps maximum</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def search(nums, target):
+    """
+    Optimal: Binary Search
+    Time: O(log n) | Space: O(1)
+    """
+    left, right = 0, len(nums) - 1
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2   # avoid integer overflow (good habit from C/Java)
+        if nums[mid] == target:
+            return mid
+        elif nums[mid] &lt; target:
+            left = mid + 1      # target is in the right half
+        else:
+            right = mid - 1     # target is in the left half
+
+    return -1
+
+
+print("Optimal:", search([-1, 0, 3, 5, 9, 12], 9))   # Expected: 4
+print("Optimal:", search([-1, 0, 3, 5, 9, 12], 2))   # Expected: -1
+print("Optimal:", search([5], 5))                       # Expected: 0 (single element)</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why use <code>left + (right - left) // 2</code> instead of <code>(left + right) // 2</code>?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Integer overflow prevention. In Python, integers are unbounded — so both work. But in C/Java, if <code>left</code> and <code>right</code> are both near INT_MAX (~2 billion), <code>left + right</code> overflows to a negative number. The subtraction form avoids this. It's a signal to interviewers that you know systems-level concerns.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: When is <code>left <= right</code> correct vs <code>left < right</code>?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Use <code>left <= right</code> when you need to examine single-element windows (you might need to check the last remaining element). Use <code>left < right</code> when you're converging on a <em>boundary</em> — e.g., finding the first position where a condition is True. LC #704 needs <code><=</code> because the target might be the last remaining element.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> $O(\log n)$. Each iteration, the search window <code>[left, right]</code> is cut in half. Starting from n elements, after k iterations, n/2^k elements remain. We stop when n/2^k = 1, which means k = log₂(n) iterations. The number of steps grows as the logarithm of the input size.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: What does binary search require of the input?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The input must be <strong>sorted</strong> (or more generally, the predicate must be <strong>monotonic</strong> — False for one contiguous range and True for another). Without sorted order, we cannot guarantee that eliminating a half is safe. Also assumes no duplicates in standard binary search; duplicates require variant logic.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) Empty array — <code>left=0, right=-1</code>, while loop never executes, returns -1 correctly. (2) Single element — <code>left=right=0</code>, mid=0, checks the one element. (3) Target smaller than all elements — <code>right</code> shrinks to -1, exits with -1. (4) Target larger than all — <code>left</code> grows past <code>right</code>, exits with -1. All handled by <code>left <= right</code> condition.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #d94f8a;padding:18px;border-radius:8px;"><h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> Citi APM infrastructure — 6,000 monitored endpoints, daily capacity baselines stored as sorted time-series data.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Scenario:</strong> When an analyst queried "what was the CPU reading for server SRV-1042 closest to timestamp 14:37:00 on a given day?" the naive approach scanned the entire day's readings (1,440 minutes = 1,440 records per server) linearly.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How this pattern applied:</strong> Because readings were stored sorted by timestamp, binary search was applicable. For any timestamp query, <code>bisect.bisect_right</code> on the sorted timestamp list returned the insertion point in O(log 1440) ≈ 11 comparisons instead of up to 1,440. This same pattern powered LC #981 (Time Based KV Store) — the algorithmic connection between the monitor query and the interview problem is direct.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Impact:</strong> Query response time for point-in-time lookups dropped from O(n) linear scans to O(log n) — for a system with 6,000 servers × 1,440 readings each, this reduced worst-case comparisons from 1,440 to 11. Dashboards that showed historical point-in-time readings became interactive (sub-second) instead of requiring 2–3 second waits.</p></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Binary Search</strong> — Exploit sorted order to halve the search space at every step</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Array is sorted (or condition is monotonic)</li>
+<li>✅ Need O(log n) search instead of O(n)</li>
+<li>✅ "Find position of X", "Find first/last occurrence of X", "Find boundary between True/False"</li>
+<li>❌ <strong>Don't use when:</strong> Array is unsorted and sorting first (O(n log n)) outweighs the search savings</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (linear scan)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Binary Search)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(\log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can explain why sorted order enables binary search</li>
+<li style="margin:4px 0;">&#9744; Can state <code>left <= right</code> vs <code>left < right</code> difference</li>
+<li style="margin:4px 0;">&#9744; Can write the solution from memory in 3 minutes</li>
+<li style="margin:4px 0;">&#9744; Can state time and space complexity with justification</li>
+<li style="margin:4px 0;">&#9744; Can name the overflow-safe midpoint formula and why it matters</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

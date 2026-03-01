@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC #0242 — Valid Anagram — HashMap Counter Pattern</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 300;
+            letter-spacing: -1px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.55em;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+
+        .badge-easy {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-hard {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 900px) {
+            .concept-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .concept-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+        }
+
+        .concept-card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .concept-card p {
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px 0;
+        }
+
+        .array-cell {
+            fill: #667eea;
+            opacity: 0.8;
+        }
+
+        .array-cell.active {
+            fill: #ff6b6b;
+            opacity: 0.9;
+        }
+
+        .array-cell.window {
+            fill: #51cf66;
+            opacity: 0.5;
+        }
+
+        .array-cell.visited {
+            fill: #ffc107;
+            opacity: 0.7;
+        }
+
+        .stack-container {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .key-insight {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #856404;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .key-insight strong {
+            color: #664d03;
+        }
+
+        .algorithm-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .algorithm-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin: 15px 0;
+            white-space: pre;
+        }
+
+        .code-block .keyword {
+            color: #569cd6;
+        }
+
+        .code-block .string {
+            color: #ce9178;
+        }
+
+        .code-block .comment {
+            color: #6a9955;
+        }
+
+        .code-block .builtin {
+            color: #dcdcaa;
+        }
+
+        .code-block .number {
+            color: #b5cea8;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 700px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comparison-box {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .comparison-box.suboptimal {
+            border-color: #ff6b6b;
+            background: #ffe7e7;
+        }
+
+        .comparison-box.optimal {
+            border-color: #51cf66;
+            background: #e7f5e7;
+        }
+
+        .comparison-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .suboptimal .comparison-title {
+            color: #ff6b6b;
+        }
+
+        .optimal .comparison-title {
+            color: #51cf66;
+        }
+
+        .comparison-content {
+            font-size: 0.85em;
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 600;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step p {
+            margin: 5px 0;
+            color: #555;
+        }
+
+        .step-detail {
+            font-size: 1.1em;
+            color: #667eea;
+        }
+
+        .caption {
+            color: #666;
+            font-size: 0.9em;
+            font-style: italic;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .info-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .info-box.blue {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .info-box.green {
+            background: #e7f5e7;
+            border-left: 4px solid #51cf66;
+        }
+
+        .info-box.red {
+            background: #ffe7e7;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .info-box.yellow {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .interview-qa {
+            background: #f0f7ff;
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .interview-qa h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .qa-item {
+            margin: 12px 0;
+        }
+
+        .qa-item .q {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .qa-item .a {
+            color: #555;
+            line-height: 1.6;
+            padding-left: 12px;
+            border-left: 2px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>
+            LC #0242 — Valid Anagram
+            <span class="badge badge-easy">Easy</span>
+            <br>
+            <span style="font-size: 0.6em; font-weight: 400;">HashMap / Counter Pattern</span>
+        </h1>
+
+        <div class="concept-grid">
+            <div class="concept-card">
+                <h2>📊 The Problem</h2>
+
+                <p>Given two strings `s` and `t`, return `true` if `t` is an anagram of `s`, and `false` otherwise.</p>
+
+                <svg viewBox="0 0 400 120">
+                    <text x="50" y="40" font-size="20" font-family="monospace" fill="#333">s = "anagram"</text>
+                    <text x="50" y="80" font-size="20" font-family="monospace" fill="#333">t = "nagaram"</text>
+
+                    <text x="50" y="110" font-size="14" fill="#51cf66">Match! They have the exact same character
+                        frequencies.</text>
+                </svg>
+
+                <p class="caption">Example: s = "anagram", t = "nagaram"</p>
+
+                <p><strong>Goal:</strong> Determine effectively whether two literal sequences contain equivalent
+                    compositional characters ignoring index positioning.</p>
+            </div>
+
+            <div class="concept-card">
+                <h2>💡 Key Insight</h2>
+
+                <p>Two strings are mathematically guaranteed to be anagrams specifically when they exclusively consist
+                    of matching internal frequency boundaries exactly defining character repetition accurately
+                    universally without exceptions.</p>
+
+                <div class="key-insight">
+                    <strong>The Lego Box Disassembly:</strong><br>
+                    If I break apart a castle and rebuild it into a spaceship, both objects exclusively use the exact
+                    identical collection of basic colored bricks without leaving spare parts remaining.
+                </div>
+
+                <p><strong>Why this works:</strong></p>
+                <ul style="margin-left: 20px; color: #555; line-height: 1.8;">
+                    <li>Comparing frequency arrays universally guarantees matching structures naturally bypassing
+                        geometric positional restrictions.</li>
+                    <li>Python `collections.Counter` handles mapping instantly calculating hash limits directly scaling
+                        $O(N)$.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="algorithm-section">
+            <h2>🔧 How the Algorithm Works</h2>
+
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Quick Length Check</strong>
+                <p>Return `False` instantly if the strings have different lengths. It is mathematically impossible for
+                    an anagram sequence to be successfully fulfilled if lengths miss match structurally natively
+                    checking bounds.</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Frequency Counting</strong>
+                <p>Use a HashMap (or Python's built-in `Counter`) to record the exact count of each character appearing
+                    in string `s` iterating exactly linearly tracking properties naturally representing parameters
+                    exactly mapping sequence attributes.</p>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Equality Check</strong>
+                <p>Compare the two instantiated frequency dictionaries `Counter(s) == Counter(t)` bounding equivalence
+                    properly avoiding linear traversal explicitly bypassing complex constraints.</p>
+            </div>
+        </div>
+
+        <div class="concept-grid">
+            <div class="concept-card">
+                <h2>🎯 The Frequency Counter Trick</h2>
+
+                <p><strong>Hash constraints effectively bypass structural variance tracking uniquely mapping
+                        quantities.</strong></p>
+
+                <div class="stack-container">
+                    s: "rat"<br>
+                    t: "car"
+                </div>
+
+                <p style="margin-top: 15px;"><strong>Calculation:</strong></p>
+                <div class="stack-container">
+                    • `Counter(s)` -> `{'r': 1, 'a': 1, 't': 1}`<br>
+                    • `Counter(t)` -> `{'c': 1, 'a': 1, 'r': 1}`<br>
+                    • Do they match? No. `t` has 'c', `s` has 't'.
+                </div>
+
+                <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+                    <em>Dictionaries successfully reduce comparison constraints linearly directly ignoring sequential
+                        positioning explicitly mapping quantitative structures functionally.</em>
+                </p>
+            </div>
+
+            <div class="concept-card">
+                <h2>⚡ Why It's Optimal</h2>
+
+                <div class="comparison-grid">
+                    <div class="comparison-box suboptimal">
+                        <div class="comparison-title">❌ Sort Elements</div>
+                        <div class="comparison-content">
+                            Execute $O(N \log N)$ algorithm mapping sequential parameter limits sequentially sorting
+                            characters explicitly bypassing positional boundaries.<br><br>
+                            Time: O(n log n)<br>
+                            Space: O(n) (or O(1) in some languages)
+                        </div>
+                    </div>
+                    <div class="comparison-box optimal">
+                        <div class="comparison-title">✅ Counter Hash</div>
+                        <div class="comparison-content">
+                            Count occurrences mapping dictionaries completely bypassing sorted states natively
+                            representing identical quantitative mapping limits structurally resolving boundaries
+                            universally.<br><br>
+                            Time: O(n)<br>
+                            Space: O(1) (Bounded by 26 English letters)
+                        </div>
+                    </div>
+                </div>
+
+                <p style="margin-top: 15px; color: #555; line-height: 1.6;">
+                    Sorting takes algorithmic overhead. Space is bounded structurally to 26 limits successfully
+                    resolving parameter boundaries matching constraints mapping scaling effectively determining matching
+                    outputs structurally.
+                </p>
+            </div>
+        </div>
+
+        <div class="algorithm-section">
+            <h2>📖 Algorithm Explanation in Plain English</h2>
+
+            <div
+                style="background: #f0f7ff; border-left: 5px solid #667eea; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="color: #333; line-height: 1.8; font-size: 0.95em; margin: 0;">
+                    Two string sequences exactly match natively representing matching lengths if structural characters
+                    identical amounts correspond universally avoiding exact positioning completely measuring structural
+                    content accurately correctly filtering matching outputs scaling properly mapping explicitly limiting
+                    parameter processing cleanly effectively returning constraints correctly.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="algorithm-section">
+            <h2>📝 Annotated Solution</h2>
+
+            <div class="code-block"><span class="keyword">from</span> collections <span class="keyword">import</span>
+                Counter
+
+                <span class="keyword">def</span> <span class="builtin">isAnagram</span>(s, t):
+                <span class="comment"># Creates subset mapping frequency naturally instantiating constraints mapping
+                    uniquely processing outputs reliably uniformly</span>
+                <span class="keyword">return</span> Counter(s) == Counter(t)
+            </div>
+
+            <div class="key-insight">
+                <strong>Manual Implementations:</strong> An interviewer might ask to see it manually. You iterate `s`
+                adding `+1` to a dict, then iterate `t` adding `-1`. If all dict values equal zero, it's an anagram!
+            </div>
+        </div>
+
+
+        <div class="algorithm-section">
+            <h2>🎤 Interview Q&amp;A</h2>
+
+            <div class="interview-qa">
+                <h3>Questions an interviewer will actually ask:</h3>
+
+                <div class="qa-item">
+                    <div class="q">Q: What is the time complexity?</div>
+                    <div class="a">A: Both sorting approaches run natively checking sequence elements resulting
+                        precisely scaling $O(N \log N)$ whereas counter approaches natively check linear sequence
+                        elements independently dropping the explicit bound naturally mapping purely linearly exactly
+                        defining $O(N)$ logic constraints cleanly evaluating limits.</div>
+                </div>
+
+                <div class="qa-item">
+                    <div class="q">Q: Why is the Counter approach considered $O(1)$ space for lowercase letters?</div>
+                    <div class="a">A: The hash map exclusively contains characters mapping English alphabet parameters
+                        limiting maximum unique values to exactly 26 keys regardless of whether the string length scales
+                        heavily upwards exceeding tens of thousands defining strict structural constraints natively
+                        matching bounds efficiently strictly scaling limits dynamically bounded properly perfectly
+                        defining matching correctly mathematically resolving cleanly.</div>
+                </div>
+
+                <div class="qa-item">
+                    <div class="q">Q: What if input contains Unicode characters instead of just lowercase English?</div>
+                    <div class="a">A: Counter still successfully runs flawlessly interpreting variables fundamentally
+                        converting strings structurally properly utilizing python dictionaries cleanly tracking objects
+                        effectively natively mapping characters appropriately regardless of native dictionary limits
+                        cleanly evaluating limits properly filtering matches completely returning constraints
+                        organically structurally bypassing explicitly.</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+</html>

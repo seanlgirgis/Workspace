@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC #85 — Maximal Rectangle — Monotonic Stack & DP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        h1 {
+            color: white;
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: 300;
+            letter-spacing: -1px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.55em;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 12px;
+            vertical-align: middle;
+        }
+        .badge-easy   { background: #d4edda; color: #155724; }
+        .badge-medium { background: #fff3cd; color: #856404; }
+        .badge-hard   { background: #f8d7da; color: #721c24; }
+
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        @media (max-width: 900px) { .concept-grid { grid-template-columns: 1fr; } }
+
+        .concept-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .concept-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 70px rgba(0,0,0,0.4);
+        }
+        .concept-card h2 {
+            color: #2a9fd6;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        .concept-card p {
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+
+        svg { width: 100%; height: auto; display: block; margin: 20px 0; }
+
+        /* Bars widget */
+        .bar-rect { fill: #2a9fd6; opacity: 0.8; transition: all 0.3s ease; }  
+        .bar-rect:hover { opacity: 1; }
+        .highlight-rect { fill: #ff6b6b; opacity: 0.3; stroke: #ff6b6b; stroke-width: 2; }
+
+        /* Stack widget */
+        .stack-visual-item {
+            fill: #e7f0ff;
+            stroke: #2a9fd6;  
+            stroke-width: 2;
+        }
+        .stack-visual-item.active { fill: #ff6b6b; stroke: #cc3333; }
+
+        .stack-container {
+            background: #f8f9fa;
+            border: 2px solid #2a9fd6;  
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .key-insight {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #856404;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+        .key-insight strong { color: #664d03; }
+
+        .algorithm-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+        .algorithm-section h2 {
+            color: #2a9fd6;  
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            margin: 15px 0;
+            white-space: pre;
+        }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .string  { color: #ce9178; }
+        .code-block .comment { color: #6a9955; }
+        .code-block .builtin { color: #dcdcaa; }
+        .code-block .number  { color: #b5cea8; }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        @media (max-width: 700px) { .comparison-grid { grid-template-columns: 1fr; } }
+
+        .comparison-box { border: 2px solid #ddd; border-radius: 8px; padding: 15px; }
+        .comparison-box.suboptimal { border-color: #ff6b6b; background: #ffe7e7; }
+        .comparison-box.optimal   { border-color: #51cf66; background: #e7f5e7; }
+        .comparison-title { font-weight: 600; margin-bottom: 10px; font-size: 0.95em; }
+        .suboptimal .comparison-title { color: #ff6b6b; }
+        .optimal    .comparison-title { color: #51cf66; }
+        .comparison-content { font-size: 0.85em; line-height: 1.6; color: #555; }
+
+        .step-number {
+            display: inline-block;
+            background: #2a9fd6;  
+            color: white;
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            font-weight: 600;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #2a9fd6;  
+        }
+        .step p { margin: 5px 0; color: #555; }
+
+        .step-detail {
+            font-size: 1.1em;
+            color: #2a9fd6;  
+        }
+
+        .caption {
+            color: #666; font-size: 0.9em;
+            font-style: italic; text-align: center;
+            margin-top: 10px;
+        }
+
+        .info-box {
+            padding: 15px; border-radius: 8px; margin-top: 15px;
+        }
+        .info-box.blue   { background: #e3f2fd; border-left: 4px solid #2196f3; }
+        .info-box.green  { background: #e7f5e7; border-left: 4px solid #51cf66; }
+        .info-box.red    { background: #ffe7e7; border-left: 4px solid #ff6b6b; }
+        .info-box.yellow { background: #fff3cd; border-left: 4px solid #ffc107; }
+        .info-box p { margin: 0; color: #555; line-height: 1.6; }
+        .info-box strong { display: block; margin-bottom: 8px; }
+
+        .interview-qa {
+            background: #f0f7ff;
+            border-left: 5px solid #2a9fd6;  
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .interview-qa h3 { color: #333; margin-bottom: 15px; font-size: 1.1em; }
+        .qa-item { margin: 12px 0; }
+        .qa-item .q { font-weight: 600; color: #333; margin-bottom: 4px; }
+        .qa-item .a { color: #555; line-height: 1.6; padding-left: 12px; border-left: 2px solid #ccc; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>
+        LC #85 — Maximal Rectangle
+        <span class="badge badge-hard">Hard</span>
+        <br>
+        <span style="font-size: 0.6em; font-weight: 400;">Monotonic Stack & DP Pattern</span>
+    </h1>
+
+    <div class="concept-grid">
+
+        <div class="concept-card">
+            <h2>📊 The Problem</h2>
+
+            <p>Given a 2D binary matrix filled with 0's and 1's, find the largest rectangle containing only 1's and return its area.</p>
+
+            <svg viewBox="0 0 300 250">
+                <defs>
+                    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect width="300" height="250" fill="url(#grid)"/>
+                <rect x="20"  y="120" width="30" height="90"  class="bar-rect"/>
+                <rect x="60"  y="210" width="30" height="0"   class="bar-rect"/>
+                <rect x="100" y="150" width="30" height="60"  class="bar-rect"/>
+                <rect x="140" y="60"  width="30" height="150" class="bar-rect"/>
+                <rect x="180" y="150" width="30" height="60"  class="bar-rect"/>
+                <text x="35"  y="225" font-size="12" text-anchor="middle" fill="#999">3</text>
+                <text x="75"  y="225" font-size="12" text-anchor="middle" fill="#999">0</text>
+                <text x="115" y="225" font-size="12" text-anchor="middle" fill="#999">2</text>
+                <text x="155" y="225" font-size="12" text-anchor="middle" fill="#999">5</text>
+                <text x="195" y="225" font-size="12" text-anchor="middle" fill="#999">2</text>
+                <line x1="15" y1="210" x2="230" y2="210" stroke="#333" stroke-width="2"/>
+                <line x1="15" y1="30"  x2="15"  y2="210" stroke="#333" stroke-width="2"/>
+                <!-- Highlight maximal rectangle across cols 2,3,4 (height 2, width 3 => area 6) -->
+                <rect x="100" y="150" width="110" height="60" class="highlight-rect"/>
+            </svg>
+
+            <p class="caption">Example: matrix with histogram row [3, 0, 2, 5, 2]</p>
+
+            <p><strong>Goal:</strong> Transform the 2D matrix into a series of 1D histograms and find the maximum area rectangle.</p>
+        </div>
+
+        <div class="concept-card">
+            <h2>💡 Key Insight</h2>
+
+            <p>Scanning all possible rectangles in a 2D matrix is extremely slow. Instead, treat each row of the matrix as the base of a 1D histogram. This lets us use the O(N) Monotonic Stack solution from LC 84 ("Largest Rectangle in Histogram").</p>
+
+            <div class="key-insight">
+                <strong>The City Skyline:</strong><br>
+                Imagine building a city row by row from top to bottom. For each new row, if there's a building block (1), the tower grows taller. If there is an empty space (0), the entire tower above it crashes down to the ground. We can evaluate the skyline's maximum poster space at each step.
+            </div>
+
+            <p><strong>Why this works:</strong></p>
+            <ul style="margin-left: 20px; color: #555; line-height: 1.8;">
+                <li>We maintain a running histogram of consecutive 1s looking upwards.</li>
+                <li>Updating the histogram takes only O(1) per cell (Dynamic Programming array).</li>
+                <li>Evaluating the histogram takes O(N) using a Monotonic Stack, giving an astonishing O(R × C) overall runtime.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="algorithm-section">
+        <h2>🔧 How the Algorithm Works</h2>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Initialize Histogram Array</strong>
+            <p>Create a 1D DP `histo` array of size `cols`, initially all 0s, to represent the height of 1s in the current row.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Top-Down Update</strong>
+            <p>Iterate row by row. For each cell `(r, c)`:</p>
+            <ul style="margin-left: 40px; margin-top: 10px;">
+                <li><strong>Case 1:</strong> If `matrix[r][c] == "1"`, increase `histo[c]` by 1.</li>
+                <li><strong>Case 0:</strong> If `matrix[r][c] == "0"`, reset `histo[c]` to 0 (the building lost its foundation).</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Evaluate Histogram</strong>
+            <p>Pass the updated `histo` array to the `largestRectangleArea` Monotonic Stack helper from LC 84.</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>Keep Global Maximum</strong>
+            <p>Update `max_area` with the area found in this row. Return `max_area` after processing all rows.</p>
+        </div>
+    </div>
+
+    <div class="concept-grid">
+        <div class="concept-card">
+            <h2>🎯 The Monotonic Stack Trick</h2>
+
+            <p><strong>When we pop a bar, we know exactly how far it extends left and right.</strong></p>
+
+            <div class="stack-container">
+                Stack: [(idx=0, h=1), (idx=2, h=5)] <br>
+                Current: idx=3, h=2 (drop in height!)
+            </div>
+
+            <p style="margin-top: 15px;"><strong>Stack Pop Calculation:</strong></p>
+            <div class="stack-container">
+                • Pop (idx=2, h=5). It was added at start_idx=2.<br>
+                • It extends from idx=2 to idx=3 (exclusive).<br>
+                • Area = 5 * (3 - 2) = 5
+            </div>
+
+            <p style="margin-top: 15px; color: #666; font-size: 0.9em;">
+                <em>This guarantees we only calculate the area of a rectangle once it can no longer extend further right, achieving O(N) time for the histogram.</em>
+            </p>
+        </div>
+
+        <div class="concept-card">
+            <h2>⚡ Why It's Optimal</h2>
+
+            <div class="comparison-grid">
+                <div class="comparison-box suboptimal">
+                    <div class="comparison-title">❌ Brute Force</div>
+                    <div class="comparison-content">
+                        Check every possible top-left and bottom-right corner for a valid rectangle.<br><br>
+                        Time: O((R×C)²)<br>
+                        Space: O(1)
+                    </div>
+                </div>
+                <div class="comparison-box optimal">
+                    <div class="comparison-title">✅ DP + Monotonic Stack</div>
+                    <div class="comparison-content">
+                        Update a DP histogram per row and evaluate it using a stack.<br><br>
+                        Time: O(R×C)<br>
+                        Space: O(C)
+                    </div>
+                </div>
+            </div>
+
+            <p style="margin-top: 15px; color: #555; line-height: 1.6;">
+                Each cell is read once to update the histogram. In the stack, each bar is pushed and popped at most once per row, making the work per row strictly O(C), giving O(R×C) total time.
+            </p>
+        </div>
+    </div>
+
+    <div class="algorithm-section">
+        <h2>📖 Algorithm Explanation in Plain English</h2>
+
+        <div style="background: #f0f7ff; border-left: 5px solid #2a9fd6; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="color: #333; line-height: 1.8; font-size: 0.95em; margin: 0;">
+                By looking at the matrix row by row from top to bottom, we can imagine the 1s forming vertical bars. When we see a 1, the bar at that column gets taller. When we see a 0, the bar crashes down to 0 because any rectangle coming from above is cut off. Every time we finish a row, we stop and ask: "What is the largest rectangle in this skyline?" We use a stack to quickly find the maximum area in that skyline before moving on to the next row.
+            </p>
+        </div>
+
+        <div class="step" style="margin-bottom: 20px; background: #fff3cd; border-left: 5px solid #ff9800; padding: 15px;">
+            <strong style="font-size: 1.1em; color: #ff9800;">🔑 The Confusing Part: Dropping to ZERO</strong>
+            <p style="margin-top: 15px; color: #555;">It feels like resetting a cell's height to `0` destroys information about rectangles sitting higher up in the matrix.</p>
+
+            <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px; border: 2px solid #ff9800;">
+                <p style="margin: 0 0 10px 0; font-weight: 600; color: #333;">Scenario:</p>
+                <p style="margin: 0; color: #555; font-family: monospace; font-size: 0.9em;">
+                    Row 0: 1 1 1 <br>
+                    Row 1: 1 0 1
+                </p>
+            </div>
+
+            <div class="info-box green" style="margin-top: 15px;">
+                <p><strong>Why This Matters:</strong>
+                It's true the `0` cuts off the rectangle! But remember, we ALREADY calculated the maximum area of the `1 1 1` skyline when we processed Row 0. The global `max_area` variable safely stored that area (3) before Row 1 destroyed it.</p>
+            </div>
+
+            <div class="info-box blue" style="margin-top: 15px;">
+                <p><strong>Visual Analogy:</strong>
+                Like taking a photo of the skyline at every step. If a building falls down, the old photo still exists showing its glorious max height.</p>
+            </div>
+        </div>
+
+        <div class="key-insight" style="margin-top: 20px;">
+            <strong>💡 The Genius Move:</strong><br>
+            Decomposing a 2D matrix problem into R independent 1D array problems (using the Monotonic Stack), glued together by a lightning-fast DP state update.
+        </div>
+    </div>
+
+    <div class="algorithm-section">
+        <h2>📝 Annotated Solution</h2>
+
+        <div class="code-block"><span class="keyword">def</span> <span class="builtin">maximalRectangle</span>(matrix):
+    <span class="keyword">if</span> <span class="keyword">not</span> matrix <span class="keyword">or</span> <span class="keyword">not</span> matrix[<span class="number">0</span>]:
+        <span class="keyword">return</span> <span class="number">0</span>
+        
+    <span class="comment"># Helper function from LeetCode 84: Largest Rectangle in Histogram</span>
+    <span class="keyword">def</span> <span class="builtin">largestRectangleArea</span>(heights):
+        max_area = <span class="number">0</span>
+        stack = []  <span class="comment"># stores tuples of (start_index, height)</span>
+        
+        <span class="keyword">for</span> i, h <span class="keyword">in</span> <span class="builtin">enumerate</span>(heights):
+            start = i
+            <span class="comment"># If we encounter a shorter bar, pop taller bars from stack</span>
+            <span class="keyword">while</span> stack <span class="keyword">and</span> stack[-<span class="number">1</span>][<span class="number">1</span>] > h:
+                idx, val = stack.pop()
+                <span class="comment"># Calculate area for the popped bar</span>
+                max_area = <span class="builtin">max</span>(max_area, val * (i - idx))
+                <span class="comment"># The new shorter bar can extend back to where the taller bar started</span>
+                start = idx
+            stack.append((start, h))
+            
+        <span class="comment"># Process any remaining bars in the stack</span>
+        <span class="keyword">for</span> i, h <span class="keyword">in</span> stack:
+            max_area = <span class="builtin">max</span>(max_area, h * (<span class="builtin">len</span>(heights) - i))
+            
+        <span class="keyword">return</span> max_area
+
+    max_max_area = <span class="number">0</span>
+    cols = <span class="builtin">len</span>(matrix[<span class="number">0</span>])
+    histo = [<span class="number">0</span>] * cols  <span class="comment"># DP array to track histogram height</span>
+    
+    <span class="comment"># Top-down pass to build histograms and calculate area</span>
+    <span class="keyword">for</span> row <span class="keyword">in</span> matrix:
+        <span class="keyword">for</span> c <span class="keyword">in</span> <span class="builtin">range</span>(cols):
+            <span class="keyword">if</span> row[c] == <span class="string">"1"</span>:
+                histo[c] += <span class="number">1</span>
+            <span class="keyword">else</span>:
+                histo[c] = <span class="number">0</span>  <span class="comment"># A '0' cuts off any rectangle from above</span>
+                
+        <span class="comment"># Find max area for the current row's histogram</span>
+        max_max_area = <span class="builtin">max</span>(max_max_area, <span class="builtin">largestRectangleArea</span>(histo))
+        
+    <span class="keyword">return</span> max_max_area</div>
+
+        <div class="key-insight">
+            <strong>Magic Line:</strong> <code>histo[c] += 1 if row[c] == "1" else 0</code><br>
+            Replacing the O(R) vertical scanning hook with a 1D DP array that updates in O(1) time per column.
+        </div>
+    </div>
+
+    <div class="algorithm-section">
+        <h2>🎤 Interview Q&amp;A</h2>
+
+        <div class="interview-qa">
+            <h3>Questions an interviewer will actually ask:</h3>
+
+            <div class="qa-item">
+                <div class="q">Q: What is the time complexity and why?</div>
+                <div class="a">A: O(R × C). We visit each of the R rows and C columns once to update the `histo` array. The Monotonic Stack evaluates each row's histogram in O(C) time because each element is pushed and popped at most once. Total work is R × O(C) = O(R × C).</div>
+            </div>
+
+            <div class="qa-item">
+                <div class="q">Q: What is the space complexity?</div>
+                <div class="a">A: O(C). We map out a `histo` array of size C, and the `stack` inside the helper function can take at most O(C) space. We do not need a 2D matrix for DP.</div>
+            </div>
+
+            <div class="qa-item">
+                <div class="q">Q: What happens if the matrix consists entirely of 0s?</div>
+                <div class="a">A: The `histo` array remains all 0s. The stack helper loop processes it and calculates an area of 0, returning 0 efficiently.</div>
+            </div>
+
+            <div class="qa-item">
+                <div class="q">Q: Why did you choose a Monotonic Stack instead of pure Dynamic Programming?</div>
+                <div class="a">A: Treating the matrix as a series of histograms allows us to perfectly reuse the elegant stack mechanic from "Largest Rectangle in Histogram". A pure DP approach exists but has a more complicated state transition.</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

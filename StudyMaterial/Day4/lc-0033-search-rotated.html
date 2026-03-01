@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #33 — Search in Rotated Sorted Array — Binary Search</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #33 — Search in Rotated Sorted Array <span class="badge">medium</span></h1>
+<p class="subtitle">Binary Search Pattern &nbsp;|&nbsp; Day 4 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 33: Search in Rotated Sorted Array</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #009688; background-color: #e0f2f1; color: #004d40; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> In a rotated array, at least ONE of the two halves (left of mid or right of mid) is always fully sorted. Identify which half is sorted, check if the target falls in that range, and eliminate the other half.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">At any midpoint, either the left half <code>[left, mid]</code> or the right half <code>[mid, right]</code> is guaranteed to be sorted. We check which half is sorted, then ask: "Is the target in the sorted half's range?" Binary decision at each step.</p>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{If } nums[left] \leq nums[mid]: \text{ left half is sorted}$$</p>
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{If } nums[mid] \leq nums[right]: \text{ right half is sorted}$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given a rotated sorted array <code>nums</code> and a <code>target</code>, return the index of <code>target</code> or <code>-1</code> if not found. Integers are distinct. Must run in O(log n).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  nums = [4,5,6,7,0,1,2], target = 0
+Output: 4</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 2:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  nums = [4,5,6,7,0,1,2], target = 3
+Output: -1</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 ≤ n ≤ 5000 | -10⁴ ≤ nums[i] ≤ 10⁴ | All integers are unique | Originally sorted then rotated</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Two Sorted Segments</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"The array has two sorted halves joined at a seam. At any midpoint, one of the two sub-halves (left or right of mid) must be clean and sorted. Look at which one is clean, check if target is in it."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">One half always sorted → range check → standard elimination</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Safe Zone</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Find the 'safe zone' — the half with predictable sorted order. If target is in the safe zone, search there. If not, search the other half."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Safe zone = sorted half. Range check = is target within [safe_start, safe_end]. Eliminates the unsafe half.</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def search(nums, target):
+    """
+    Optimal: Binary Search with Rotation Detection
+    Time: O(log n) | Space: O(1)
+    """
+    left, right = 0, len(nums) - 1
+
+    while left &lt;= right:
+        mid = left + (right - left) // 2
+
+        if nums[mid] == target:
+            return mid
+
+        # Left half [left, mid] is sorted
+        if nums[left] &lt;= nums[mid]:
+            if nums[left] &lt;= target &lt; nums[mid]:
+                right = mid - 1    # target is in the sorted left half
+            else:
+                left = mid + 1     # target is NOT in the left half — go right
+        # Right half [mid, right] is sorted
+        else:
+            if nums[mid] &lt; target &lt;= nums[right]:
+                left = mid + 1     # target is in the sorted right half
+            else:
+                right = mid - 1   # target is NOT in the right half — go left
+
+    return -1
+
+
+print("Optimal:", search([4, 5, 6, 7, 0, 1, 2], 0))    # Expected: 4
+print("Optimal:", search([4, 5, 6, 7, 0, 1, 2], 3))    # Expected: -1
+print("Optimal:", search([1], 0))                        # Expected: -1
+print("Optimal:", search([1, 3], 3))                     # Expected: 1</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: How do you determine which half is sorted?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Compare <code>nums[left]</code> to <code>nums[mid]</code>. If <code>nums[left] <= nums[mid]</code>, the left half <code>[left, mid]</code> is fully sorted (no rotation occurred in this range). Otherwise, the right half <code>[mid, right]</code> is fully sorted. One of the two halves must always be sorted in a singly-rotated array.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Why use <code>nums[left] <= nums[mid]</code> (≤) instead of strict <)?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> When <code>left == mid</code> (two-element window), we need <code><=</code> to correctly identify that the one-element left "half" is trivially sorted. Strict <code><</code> would incorrectly classify a two-element left half as unsorted when both elements are equal (which can't happen here since all integers are unique, but the <code><=</code> is still correct and conventional).</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> $O(\log n)$. Each iteration eliminates one half — either <code>left = mid + 1</code> or <code>right = mid - 1</code>. The window strictly shrinks by at least half each time. After at most log₂(n) iterations, we either find the target or exhaust the window.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: How does this differ from LC #153 (Find Minimum)?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> LC #153 finds the minimum — we search for the pivot. LC #33 searches for a specific target — we use the sorted-half property plus a range check. Both compare <code>nums[mid]</code> to a boundary but for different purposes: #153 to find the inflection point, #33 to locate a specific value.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) Array not rotated — <code>nums[left] <= nums[mid]</code> always true, behaves like standard binary search. (2) Target equals <code>nums[left]</code> or <code>nums[right]</code> — handled by <code>left <= right</code> condition, found at first or last step. (3) Two elements — mid = left, left half is one element, range check works correctly. (4) Single element — while runs once, mid = 0, first check finds it or returns -1.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #d94f8a;padding:18px;border-radius:8px;"><h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> Citi ran circular log buffers for APM data — a 24-hour rolling window implemented as a circular array. The buffer was "rotated" relative to the logical time order: midnight's data might start at physical index 300, not 0.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Scenario:</strong> Finding whether a specific alert event (by timestamp) occurred within the circular buffer without knowing the rotation offset — equivalent to LC #33 on timestamps.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How this pattern applied:</strong> The circular buffer had the exact rotated-sorted-array structure. Binary search with rotation detection located any timestamp in O(log 1440) ≈ 11 comparisons instead of a linear scan of 1,440 minute-slots.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Impact:</strong> Real-time alert correlation — "did server X have a CPU spike in the last 24 hours?" — became a binary search operation on the circular buffer instead of a linear scan. This made the correlation check fast enough to run in the alerting hot path (< 1ms), enabling smarter alert deduplication.</p></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#d94f8a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#d94f8a;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Rotated Binary Search</strong> — At each midpoint, one half is sorted. Range-check the sorted half to eliminate the other.</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Rotated sorted array (one rotation), distinct elements, O(log n) required</li>
+<li>✅ Circular buffers, time-series with wrap-around</li>
+<li>❌ <strong>Don't use when:</strong> Array has duplicates without modification (use LC #81 variant with <code>left++</code> when equal)</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (linear)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Rotated Binary Search)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(\log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can explain "one half is always sorted" invariant</li>
+<li style="margin:4px 0;">&#9744; Can write the range check conditions without looking</li>
+<li style="margin:4px 0;">&#9744; Can identify which comparison detects which sorted half</li>
+<li style="margin:4px 0;">&#9744; Can explain the duplicates variant</li>
+<li style="margin:4px 0;">&#9744; Can connect to circular buffer / time-series use case</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

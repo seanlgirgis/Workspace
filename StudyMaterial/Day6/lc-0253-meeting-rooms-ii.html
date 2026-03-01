@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #253 — Meeting Rooms II — Intervals</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #253 — Meeting Rooms II <span class="badge">medium</span></h1>
+<p class="subtitle">Intervals Pattern &nbsp;|&nbsp; Day 6 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 253: Meeting Rooms II</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #9C27B0; background-color: #f3e5f5; color: #4a148c; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> We need the peak number of simultaneously running meetings. Use a min-heap of end times. For each new meeting (sorted by start), check if the earliest-ending room is free. If yes, reuse it (heapreplace). If no, open a new room (heappush). The heap size = number of rooms in use.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">The minimum rooms needed = the maximum simultaneous meetings at any point in time.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">We track "rooms in use" via a min-heap of end times — the root is the room that becomes free soonest.</p>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{min rooms} = \max_{t} |\{[s_i, e_i] : s_i \leq t &lt; e_i\}|$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given an array of meeting time intervals <code>[start, end]</code>, find the minimum number of conference rooms required.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [[0,30],[5,10],[15,20]]
+Output: 2</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 2:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [[7,10],[2,4]]
+Output: 1</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 ≤ intervals.length ≤ 10⁴ | 0 ≤ start_i < end_i ≤ 10⁶</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Room Reuse</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"As each meeting starts, check if any room is free. The room that finishes soonest is checked first. If it's done, reuse it. If not, open a new room. A min-heap of end times tells us which room finishes soonest."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Min-heap of end times. heap[0] = earliest-ending room. If heap[0] ≤ new_start: reuse. Else: new room.</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Peak Concurrency</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"The heap size at any point = number of rooms currently in use. The maximum heap size over all time = the minimum rooms needed."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">heappush adds a room. heapreplace reuses a room (no size change). max(len(heap)) = answer.</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: $O(T \times n)$ vs. $O(n \log n)$</h3>
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #f0f7ff; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> We only care about "room availability" at meeting START times — not every point in time. Sort meetings by start. At each start, check if the earliest-ending room (min-heap root) is available. If yes: reuse it. If no: add a room. The heap size tracks current room count.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">📉 Why Brute Force Fails: The $O(T \times n)$ Trap</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Checking every time unit up to max_time (potentially 10⁶) × n meetings = up to 10¹⁰ operations.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Input Type</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Brute Force Performance</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Reason</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>max_time = 10⁶, n = 10⁴</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">10¹⁰ checks</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">One check per time unit per meeting</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Long meetings</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Slow</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Each long meeting counted at every time unit</td>
+</tr>
+</tbody></table>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🚀 The Optimal Approach: $O(n \log n)$</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Sort by start time. Maintain a min-heap of end times (each occupied room's end time). For each meeting:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>If <code>heap[0] <= start</code>: earliest room just freed → reuse it (<code>heapreplace(heap, end)</code>)</li>
+<li>Else: no room available → open new room (<code>heappush(heap, end)</code>)</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Final answer: <code>len(heap)</code> = rooms in use at peak.</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Key Lifecycle Rule</h4>
+<ol style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Sort meetings by start time</strong> — process in chronological order</li>
+<li><strong>For each meeting:</strong> check if the soonest-finishing room is free</li>
+<li><strong>Reuse or open</strong> — heapreplace (reuse) or heappush (new room)</li>
+</ul>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">✅ Mathematical Proof</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">The min-heap always contains exactly the set of currently occupied rooms' end times. When we process meeting i (start_i), heap[0] is the earliest that any room becomes free. If heap[0] <= start_i, that room is free — we can reuse it. If not, all rooms are still occupied — we must add one. At the end, len(heap) = number of rooms needed for the peak concurrent period.</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Summary:</strong> The heap encodes the "earliest available room." Reuse when available, add when not. len(heap) at end = minimum rooms needed.</p>
+</div>
+</div></div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>import heapq
+
+def minMeetingRooms(intervals: list[list[int]]) -&gt; int:
+    """
+    Optimal: Min-Heap of end times
+    Time: O(n log n) | Space: O(n) for heap
+    """
+    if not intervals:
+        return 0
+    intervals.sort(key=lambda x: x[0])   # sort by start time
+    heap = []   # min-heap of end times (each entry = end time of an occupied room)
+
+    for start, end in intervals:
+        if heap and heap[0] &lt;= start:    # earliest room is free
+            heapq.heapreplace(heap, end) # reuse that room (pop old end, push new end)
+        else:
+            heapq.heappush(heap, end)    # all rooms occupied — open new room
+
+    return len(heap)
+
+
+print("Optimal:", minMeetingRooms([[0,30],[5,10],[15,20]]))   # Expected: 2
+print("Optimal:", minMeetingRooms([[7,10],[2,4]]))             # Expected: 1
+print("Optimal:", minMeetingRooms([[1,5],[5,10]]))             # Expected: 1 (back-to-back, not concurrent)</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: How does this relate to capacity planning?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Replace "meetings" with "ETL jobs," "monitoring agents," or "database queries." The algorithm tells you the minimum number of worker threads or servers needed to handle peak concurrent workload. At Citi: replace meetings with APM polling intervals — what's the minimum number of polling agents needed to monitor 6,000 servers with no gaps?</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: What does <code>heapreplace</code> do vs pop + push?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> <code>heapreplace(heap, val)</code> is an atomic pop + push in O(log n) — it pops the minimum and pushes the new value in a single heap operation. This is more efficient than <code>heappop</code> + <code>heappush</code> (which would be two O(log n) operations). Use <code>heapreplace</code> when you know you'll always push after popping (the room is always reused, not discarded).</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> O(n log n). Sorting: O(n log n). Processing: n meetings, each does one heap operation (heapreplace or heappush) in O(log n). Total: O(n log n + n log n) = O(n log n). The heap never grows beyond n elements.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: Why sort by start time and not end time?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> We process meetings as they start — chronologically. At each meeting's start time, we need to know if any room has become free (end time ≤ current start time). Sorting by start time means we process meetings in the order they begin, which is the natural order for room allocation decisions.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) Empty intervals — early return 0. (2) Back-to-back meetings (end = next start) — <code>heap[0] <= start</code> uses <code><=</code>, so [0,5] and [5,10] correctly reuse the same room. (3) All at same time — heap grows to n, returns n. (4) All sequential — heap never grows past 1, returns 1.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #8a5cc4;padding:18px;border-radius:8px;"></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Min-Heap of End Times</strong> — Track occupied rooms; reuse the earliest-finishing room; heap size = current room count</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Minimum resources needed for peak concurrent workload</li>
+<li>✅ Meeting rooms, CPU cores, server agents, worker threads</li>
+<li>✅ Any "how many do I need simultaneously?" problem</li>
+<li>❌ <strong>Don't use when:</strong> You want to maximize throughput differently — use LC #435 (greedy by end)</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (scan all times)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(T \times n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(T)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Min-Heap)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n \log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can explain the min-heap of end times approach</li>
+<li style="margin:4px 0;">&#9744; Can explain heapreplace and why it's used</li>
+<li style="margin:4px 0;">&#9744; Can write the solution from memory in 4 minutes</li>
+<li style="margin:4px 0;">&#9744; Can explain the relationship to capacity planning</li>
+<li style="margin:4px 0;">&#9744; Can state the back-to-back edge case and how <= handles it</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #703 — Kth Largest Element in a Stream — Heap</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #703 — Kth Largest Element in a Stream <span class="badge">easy</span></h1>
+<p class="subtitle">Heap Pattern &nbsp;|&nbsp; Day 5 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 703: Kth Largest Element in a Stream</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #e3f2fd; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> A min-heap of size k maintains the k largest elements seen so far. The root — the smallest in the heap — is always the kth largest overall. When a new element arrives: push it, and if the heap exceeds size k, pop the root (evicting the smallest of the top k, which is no longer in the top k).</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Maintain the invariant: heap contains exactly the k largest elements. The root is the minimum of the top k = the kth largest.</p>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{heap root} = \min(\text{top } k \text{ elements}) = k\text{th largest element}$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Design a class that finds the kth largest element in a stream. Initialize with integer <code>k</code> and array <code>nums</code>. Implement <code>add(val)</code> which appends a value to the stream and returns the kth largest element.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  k = 3, nums = [4, 5, 8, 2]
+add(3) → 4 | add(5) → 5 | add(10) → 5 | add(9) → 8 | add(4) → 8</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 ≤ k ≤ 10⁴ | 0 ≤ nums.length ≤ 10⁴ | -10⁴ ≤ nums[i] ≤ 10⁴ | At most 10⁴ calls to add | It's guaranteed kth largest always exists</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Bouncer's VIP List</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Maintain a VIP list of the top k people. The person at the door of the list (the least VIP) is position k. When someone new arrives, check if they belong. If yes, add them and evict whoever is now position k+1."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">min-heap of size k — root = k-th VIP. heappush + heappop when size exceeds k</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Sliding Cutoff</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"The kth largest is a moving bar. New values above the bar replace the bar. Values below the bar are irrelevant. The min-heap's root IS the bar."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Heap root tracks the current cutoff. Elements below it are outside the top k.</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: $O(n \log n)$ vs. $O(\log k)$ per add</h3>
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #f0f7ff; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> We don't need to know all n elements in sorted order — we only need the k largest. A min-heap of fixed size k maintains exactly this. Push: O(log k). Pop: O(log k). The heap size never grows beyond k, so each add() is O(log k) regardless of how many total elements have been seen.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">📉 Why Brute Force Fails: The $O(n \log n)$ Trap</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Sort + index after each add() re-sorts the growing list. After m add() calls on initial n elements, total work is O((n+m) log(n+m)) per call.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Input Type</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Brute Force Performance</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Reason</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>10,000 add() calls</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n² log n) total</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Each add re-sorts the full list</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Streaming data</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Unbounded cost</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort cost grows with stream length</td>
+</tr>
+</tbody></table>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🚀 The Optimal Approach: $O(\log k)$ per add</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Keep a min-heap of exactly k elements. Push the new value, then pop if size > k. The root is always the kth largest.</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Key Lifecycle Rule</h4>
+<ol style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Push new element</strong> onto the heap — O(log k)</li>
+<li><strong>If heap size > k:</strong> pop the root (smallest element, no longer in top k) — O(log k)</li>
+<li><strong>Root is the answer</strong> — O(1)</li>
+</ul>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">✅ Mathematical Proof</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">The heap invariant: heap contains the k largest elements seen. When we push a new element:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>If new > root: new displaces root in top k, root is evicted</li>
+<li>If new ≤ root: new is below the kth largest, immediately evicted</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">After each add, heap contains the k largest, root = kth largest. ✓</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Summary:</strong> By fixing the heap size at k, we get O(log k) operations — independent of total stream length. The heap size is a constant; only the heap structure changes.</p>
+</div>
+</div></div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>import heapq
+
+class KthLargest:
+    """
+    Optimal: Min-Heap of size k
+    __init__: O(n log k) | add: O(log k) | Space: O(k)
+    """
+    def __init__(self, k: int, nums: list[int]):
+        self.k = k
+        self.heap = []
+        for num in nums:
+            self.add(num)   # reuse add() logic to build heap correctly
+
+    def add(self, val: int) -&gt; int:
+        heapq.heappush(self.heap, val)
+        if len(self.heap) &gt; self.k:
+            heapq.heappop(self.heap)   # evict the smallest of the top k+1
+        return self.heap[0]            # root = kth largest
+
+
+kl = KthLargest(3, [4, 5, 8, 2])
+print("Optimal:", kl.add(3))    # Expected: 4
+print("Optimal:", kl.add(5))    # Expected: 5
+print("Optimal:", kl.add(10))   # Expected: 5
+print("Optimal:", kl.add(9))    # Expected: 8
+print("Optimal:", kl.add(4))    # Expected: 8</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why a min-heap instead of a max-heap for "kth largest"?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The root of a min-heap of size k is the smallest of the k largest elements — which is the kth largest overall. A max-heap would give us the largest element as root, which isn't directly the kth largest without knowing k's position. The min-heap of size k IS the top-k filter: everything below root isn't in the top k.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: What if k equals 1 — what does the heap become?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> A heap of size 1 — always holds the single maximum element. <code>add()</code> returns the running maximum of the entire stream. The heap simply tracks the one largest value seen.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> <code>__init__</code>: O(n log k) — n elements, each heappush is O(log k). <code>add()</code>: O(log k) — one heappush + at most one heappop, each O(log k). Space: O(k) — the heap never exceeds k elements. If k << n, this is a massive improvement over O(n log n) sorting.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: How does this pattern apply to real-time leaderboards or percentile tracking?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Exact same structure. For a live P95 (95th percentile) response time across n = 1,000,000 requests: a min-heap of size k = 50,000 (top 5%) tracks the P95 boundary as a stream. Each new response time is pushed; if it exceeds the current P95 threshold (heap root), it enters the top 5% and evicts the old boundary. O(log 50000) ≈ 16 operations per request.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) Initial nums array shorter than k — heap has fewer than k elements, add() still returns heap[0] correctly once heap size reaches k. (2) Add value smaller than all existing — heappush then immediately heappop (size > k case), root unchanged. (3) k = 1 — heap always size 1, returns running maximum. (4) All values equal — heap fills with equal values, root = that value, always returned.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #e05b85;padding:18px;border-radius:8px;"></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Min-Heap of Size k</strong> — Track the k largest elements in a stream; the root is always the kth largest</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Streaming data, need running kth largest/smallest</li>
+<li>✅ "Top K" without sorting all n elements</li>
+<li>✅ Real-time leaderboards, percentile tracking, capacity monitoring</li>
+<li>❌ <strong>Don't use when:</strong> You need all k elements sorted (heap gives unordered top k) — need heapq.nlargest()</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time (per add)</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (sort)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n \log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Min-Heap size k)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(\log k)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(k)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can explain why min-heap of size k gives the kth largest</li>
+<li style="margin:4px 0;">&#9744; Can write the add() method from memory</li>
+<li style="margin:4px 0;">&#9744; Can explain why we evict when size > k</li>
+<li style="margin:4px 0;">&#9744; Can apply to percentile tracking use case with specific numbers</li>
+<li style="margin:4px 0;">&#9744; Can describe the k=1 edge case</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

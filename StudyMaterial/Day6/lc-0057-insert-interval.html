@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #57 — Insert Interval — Intervals</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #57 — Insert Interval <span class="badge">medium</span></h1>
+<p class="subtitle">Intervals Pattern &nbsp;|&nbsp; Day 6 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 57: Insert Interval</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #FF5722; background-color: #fbe9e7; color: #bf360c; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> The existing intervals are already sorted and non-overlapping. Process them in three phases: (1) intervals entirely before the new one — add directly. (2) Intervals overlapping the new one — merge all into one. (3) Intervals entirely after — add directly. Three sequential while loops, each handling one phase.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">For existing interval <code>[s, e]</code> and new interval <code>[ns, ne]</code>:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Before: <code>e < ns</code> — no overlap, add <code>[s, e]</code></li>
+<li>Overlap: <code>s <= ne</code> — merge: <code>ns = min(ns,s)</code>, <code>ne = max(ne,e)</code></li>
+<li>After: <code>s > ne</code> — no overlap, add remaining</li>
+</ul>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">You are given a sorted, non-overlapping array of intervals and a new interval. Insert the new interval (merging if necessary) and return the result.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  intervals = [[1,2],[3,5],[6,7],[8,10],[12,16]], newInterval = [4,8]
+Output: [[1,2],[3,10],[12,16]]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 2:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  intervals = [[1,5]], newInterval = [2,3]
+Output: [[1,5]]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 0 ≤ intervals.length ≤ 10⁴ | intervals sorted by start, non-overlapping | 0 ≤ start_i ≤ end_i ≤ 10⁵</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Three-Phase Scan</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"I'm walking along a sorted timeline. First, I pass intervals that end before my new one starts — copy them. Then, I hit intervals that overlap my new one — merge them all into one big interval. Finally, I copy everything after."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Three sequential while loops: before, merge, after. Linear O(n).</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Maintenance Blackout Insert</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Adding a new maintenance window to a sorted schedule. Windows before it stay. Windows that overlap with it get absorbed. Windows after it stay."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Three clear phases, each handled by one while loop condition</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: $O(n \log n)$ vs. $O(n)$</h3>
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #f0f7ff; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> The input is already sorted. We don't need to sort again. The three-phase scan exploits the pre-sorted order: scan past intervals before the new one, merge all overlapping ones into the new interval, then copy the rest. One linear pass = O(n).</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">📉 Why Brute Force Fails: The $O(n \log n)$ Trap</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Re-sorting throws away the pre-sorted property of the input — wasted work.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Input Type</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Brute Force Performance</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Reason</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Already sorted input</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort runs even though input is sorted</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>n = 10,000</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">~130,000 sort ops</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">All wasted — could be 10,000 with linear scan</td>
+</tr>
+</tbody></table>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🚀 The Optimal Approach: $O(n)$</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Three sequential while loops, each with a clear stopping condition:</p>
+<ol style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Phase 1:</strong> <code>intervals[i][1] < new[0]</code> — interval ends before new starts → add to result</li>
+<li><strong>Phase 2:</strong> <code>intervals[i][0] <= new[1]</code> — interval overlaps new → expand new's boundaries</li>
+<li><strong>Phase 3:</strong> Remaining intervals after the merge — add all directly</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Key Lifecycle Rule</h4>
+<ol style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Copy all intervals that end before new starts</strong> (<code>end < new_start</code>)</li>
+<li><strong>Merge all overlapping intervals into new</strong> (<code>start <= new_end</code>)</li>
+<li><strong>Append new, then copy remaining intervals</strong></li>
+</ul>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">✅ Mathematical Proof</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Each interval is visited exactly once by exactly one of the three while loops. Three loops together = O(n) total. No comparisons are repeated.</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Summary:</strong> Three-phase scan is the optimal pattern for insert-into-sorted-intervals. Each phase has one clean stopping condition. O(n) total — no sort needed.</p>
+</div>
+</div></div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def insert(intervals: list[list[int]], new: list[int]) -&gt; list[list[int]]:
+    """
+    Optimal: Three-phase linear scan
+    Time: O(n) | Space: O(n) for output
+    """
+    result = []
+    i = 0
+    n = len(intervals)
+
+    # Phase 1: intervals that end before new starts — no overlap
+    while i &lt; n and intervals[i][1] &lt; new[0]:
+        result.append(intervals[i])
+        i += 1
+
+    # Phase 2: intervals that overlap with new — merge into new
+    while i &lt; n and intervals[i][0] &lt;= new[1]:
+        new[0] = min(new[0], intervals[i][0])   # expand new's start if needed
+        new[1] = max(new[1], intervals[i][1])   # expand new's end if needed
+        i += 1
+    result.append(new)   # append the merged new interval
+
+    # Phase 3: intervals that start after new ends — no overlap
+    while i &lt; n:
+        result.append(intervals[i])
+        i += 1
+
+    return result
+
+
+print("Optimal:", insert([[1,2],[3,5],[6,7],[8,10],[12,16]], [4,8]))   # [[1,2],[3,10],[12,16]]
+print("Optimal:", insert([[1,5]], [2,3]))                               # [[1,5]]
+print("Optimal:", insert([], [5,7]))                                    # [[5,7]]
+print("Optimal:", insert([[1,5]], [6,8]))                               # [[1,5],[6,8]]</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: What are the three phases of the algorithm?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Phase 1: copy all intervals whose end is strictly before the new interval's start — they can't overlap. Stopping condition: <code>intervals[i][1] < new[0]</code>. Phase 2: merge all intervals that overlap with new — stopping condition: <code>intervals[i][0] <= new[1]</code>. Phase 3: copy all remaining intervals — they start after the new interval ends.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Why is this O(n) while the brute force is O(n log n)?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The input is already sorted. The optimal algorithm exploits this — no sort needed. Three sequential while loops, each scanning forward without backtracking, means each interval is visited exactly once. Total: O(n). Brute force re-sorts (O(n log n)) unnecessarily.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> O(n). Each of the n intervals is processed by exactly one of the three while loops — they collectively scan the array left to right without revisiting any interval. The pointer <code>i</code> only ever increments. No nested loops, no sorting = O(n).</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: What if the new interval doesn't overlap with any existing interval?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Phase 2 may execute zero iterations (new interval fits in a gap — its start is after all Phase 1 intervals end and before Phase 3 intervals start). The new interval is appended at the correct sorted position between the Phase 1 and Phase 3 results. The algorithm handles this naturally.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) Empty intervals — Phase 1 and Phase 3 are skipped, Phase 2 is skipped, just append new. (2) New interval before all — Phase 1 is empty, Phase 2 may start from index 0. (3) New interval after all — Phase 1 processes all, Phase 2 is empty, new is appended at end. (4) New interval contains all existing — Phase 2 processes all, result is just [new] after merging. All handled by the three-loop structure.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #8a5cc4;padding:18px;border-radius:8px;"></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Three-Phase Linear Scan</strong> — Before | Merge | After, each phase a while loop with a clear stopping condition</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Insert into sorted non-overlapping interval list</li>
+<li>✅ Adding events/windows to a sorted calendar</li>
+<li>✅ When input is guaranteed sorted — O(n), no sort needed</li>
+<li>❌ <strong>Don't use when:</strong> Input is unsorted — sort first then use Merge Intervals (LC #56)</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (re-sort)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n \log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Three-Phase)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can describe all three phases and their stopping conditions</li>
+<li style="margin:4px 0;">&#9744; Can write all three while loops from memory</li>
+<li style="margin:4px 0;">&#9744; Can explain why no sort is needed (pre-sorted input)</li>
+<li style="margin:4px 0;">&#9744; Can trace through the edge case where new interval overlaps all existing</li>
+<li style="margin:4px 0;">&#9744; Can connect to maintenance window scheduling use case</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

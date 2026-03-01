@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #986 — Interval List Intersections — Intervals</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #986 — Interval List Intersections <span class="badge">medium</span></h1>
+<p class="subtitle">Intervals Pattern &nbsp;|&nbsp; Day 6 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 986: Interval List Intersections</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #FF9800; background-color: #fff3e0; color: #e65100; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Two pointers on two sorted interval lists. The intersection of [a,b] and [c,d] is [max(a,c), min(b,d)] — valid only if max(a,c) ≤ min(b,d). After checking, advance the pointer for whichever interval ends first — it can't overlap any remaining intervals in the other list.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{Intersection}([a,b], [c,d]) = [\max(a,c), \min(b,d)] \text{ if } \max(a,c) \leq \min(b,d)$$</p>
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{Advance pointer: advance } i \text{ if } b &lt; d, \text{ else advance } j$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given two lists of closed intervals, each sorted and non-overlapping within itself, return their intersection.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>A = [[0,2],[5,10],[13,23],[24,25]]
+B = [[1,5],[8,12],[15,24],[25,26]]
+Output: [[1,2],[5,5],[8,10],[15,23],[24,24],[25,25]]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 0 ≤ firstList.length, secondList.length ≤ 1000 | 0 ≤ start_i < end_i ≤ 10⁹</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Two Highlighters</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Two people highlight sections of a document with different colors. The overlapping (doubly-highlighted) sections are the intersections. Walk both highlights left to right with two pointers — whenever they overlap, record it. Advance whichever highlight ends first."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Two pointers i, j on sorted lists. Intersection = [max(starts), min(ends)] if valid. Advance lesser end.</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Calendar Overlap</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Find when two people are both available (or both busy). Walk their schedules with two pointers — when their intervals overlap, that's the intersection. Move the pointer for whoever's interval ends first."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Two pointers, advance shorter interval — it can't overlap any further intervals from the other list</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: $O(m \times n)$ vs. $O(m + n)$</h3>
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #f0f7ff; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> The lists are sorted. An interval that ends before the current interval in the other list can't possibly overlap any future intervals in the other list. So when we process a pair, we can safely advance the pointer for whichever interval ends first. This ensures we never revisit any interval from either list.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">📉 Why Brute Force Fails: The $O(m \times n)$ Trap</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Every interval in A checked against every interval in B: m × n pairs. For m = n = 1000: 1,000,000 pair checks.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Input Type</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Brute Force Performance</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Reason</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>m = n = 1000</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">1 million comparisons</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">All pairs checked</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Disjoint lists</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">m × n checks</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Still checks all pairs before concluding no overlap</td>
+</tr>
+</tbody></table>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🚀 The Optimal Approach: $O(m + n)$</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Two pointers i=0 (into A) and j=0 (into B). At each step:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Compute intersection <code>[max(A[i][0], B[j][0]), min(A[i][1], B[j][1])]</code></li>
+<li>If valid (lo ≤ hi): add to result</li>
+<li>Advance the pointer for whichever interval ends first (it can't overlap the next interval in the other list)</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Key Lifecycle Rule</h4>
+<ol style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Intersection formula:</strong> <code>[max(starts), min(ends)]</code> — valid if max ≤ min</li>
+<li><strong>Advance:</strong> pointer for interval with smaller end. It's "used up" — can't overlap anything further in the other list.</li>
+</ul>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">✅ Mathematical Proof</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">If A[i][1] < B[j][1], then A[i] ends before B[j]. Any future B intervals start at B[j+1][0] ≥ B[j][0] > A[i][1] (since B is sorted and non-overlapping). So A[i] can't intersect any B[j'] for j' > j. Safe to advance i.</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Summary:</strong> Two pointers + sorted order → each interval is visited at most once. O(m + n) instead of O(m × n). The advance-the-shorter rule is the key — the shorter interval is "done," it can't overlap anything further in the other list.</p>
+</div>
+</div></div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def intervalIntersection(A: list[list[int]], B: list[list[int]]) -&gt; list[list[int]]:
+    """
+    Optimal: Two pointers on sorted lists
+    Time: O(m + n) | Space: O(1) extra (output not counted)
+    """
+    result = []
+    i = j = 0
+
+    while i &lt; len(A) and j &lt; len(B):
+        lo = max(A[i][0], B[j][0])   # intersection start = max of both starts
+        hi = min(A[i][1], B[j][1])   # intersection end = min of both ends
+        if lo &lt;= hi:                  # valid intersection (non-empty)
+            result.append([lo, hi])
+
+        # Advance the pointer for the interval that ends first
+        # That interval is "used up" — can't overlap anything further in the other list
+        if A[i][1] &lt; B[j][1]:
+            i += 1
+        else:
+            j += 1
+
+    return result
+
+
+A = [[0,2],[5,10],[13,23],[24,25]]
+B = [[1,5],[8,12],[15,24],[25,26]]
+print("Optimal:", intervalIntersection(A, B))
+# Expected: [[1,2],[5,5],[8,10],[15,23],[24,24],[25,25]]</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: How do you compute the intersection of two intervals?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> For intervals [a,b] and [c,d], the intersection is [max(a,c), min(b,d)]. It's valid (non-empty) if <code>max(a,c) ≤ min(b,d)</code>. The max of starts ensures we start where both are active. The min of ends ensures we stop when the first one ends. If max > min, they don't overlap.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Why advance the pointer for the interval that ends first?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> If A[i][1] < B[j][1], then A[i] ends before B[j]. B[j] and all subsequent B intervals start at or after B[j][0] > A[i][1] (sorted, non-overlapping). So A[i] cannot intersect with B[j] or any later B interval. Advancing i is safe — we've found all possible intersections involving A[i].</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of the optimal approach and why?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> O(m + n). Each pointer (i for A, j for B) only ever increments — never decrements. i goes from 0 to m-1, j goes from 0 to n-1. Total iterations ≤ m + n. Each iteration is O(1). No intervals from either list are visited more than once.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: What real-world problem is this pattern solving?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> "Find when two systems were both operational" — e.g., when were both System A and System B running simultaneously (for SLA joint compliance)? Or: "find time windows when two server maintenance schedules overlap." The two interval lists represent uptime windows for each system; intersections are the joint uptime.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) One list is empty — while loop never executes, returns []. (2) No overlaps — lo > hi for every pair, result is []. (3) One interval contains another — e.g., [1,10] and [2,5]: intersection = [2,5], then advance j (5 < 10). (4) Touching intervals [a,b] and [b,c] — intersection = [b,b] (valid since lo = b ≤ hi = b). Point intersection is included.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #8a5cc4;padding:18px;border-radius:8px;"></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#8a5cc4;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#8a5cc4;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Two Pointers on Sorted Lists</strong> — O(m+n) intersection instead of O(m×n) brute force; advance the shorter interval</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Intersection of two sorted non-overlapping interval lists</li>
+<li>✅ "When are both systems simultaneously active?"</li>
+<li>✅ Joint availability windows, concurrent uptime, overlap detection</li>
+<li>❌ <strong>Don't use when:</strong> Lists are unsorted — sort first (O(n log n + m log m))</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (all pairs)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(m \times n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$ extra</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Two Pointers)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(m + n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$ extra</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can state the intersection formula [max(starts), min(ends)]</li>
+<li style="margin:4px 0;">&#9744; Can explain the "advance the shorter" rule and why it's correct</li>
+<li style="margin:4px 0;">&#9744; Can write the solution from memory in 3 minutes</li>
+<li style="margin:4px 0;">&#9744; Can explain the valid intersection condition (lo ≤ hi)</li>
+<li style="margin:4px 0;">&#9744; Can connect to joint uptime / SLA compliance use case</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

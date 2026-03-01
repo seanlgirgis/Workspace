@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #295 — Find Median from Data Stream — Heap</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #f8d7da; color: #721c24; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #295 — Find Median from Data Stream <span class="badge">hard</span></h1>
+<p class="subtitle">Heap Pattern &nbsp;|&nbsp; Day 5 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🏗️ LeetCode 295: Find Median from Data Stream</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #F44336; background-color: #ffebee; color: #b71c1c; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Split the data in half. The lower half lives in a max-heap (we want its maximum — the lower median). The upper half lives in a min-heap (we want its minimum — the upper median). Keep the two heaps balanced in size. The median is at the boundary.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🛠️ The Mathematical Model</h4>
+
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{lo} = \text{max-heap (lower half)}, \quad \text{hi} = \text{min-heap (upper half)}$$</p>
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{Invariant: } |\text{lo}| = |\text{hi}| \text{ or } |\text{lo}| = |\text{hi}| + 1$$</p>
+<p style="color:#555;font-style:italic;text-align:center;margin:8px 0;">$$\text{Median: lo[0] if odd count; } (\text{lo}[0] + \text{hi}[0]) / 2 \text{ if even}$$</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Implement <code>MedianFinder</code> class:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li><code>addNum(int num)</code> — adds a number to the data structure</li>
+<li><code>findMedian()</code> — returns the median of all elements so far</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example 1:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>addNum(1) | addNum(2) | findMedian() → 1.5
+addNum(3) | findMedian() → 2.0</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> -10⁵ ≤ num ≤ 10⁵ | At most 5×10⁴ calls to addNum and findMedian | At least one element before findMedian is called</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%; border-collapse: collapse;">
+    <tr style="background-color: #f2f2f2; text-align: left;">
+        <th style="padding: 12px; border: 1px solid #ddd;">Model</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">The "Story"</th>
+        <th style="padding: 12px; border: 1px solid #ddd;">Mechanism</th>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Two Sorted Stacks</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"Sort all values and cut them in half. The left half faces right (you see its top = max of lower half). The right half faces left (you see its top = min of upper half). The median is between these two tops."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Max-heap lo (top = lower median), min-heap hi (top = upper median). Balance sizes. Median at boundary.</td>
+    </tr>
+    <tr>
+        <td style="padding: 12px; border: 1px solid #ddd;"><b>Balance Scale</b></td>
+        <td style="padding: 12px; border: 1px solid #ddd;">"A balance scale with two pans. Left pan = lower half, right pan = upper half. They must stay within 1 element of each other. The center weight is the median."</td>
+        <td style="padding: 12px; border: 1px solid #ddd;">Size invariant: |lo| == |hi| or |lo| == |hi| + 1. Rebalance after each add.</td>
+    </tr>
+</table>
+</div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: $O(n \log n)$ vs. $O(\log n)$ per add</h3>
+
+<div style="padding: 15px; border-left: 8px solid #2196F3; background-color: #f0f7ff; color: #0d47a1; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> The median only depends on two values: the maximum of the lower half and the minimum of the upper half. We don't need the full sorted order. Two heaps maintain exactly these two boundary values in O(log n) per update and O(1) per query.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">📉 Why Brute Force Fails: The $O(n \log n)$ Trap</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Sort on each findMedian() call scales with list size. After m add() calls, findMedian() costs O(m log m) per call.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Input Type</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Brute Force Performance</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Reason</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>50,000 calls</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n² log n) total</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">n sorts, each O(n log n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>High-frequency streaming</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Unusable</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort cost grows with stream length</td>
+</tr>
+</tbody></table>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🚀 The Optimal Approach: $O(\log n)$ per addNum, $O(1)$ per findMedian</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Two heaps partition the data:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li><code>lo</code>: max-heap (negated in Python) — holds the lower half</li>
+<li><code>hi</code>: min-heap — holds the upper half</li>
+<li>Invariant: <code>|lo| == |hi|</code> (even count) or <code>|lo| == |hi| + 1</code> (odd count, lo has extra)</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Key Lifecycle Rule</h4>
+<ol style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Always push to lo first</strong> (negate for max-heap)</li>
+<li><strong>Rebalance ordering:</strong> if lo's max > hi's min, move lo's top to hi</li>
+<li><strong>Rebalance sizes:</strong> if |lo| > |hi| + 1, move lo's top to hi; if |hi| > |lo|, move hi's top to lo</li>
+</ul>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">✅ Mathematical Proof</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">After every addNum(), the invariant holds: lo contains the lower ⌈n/2⌉ elements, hi contains the upper ⌊n/2⌋. Both heaps give O(1) access to their tops. findMedian() reads lo[0] (and optionally hi[0]) in O(1).</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Summary:</strong> Two heaps maintain the "boundary" of the sorted data. We never need the full order — just the maximum-of-lower and minimum-of-upper. That's exactly what heaps provide.</p>
+</div>
+</div></div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>import heapq
+
+class MedianFinder:
+    """
+    Optimal: Two Heaps
+    addNum: O(log n) | findMedian: O(1) | Space: O(n)
+    """
+    def __init__(self):
+        self.lo = []   # max-heap (lower half) — store negated values
+        self.hi = []   # min-heap (upper half)
+
+    def addNum(self, num: int) -&gt; None:
+        heapq.heappush(self.lo, -num)   # always push to lo first (negated)
+
+        # Rebalance ordering: lo's max must be &lt;= hi's min
+        if self.lo and self.hi and (-self.lo[0]) &gt; self.hi[0]:
+            heapq.heappush(self.hi, -heapq.heappop(self.lo))
+
+        # Rebalance sizes: lo can have at most 1 more element than hi
+        if len(self.lo) &gt; len(self.hi) + 1:
+            heapq.heappush(self.hi, -heapq.heappop(self.lo))
+        elif len(self.hi) &gt; len(self.lo):
+            heapq.heappush(self.lo, -heapq.heappop(self.hi))
+
+    def findMedian(self) -&gt; float:
+        if len(self.lo) &gt; len(self.hi):
+            return float(-self.lo[0])   # odd count — median is lo's top
+        return (-self.lo[0] + self.hi[0]) / 2.0   # even count — average of both tops
+
+
+mf = MedianFinder()
+mf.addNum(1); mf.addNum(2)
+print("Optimal:", mf.findMedian())   # Expected: 1.5
+mf.addNum(3)
+print("Optimal:", mf.findMedian())   # Expected: 2.0</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why two heaps instead of a sorted list?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Insertion into a sorted list is O(n) — you need to find the correct position and shift elements. Heap insertion (heappush) is O(log n). For streaming data with m addNum() calls, sorted list costs O(m × n) total vs. O(m log n) with heaps. The two-heap approach is also O(1) for findMedian, while sorted list requires no extra computation at query time but pays more at insert time.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Why always push to lo first, then rebalance?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> By routing everything through lo first, we ensure every new element is evaluated against the lower half. If it turns out the element belongs in the upper half (lo's max > hi's min after insert), we move it. This "push-then-check" pattern is simpler than trying to determine the correct heap before pushing.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the time complexity of addNum and findMedian?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> addNum = O(log n) — at most 2-3 heap operations (heappush + heappop for rebalancing), each O(log n). findMedian = O(1) — just reads the tops of both heaps without modifying them. Space = O(n) — the two heaps together hold all n elements.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: Where does this pattern apply in real monitoring systems?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Rolling P50 (median) for SLO monitoring. You can extend to rolling P95 by changing the split ratio: lo has 5% of elements, hi has 95% — the P95 is lo's top. In Citi's APM infrastructure, rolling percentile computation over 5-minute windows on response times used this exact pattern: two heaps, rebalanced each minute as new readings arrived and old ones expired.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What are the edge cases to watch for?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> (1) Single element — lo has 1 element, hi is empty. findMedian returns lo[0]. (2) Two elements — after rebalancing, lo has 1, hi has 1. findMedian averages both tops. (3) Even vs odd count — the size check <code>len(lo) > len(hi)</code> (not >=) correctly identifies the odd-count case. (4) Negative numbers — negation for max-heap works correctly: <code>-(-5) = 5</code>, <code>-(-3) = 3</code>.</p>
+</div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #e05b85;padding:18px;border-radius:8px;"></div>
+</div>
+<div class="card" style="">
+<h2 style="color:#e05b85;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#e05b85;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Two Heaps</strong> — Max-heap for lower half + min-heap for upper half. Median at the boundary.</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use It</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ Streaming median — elements arrive one by one</li>
+<li>✅ Rolling percentiles (P50, P95) — change the size ratio</li>
+<li>✅ Need O(1) median query with O(log n) updates</li>
+<li>❌ <strong>Don't use when:</strong> Batch median on static array — just sort and index</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">addNum</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">findMedian</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (sort)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n \log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal (Two Heaps)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(\log n)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(1)$</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">$O(n)$</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can explain why two heaps give O(1) median access</li>
+<li style="margin:4px 0;">&#9744; Can describe the size invariant and ordering invariant</li>
+<li style="margin:4px 0;">&#9744; Can write the full MedianFinder from memory in 8 minutes</li>
+<li style="margin:4px 0;">&#9744; Can extend to arbitrary percentiles (P95, P99)</li>
+<li style="margin:4px 0;">&#9744; Can connect to SLO monitoring use case with specific numbers</li>
+</ul>
+</div>
+</div>
+</body>
+</html>

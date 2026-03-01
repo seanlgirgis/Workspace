@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Guide - Contains Duplicate</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2 {
+            color: #2c3e50;
+        }
+
+        .diagram-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        .step {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .array-box {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+            border: 2px solid #3498db;
+            margin: 0 5px;
+            font-weight: bold;
+            border-radius: 4px;
+            background: #e8f4f8;
+        }
+
+        .array-box.active {
+            background: #f39c12;
+            color: white;
+            border-color: #e67e22;
+        }
+
+        .set-container {
+            border: 2px dashed #9b59b6;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            min-height: 40px;
+            background: #fdfaf6;
+        }
+
+        .set-item {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 5px;
+            background: #8e44ad;
+            color: white;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        code {
+            background: #eee;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .insight {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-left: 4px solid #28a745;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Visual Guide: Contains Duplicate (Hash Set)</h1>
+    <p>Array: <code>[1, 2, 3, 1]</code></p>
+
+    <div class="insight">
+        <strong>The "Aha!" Moment:</strong> A Hash Set lets you track what you've seen with near-instant $O(1)$ lookups.
+        If the element is already in the set, you know immediately there's a duplicate.
+    </div>
+
+    <div class="diagram-container">
+        <div class="step">
+            <h3>Step 1: Inspect Index 0 (Value = 1)</h3>
+            <div>
+                <span class="array-box active">1</span><span class="array-box">2</span><span
+                    class="array-box">3</span><span class="array-box">1</span>
+            </div>
+            <p>Is '1' in the Set? No. Add it.</p>
+            <div class="set-container">
+                <span class="set-item">1</span>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 2: Inspect Index 1 (Value = 2)</h3>
+            <div>
+                <span class="array-box">1</span><span class="array-box active">2</span><span
+                    class="array-box">3</span><span class="array-box">1</span>
+            </div>
+            <p>Is '2' in the Set? No. Add it.</p>
+            <div class="set-container">
+                <span class="set-item">1</span> <span class="set-item">2</span>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Step 3: Inspect Index 3 (Value = 1)</h3>
+            <div>
+                <span class="array-box">1</span><span class="array-box">2</span><span class="array-box">3</span><span
+                    class="array-box active">1</span>
+            </div>
+            <p>Is '1' in the Set? <strong>YES!</strong></p>
+            <p style="color:red; font-weight:bold;">Return True. Duplicate found.</p>
+            <div class="set-container" style="border-color:red; background:#ffe6e6;">
+                <span class="set-item">1</span> <span class="set-item">2</span> <span class="set-item">3</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
