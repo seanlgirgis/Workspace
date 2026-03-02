@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #76 — Minimum Window Substring — Sliding Window</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #f8d7da; color: #721c24; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #0a7a6b; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #76 — Minimum Window Substring <span class="badge">hard</span></h1>
+<p class="subtitle">Sliding Window Pattern &nbsp;|&nbsp; Day 2 Study Material</p>
+
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#0a7a6b;font-size:1.4em;margin:16px 0 8px;">LC #76 — Minimum Window Substring</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Sliding Window + HashMap | <strong>Difficulty:</strong> Hard | <strong>Day 2</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #11998e;background:#e8faf5;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given strings <code>s</code> and <code>t</code>, return the minimum window</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">substring of <code>s</code> that contains all characters of <code>t</code>.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>s = "ADOBECODEBANC", t = "ABC" → "BANC"
+s = "a",             t = "a"  → "a"
+s = "a",             t = "aa" → ""  (can't satisfy)</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> Expand right until the window contains all required characters (valid). Then shrink left as much as possible while still valid. Record the minimum. Repeat.</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The "Have / Required" Counter</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><code>required</code> = number of <em>distinct</em> characters in <code>t</code> that must be satisfied (each at the right count).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><code>have</code> = number of those characters currently satisfied in the window.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Window is valid when <code>have == required</code>.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Satisfy vs Over-satisfy</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Satisfying means meeting exactly the required count — not exceeding it. If <code>t = "AA"</code>, the window must have at least 2 A's. Having 3 still satisfies (we only track when we reach <em>exactly</em> the needed count from below).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Expand-then-Shrink Cycle</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Right expands until valid → record window → shrink left until invalid → right expands again. This two-pointer dance covers all candidate windows in O(n+m).</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n² × m)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(m)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Sliding Window</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n + m)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(m)</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>O(n+m):</strong> We scan <code>s</code> once (O(n)) and build <code>need</code> from <code>t</code> (O(m)). Each character in <code>s</code> is added and removed from the window at most once.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>O(m) space:</strong> <code>need</code> holds |t| unique characters. <code>window</code> holds at most |s| keys in the worst case.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n+m) time, O(m) space
+from collections import Counter
+
+def minWindow(s: str, t: str) -&gt; str:
+    if not t or not s:
+        return ""
+
+    need = Counter(t)          # required freq for each char in t
+    have, required = 0, len(need)
+    left = 0
+    result = ""
+    window = {}
+
+    for right, char in enumerate(s):
+        window[char] = window.get(char, 0) + 1
+        # Check if adding char satisfied its requirement (exactly met, not exceeded)
+        if char in need and window[char] == need[char]:
+            have += 1
+
+        # Shrink left as long as window is valid
+        while have == required:
+            window_size = right - left + 1
+            if not result or window_size &lt; len(result):
+                result = s[left:right+1]
+            # Remove leftmost char
+            left_char = s[left]
+            window[left_char] -= 1
+            if left_char in need and window[left_char] &lt; need[left_char]:
+                have -= 1
+            left += 1
+
+    return result
+
+# Test
+print(minWindow("ADOBECODEBANC", "ABC"))   # BANC
+print(minWindow("a", "a"))                  # a
+print(minWindow("a", "aa"))                 # (empty — can't satisfy)
+print(minWindow("aa", "aa"))               # aa</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What does <code>have</code> track exactly?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: The number of distinct characters from <code>t</code> whose count in the current window meets or exceeds the required count. When <code>have == required</code>, every character in <code>t</code> is satisfied.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why check <code>window[char] == need[char]</code> (not <code>>=</code>)?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: We only increment <code>have</code> when we <em>first</em> reach the required count. If we already exceeded it, adding another copy doesn't increment <code>have</code> again (avoiding double-counting).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why decrement <code>have</code> when <code>window[left_char] < need[left_char]</code>?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: When removing the left char drops its count <em>below</em> required, we've un-satisfied that character. <code>have</code> decrements to signal the window is no longer valid.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's the general two-pointer template?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Expand right to reach valid → record result → shrink left until invalid → repeat. This template works for minimum window, maximum window with constraint, etc.</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#e8faf5;border-left:5px solid #0a7a6b;padding:18px;border-radius:8px;"><h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The "minimum covering set" pattern:</strong> Find the shortest time window that contains at least one occurrence of every required metric type.</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>from collections import Counter
+
+# Minimum time window containing all required alert types
+event_stream = ["cpu","mem","cpu","disk","net","cpu","mem","disk"]
+required_types = ["cpu", "mem", "disk"]
+
+events = list(enumerate(event_stream))  # (index, type)
+need = Counter(required_types)
+have, req = 0, len(need)
+left = 0
+window_counts = {}
+min_window = None
+
+for right, etype in events:
+    window_counts[etype] = window_counts.get(etype, 0) + 1
+    if etype in need and window_counts[etype] == need[etype]:
+        have += 1
+    while have == req:
+        if min_window is None or right - left &lt; min_window[1] - min_window[0]:
+            min_window = (left, right)
+        ltype = event_stream[left]
+        window_counts[ltype] -= 1
+        if ltype in need and window_counts[ltype] &lt; need[ltype]:
+            have -= 1
+        left += 1
+
+print(f"Minimum window: indices {min_window[0]}-{min_window[1]}")
+print(f"Events: {event_stream[min_window[0]:min_window[1]+1]}")</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "Minimum window substring is the pattern for finding the shortest time period covering all required event types — a real diagnostic tool for root cause analysis."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sliding Window + HashMap (char counts)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n + m)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(m)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key tracking</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>have</code> = satisfied chars; <code>required</code> = distinct chars in t</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Expand right until have==required (valid). Shrink left while still valid, recording minimum. have tracks distinct-char satisfaction, not total chars."</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #20 — Valid Parentheses — Stack</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #c47a10; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #20 — Valid Parentheses <span class="badge">easy</span></h1>
+<p class="subtitle">Stack Pattern &nbsp;|&nbsp; Day 3 Study Material</p>
+
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#c47a10;font-size:1.4em;margin:16px 0 8px;">LC #20 — Valid Parentheses</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Stack | <strong>Difficulty:</strong> Easy | <strong>Day 3</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #f7971e;background:#fff8e1;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given string <code>s</code> containing <code>()[]{}</code>,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">return <code>true</code> if the string is valid. Valid means every opener has a matching</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">closer in the correct order, and they are properly nested.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>"()[]{}"   → true
+"()[]{}"   → true
+"(]"       → false  (wrong closer)
+"([)]"     → false  (wrong nesting order)
+"{[]}"     → true   (properly nested)</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> Push openers onto the stack. For each closer, check that the top of the stack is its matching opener. Any mismatch or leftover items = invalid.</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The Stack as "Pending Openers"</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The stack holds openers that haven't been matched yet. They're "waiting" for their closing partner. LIFO (last in, first out) naturally enforces proper nesting — the most recent opener must be closed first.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. The Pairing Map</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><code>{')': '(', ']': '[', '}': '{'}</code> maps each closer to its expected opener. This avoids long if-elif chains and makes the logic extensible to new bracket types.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Two Failure Modes</strong></p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Mismatch: closer doesn't match top of stack (wrong type or empty stack)</li>
+<li>Leftover: stack is non-empty at end (unclosed openers)</li>
+</ul>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Iterative shrink</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Stack (Optimal)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Space note:</strong> In the worst case (all openers, no closers), the stack holds n items: <code>((((...</code> → O(n) space.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Best case:</strong> Alternating opener-closer: <code>()()()</code> → stack never exceeds size 1.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(n) space
+# Stack: push openers, pop and verify for closers.
+
+def isValid(s: str) -&gt; bool:
+    stack = []
+    pairs = {')': '(', ']': '[', '}': '{'}
+
+    for char in s:
+        if char in '([{':
+            stack.append(char)
+        elif char in ')]}':            if not stack or stack[-1] != pairs[char]:
+                return False
+            stack.pop()
+
+    return len(stack) == 0   # empty = all openers matched
+
+# Test
+print(isValid("()[]{}"))   # True
+print(isValid("(]"))       # False
+print(isValid("([)]"))     # False
+print(isValid("{[]}"))     # True
+print(isValid(""))         # True (empty string is valid)
+print(isValid("("))        # False (unclosed opener)</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why check <code>not stack</code> before <code>stack[-1]</code>?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Short-circuit evaluation. If the stack is empty and we see a closer, it's immediately invalid — there's nothing to match. Checking <code>not stack</code> first prevents an IndexError on <code>stack[-1]</code>.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What happens with an empty string?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: The loop never runs, stack remains empty, <code>len(stack) == 0</code> returns True. An empty string is considered valid.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Real-world applications?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Validating nested structures: JSON/XML parsing, nested SQL subqueries, template engines (Jinja, Handlebars), config file validation (YAML, TOML). At Citi: validating nested alert condition expressions.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: How would you extend this for additional bracket types?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Just add entries to the <code>pairs</code> dict. The algorithm generalizes to any matching delimiter pair without code changes — a good extensibility answer.</p>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #c47a10;padding:18px;border-radius:8px;"><h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Nested configuration validation.</strong> At Citi, monitoring rules were expressed as nested conditions:</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Validate nested alert condition expression
+def validate_condition(expr: str) -&gt; bool:
+    """
+    Valid: "(cpu &gt; 80 AND (mem &gt; 70 OR disk &gt; 90))"
+    Invalid: "(cpu &gt; 80 AND [mem &gt; 70])"  — mixed brackets
+    """
+    stack = []
+    pairs = {')': '(', ']': '[', '}': '{'}
+    for char in expr:
+        if char in '([{':
+            stack.append(char)
+        elif char in ')]}':            if not stack or stack[-1] != pairs[char]:
+                return False
+            stack.pop()
+    return len(stack) == 0
+
+tests = [
+    ("(cpu &gt; 80 AND (mem &gt; 70 OR disk &gt; 90))", True),
+    ("(cpu &gt; 80 AND [mem &gt; 70])", False),
+]
+for expr, expected in tests:
+    result = validate_condition(expr)
+    status = "PASS" if result == expected else "FAIL"
+    print(f"{status}: {repr(expr[:40])} → {result}")</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "Valid parentheses is the foundation of any parser or config validator. I used this pattern to validate nested monitoring expressions — ensuring alert conditions were syntactically correct before deployment."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Stack — push openers, pop and verify for closers</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key insight</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">LIFO naturally enforces proper nesting</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Push openers. For each closer, top of stack must be the matching opener. Empty stack at end = valid."</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Two failure modes to mention:</strong> Wrong closer type (mismatch). Unclosed openers remaining in stack (leftover).</p>
+</div>
+</div>
+</body>
+</html>

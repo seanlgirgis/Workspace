@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #239 — Sliding Window Maximum — Sliding Window</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #f8d7da; color: #721c24; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #0a7a6b; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #239 — Sliding Window Maximum <span class="badge">hard</span></h1>
+<p class="subtitle">Sliding Window Pattern &nbsp;|&nbsp; Day 2 Study Material</p>
+
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#0a7a6b;font-size:1.4em;margin:16px 0 8px;">LC #239 — Sliding Window Maximum</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Deque (Monotonic Queue) | <strong>Difficulty:</strong> Hard | <strong>Day 2</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #11998e;background:#e8faf5;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given array <code>nums</code> and integer <code>k</code>, return an array</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">of the maximum value in each sliding window of size k.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>nums = [1,3,-1,-3,5,3,6,7], k=3 → [3,3,5,5,6,7]
+nums = [1],                  k=1 → [1]
+nums = [1,-1],               k=1 → [1,-1]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> Maintain a <strong>monotonic decreasing deque</strong> of indices. The front always holds the index of the current window's maximum. Remove from the front when that index falls out of the window. Remove from the back when a larger element enters (those smaller elements can never become the max).</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The Monotonic Deque as a "Useful Candidates" List</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Only elements that could become the window max are worth keeping. If element <code>b</code> is smaller than and to the left of element <code>a</code>, then <code>b</code> can never be the max while <code>a</code> is in the window. Remove <code>b</code>.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Deque Front = Current Max</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The deque is maintained in decreasing order of values (indices stored). The front index always points to the current window's maximum.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Two Operations</strong></p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Left cleanup: Pop front if its index is outside the window (<code>dq[0] < i - k + 1</code>)</li>
+<li>Right cleanup: Pop back while <code>nums[back] < nums[current]</code> (smaller elements are useless)</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>4. Amortized O(n)</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Each element is added and removed from the deque at most once — so despite inner while loops, total work is O(n).</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n×k)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Monotonic Deque</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(k)</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why O(n) despite inner loops?</strong> Each element enters and exits the deque at most once. Amortized, the total number of push+pop operations across all iterations is ≤ 2n.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why O(k) space?</strong> The deque holds at most k indices at any time (one window's worth).</p>
+</div></div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(k) space
+from collections import deque
+
+def maxSlidingWindow(nums: list[int], k: int) -&gt; list[int]:
+    dq = deque()   # stores indices, values are decreasing
+    result = []
+
+    for i, num in enumerate(nums):
+        # Remove indices outside the current window
+        while dq and dq[0] &lt; i - k + 1:
+            dq.popleft()
+
+        # Remove indices whose values are smaller than current (they're useless)
+        while dq and nums[dq[-1]] &lt; num:
+            dq.pop()
+
+        dq.append(i)
+
+        # Window is full — record the max (front of deque)
+        if i &gt;= k - 1:
+            result.append(nums[dq[0]])
+
+    return result
+
+# Test
+print(maxSlidingWindow([1,3,-1,-3,5,3,6,7], 3))   # [3,3,5,5,6,7]
+print(maxSlidingWindow([1], 1))                    # [1]
+print(maxSlidingWindow([9,11], 2))                 # [11]
+print(maxSlidingWindow([4,-2], 2))                 # [4]</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why store indices instead of values in the deque?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: We need to check if the front element has fallen outside the window. Comparing indices to <code>i - k + 1</code> requires the index, not the value.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What makes this "monotonic"?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: The values corresponding to indices in the deque are always in decreasing order. We maintain this monotonic property by removing smaller elements from the back on every insertion.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Real-world use case?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Rolling maximum of a time series — "what was the peak CPU in the last 5 minutes?" With streaming data arriving per-second, this runs in O(1) per new reading rather than O(k) per reading.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: How would you adapt this for rolling minimum?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Flip the comparison: remove from back when <code>nums[dq[-1]] > num</code> (maintain increasing order). Front will always be the minimum.</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#e8faf5;border-left:5px solid #0a7a6b;padding:18px;border-radius:8px;"><h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Direct application: rolling peak CPU detection.</strong></p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Rolling maximum CPU over a k-window — O(n) with monotonic deque
+from collections import deque
+
+def rolling_peak(readings: list[float], window: int) -&gt; list[float]:
+    """Returns peak CPU for each window position. O(n) time."""
+    dq = deque()
+    peaks = []
+    for i, cpu in enumerate(readings):
+        while dq and dq[0] &lt; i - window + 1:
+            dq.popleft()
+        while dq and readings[dq[-1]] &lt; cpu:
+            dq.pop()
+        dq.append(i)
+        if i &gt;= window - 1:
+            peaks.append(readings[dq[0]])
+    return peaks
+
+# 6 hourly CPU readings, 3-hour rolling peak
+readings = [72.1, 68.5, 81.3, 75.0, 90.2, 88.7, 65.4]
+print("Rolling 3-hour peak CPU:", rolling_peak(readings, 3))</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "At Citi, identifying the peak CPU in a rolling window was a core capacity alert. The monotonic deque gives O(n) — critical for streaming telemetry where n grows continuously."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Monotonic Deque</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n) amortized</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(k)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Deque invariant</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Values are decreasing (indices stored; front = current max)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Monotonic deque: remove expired front, remove smaller elements from back. Front is always the window max. Each element enters and exits at most once — O(n) amortized."</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</body>
+</html>

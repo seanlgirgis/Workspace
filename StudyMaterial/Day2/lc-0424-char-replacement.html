@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #424 — Longest Repeating Character Replacement — Sliding Window</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #0a7a6b; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #424 — Longest Repeating Character Replacement <span class="badge">medium</span></h1>
+<p class="subtitle">Sliding Window Pattern &nbsp;|&nbsp; Day 2 Study Material</p>
+
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#0a7a6b;font-size:1.4em;margin:16px 0 8px;">LC #424 — Longest Repeating Character Replacement</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Sliding Window + HashMap | <strong>Difficulty:</strong> Medium | <strong>Day 2</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #11998e;background:#e8faf5;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given string <code>s</code> and integer <code>k</code>,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">return the length of the longest substring containing the same letter after at most <code>k</code></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">character replacements.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>"AABABBA", k=1 → 4  ("AABA" or "ABBB": replace one B → AAAA, length 4)
+"ABAB",    k=2 → 4  (replace both Bs → "AAAA")
+"AAAA",    k=0 → 4</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> A window is valid if <code>(window_size - max_count_in_window) ≤ k</code>. The left term counts how many characters would need to be replaced. If that's ≤ k, we can make the whole window uniform.</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The Validity Formula</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><code>replacements_needed = window_size - count_of_most_frequent_char</code></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">If <code>replacements_needed ≤ k</code>, the window is valid. This is the invariant.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Why We Don't Update max_count on Shrink</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">We only want the maximum valid window ever seen. <code>max_count</code> never decreases. Even if the most frequent char leaves the window, we don't shrink <code>max_count</code> — this can only prevent us from growing the window, not from finding a larger valid window later.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. The Sliding Window Contract</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Right pointer expands. When the window becomes invalid, left pointer moves up by exactly 1 (not until valid again). This maintains O(n) total movement.</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n² × 26)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(26)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Sliding Window</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(26) = O(1)</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why O(1) space?</strong> <code>count</code> can have at most 26 keys (uppercase English letters). That's a fixed-size map.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why O(n) time?</strong> Left and right each move at most n steps total. The inner operations (update count, max_count) are O(1). Total: O(n).</p>
+</div></div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(1) space (at most 26 distinct chars)
+
+def characterReplacement(s: str, k: int) -&gt; int:
+    count = {}
+    left = 0
+    max_count = 0   # max frequency of any single char in current window
+    result = 0
+
+    for right in range(len(s)):
+        count[s[right]] = count.get(s[right], 0) + 1
+        max_count = max(max_count, count[s[right]])
+
+        # Characters to replace = window_size - most_frequent_count
+        # If &gt; k, shrink by 1 from left
+        if (right - left + 1) - max_count &gt; k:
+            count[s[left]] -= 1
+            left += 1
+
+        result = max(result, right - left + 1)
+
+    return result
+
+# Test
+print(characterReplacement("AABABBA", 1))   # 4
+print(characterReplacement("ABAB", 2))       # 4
+print(characterReplacement("AAAA", 0))       # 4
+print(characterReplacement("A", 0))          # 1</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why don't we decrement max_count when shrinking the window?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: We're looking for the <em>maximum length</em>, so max_count should reflect the best window we've ever seen. If we shrink past the max-count character, the window is now "conservatively" sized — we'll grow it again when we find a better character. Keeping max_count high prevents us from mistakenly invalidating a window that's the same size as our target.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Is the window always valid?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: No — the window may temporarily be invalid (when we shrink left, we don't shrink until valid). The key insight: we're searching for the maximum window, so we only grow and move right by 1. We never shrink below the current max.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What changes if characters are lowercase or Unicode?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: The count map grows, but the algorithm is identical. Space would be O(charset_size) — still effectively O(1) for bounded alphabets.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Time-series analogy?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: "Longest period where a metric stayed within k standard deviations of its dominant value" — same invariant: (window_size - count_of_dominant_state) ≤ k.</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#e8faf5;border-left:5px solid #0a7a6b;padding:18px;border-radius:8px;"><h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The "dominant state window" pattern:</strong> How long did a server remain in a predominantly "healthy" state, tolerating up to k anomalous readings?</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Longest stretch where srv-01 was "healthy" with at most 1 spike
+states = ["H","H","S","H","H","S","S","H","H","H"]  # H=healthy, S=spike
+k = 1
+
+count = {}
+left = 0
+max_count = 0
+longest_healthy = 0
+
+for right, state in enumerate(states):
+    count[state] = count.get(state, 0) + 1
+    max_count = max(max_count, count[state])
+    if (right - left + 1) - max_count &gt; k:
+        count[states[left]] -= 1
+        left += 1
+    longest_healthy = max(longest_healthy, right - left + 1)
+
+print(f"Longest predominantly-healthy window: {longest_healthy} readings")</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "Character replacement maps directly to alert tolerance windows — the longest period a server was in a dominant state, tolerating at most k deviations. That's a real capacity planning metric."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sliding Window + frequency map</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(26) = O(1)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Invariant</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>(right - left + 1) - max_count ≤ k</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Window valid if (size - max_freq) ≤ k. Expand right, shrink left by 1 when invalid. max_count never decreases."</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</body>
+</html>

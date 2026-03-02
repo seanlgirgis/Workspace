@@ -1105,6 +1105,48 @@ gen_html('lc-0347-top-k-frequent', f'{BASE}/lc-0347-top-k-frequent.ipynb',
 
 SQL_CTES_CELLS = [
 
+code('c00-setup', '''import sqlite3
+import pandas as pd
+
+# In-memory SQLite database for all SQL cells in this notebook
+conn = sqlite3.connect(':memory:')
+conn.executescript("""
+CREATE TABLE employees (
+    employee_id INTEGER PRIMARY KEY, name TEXT, department_id INTEGER, salary REAL
+);
+INSERT INTO employees VALUES
+    (1,'Alice',1,95000),(2,'Bob',1,72000),(3,'Carol',1,88000),
+    (4,'Dave',2,105000),(5,'Eve',2,98000),(6,'Frank',2,67000),
+    (7,'Grace',3,82000),(8,'Hank',3,79000),(9,'Iris',3,91000),
+    (10,'Jack',3,55000);
+
+CREATE TABLE telemetry_raw (
+    server_id TEXT, collection_date TEXT, cpu_utilization REAL
+);
+INSERT INTO telemetry_raw VALUES
+    ('srv-01','2026-02-01',72.5),('srv-01','2026-02-01',73.1),
+    ('srv-01','2026-02-02',85.2),('srv-01','2026-02-03',91.0),
+    ('srv-01','2026-02-04',88.7),('srv-01','2026-02-05',95.3),
+    ('srv-02','2026-02-01',45.0),('srv-02','2026-02-02',47.2),
+    ('srv-02','2026-02-03',50.1),('srv-02','2026-02-04',48.8),
+    ('srv-02','2026-02-05',46.5),('srv-03','2026-02-01',78.0),
+    ('srv-03','2026-02-02',82.3),('srv-03','2026-02-03',85.1),
+    ('srv-03','2026-02-04',88.9),('srv-03','2026-02-05',92.4);
+
+CREATE TABLE employees_org (
+    employee_id INTEGER, name TEXT, manager_id INTEGER
+);
+INSERT INTO employees_org VALUES
+    (1,'CEO',NULL),(2,'CTO',1),(3,'CFO',1),
+    (4,'VP Engineering',2),(5,'VP Data',2),
+    (6,'Senior DE',4),(7,'Data Engineer',5),(8,'Analyst',5);
+""")
+print("Sample database ready!")
+print("Tables: employees (10 rows), telemetry_raw (16 rows), employees_org (8 rows)")
+print()
+print("Preview — employees table:")
+print(pd.read_sql_query("SELECT * FROM employees LIMIT 4", conn).to_string(index=False))'''),
+
 md('c01', '''# SQL — Common Table Expressions (CTEs)
 **Day 1 — SQL Module**
 
@@ -1143,10 +1185,9 @@ FROM second_cte;
 - Reference earlier CTEs by name in later CTEs
 - The final `SELECT` is the actual query that returns results — it's not part of the CTE'''),
 
-code('c03', '''-- Example 1: Find employees earning above their department average
--- Step 1: Calculate average salary per department (named CTE)
--- Step 2: Join back to find employees above that average
+code('c03', '''# Run against our sample SQLite database (conn from c00-setup)
 
+sql_above_avg = """
 WITH dept_averages AS (
     SELECT
         department_id,
@@ -1157,30 +1198,40 @@ WITH dept_averages AS (
 SELECT
     e.name,
     e.salary,
-    d.avg_salary,
-    ROUND(e.salary - d.avg_salary, 2) AS above_average_by
+    ROUND(d.avg_salary, 2) AS dept_avg,
+    ROUND(e.salary - d.avg_salary, 2) AS above_avg_by
 FROM employees e
 JOIN dept_averages d ON e.department_id = d.department_id
 WHERE e.salary > d.avg_salary
-ORDER BY above_average_by DESC;
+ORDER BY above_avg_by DESC
+"""
 
--- Without CTE (nested subquery — same result, harder to read):
+result = pd.read_sql_query(sql_above_avg, conn)
+print("Employees earning above their department average (CTE version):")
+print(result.to_string(index=False))
+
+# Same result using a nested subquery — much harder to read:
+sql_subquery = """
 SELECT e.name, e.salary,
-       (SELECT AVG(salary) FROM employees e2
-        WHERE e2.department_id = e.department_id) AS avg_salary
+       ROUND((SELECT AVG(salary) FROM employees e2
+        WHERE e2.department_id = e.department_id), 2) AS dept_avg
 FROM employees e
 WHERE e.salary > (SELECT AVG(salary) FROM employees e2
-                  WHERE e2.department_id = e.department_id);'''),
+                  WHERE e2.department_id = e.department_id)
+ORDER BY e.salary DESC
+"""
+
+print("\\nSame result, subquery version (harder to read and reuse):")
+print(pd.read_sql_query(sql_subquery, conn).to_string(index=False))'''),
 
 md('c04', '''## Chained CTEs — Multi-Step Pipeline
 
 This is where CTEs shine: expressing a data pipeline as sequential, named steps.'''),
 
-code('c05', '''-- Capacity planning pipeline:
--- Step 1: Deduplicate raw telemetry
--- Step 2: Compute daily averages
--- Step 3: Identify at-risk servers (peak > 80%)
+code('c05', '''# Capacity planning pipeline — chained CTEs (conn from c00-setup)
+# SQLite-compatible: uses date('now', '-365 days') instead of INTERVAL
 
+sql_pipeline = """
 WITH deduped AS (
     -- Remove any duplicate records from the same server/day
     SELECT DISTINCT
@@ -1188,7 +1239,7 @@ WITH deduped AS (
         collection_date,
         cpu_utilization
     FROM telemetry_raw
-    WHERE collection_date >= CURRENT_DATE - INTERVAL '30 days'
+    WHERE collection_date >= date('now', '-365 days')
 ),
 daily_avg AS (
     -- One row per server per day
@@ -1201,7 +1252,7 @@ daily_avg AS (
     GROUP BY server_id, collection_date
 ),
 monthly_stats AS (
-    -- Aggregate to 30-day summary per server
+    -- Aggregate to summary per server
     SELECT
         server_id,
         AVG(avg_cpu)  AS avg_30d,
@@ -1219,14 +1270,22 @@ SELECT
          WHEN avg_30d  > 65 THEN 'MONITOR'
          ELSE 'HEALTHY' END AS status
 FROM monthly_stats
-ORDER BY peak_30d DESC;'''),
+ORDER BY peak_30d DESC
+"""
+
+result = pd.read_sql_query(sql_pipeline, conn)
+print("Capacity planning pipeline result:")
+print(result.to_string(index=False))
+print("\\nTip: Test any step in isolation — replace final SELECT with: SELECT * FROM daily_avg")'''),
 
 md('c06', '''## Recursive CTEs — Walk a Hierarchy
 
 Use when data has a parent-child relationship: org charts, folder trees, alert escalation chains, network topology.'''),
 
-code('c07', '''-- Recursive CTE: Walk an org chart from CEO down to all reports
+code('c07', '''# Recursive CTE: Walk org chart from CEO down (conn from c00-setup)
+# SQLite supports RECURSIVE CTEs. Uses substr() for indent (no LPAD in SQLite).
 
+sql_recursive = """
 WITH RECURSIVE org_chart AS (
     -- BASE CASE: The root node (CEO has no manager)
     SELECT
@@ -1235,31 +1294,34 @@ WITH RECURSIVE org_chart AS (
         manager_id,
         1 AS org_level,
         name AS path
-    FROM employees
+    FROM employees_org
     WHERE manager_id IS NULL
 
     UNION ALL
 
-    -- RECURSIVE CASE: Join employees to their manager
+    -- RECURSIVE CASE: Join each employee to their manager row
     SELECT
         e.employee_id,
         e.name,
         e.manager_id,
         oc.org_level + 1,
-        oc.path || ' > ' || e.name   -- build the path string
-    FROM employees e
+        oc.path || ' > ' || e.name
+    FROM employees_org e
     JOIN org_chart oc ON e.manager_id = oc.employee_id
-    WHERE oc.org_level < 10           -- SAFETY: prevent infinite loops from cycles
+    WHERE oc.org_level < 10
 )
 SELECT
-    LPAD(' ', (org_level - 1) * 4, ' ') || name AS org_tree,
+    substr('                ', 1, (org_level - 1) * 4) || name AS org_tree,
     org_level,
     path
 FROM org_chart
-ORDER BY path;
+ORDER BY path
+"""
 
--- Without the depth limit, a cycle (A manages B, B manages A) would loop forever.
--- Always add WHERE level < N or a MAXRECURSION hint.'''),
+result = pd.read_sql_query(sql_recursive, conn)
+print("Org chart traversal (recursive CTE):")
+print(result.to_string(index=False))
+print("\\nNote: WHERE org_level < 10 prevents infinite loops from data cycles")'''),
 
 md('c08', '''## Interview Q&A
 
@@ -1350,21 +1412,25 @@ unique_lengths = {len(word) for word in ["data", "engineer", "SQL", "cat"]}
 **Rule:** Use list comprehension when you need the full list in memory at once (small data, or data you'll iterate multiple times). Use a generator when processing once in sequence.'''),
 
 code('g03', '''# Memory comparison — list vs generator
-
 import sys
 
-# List comprehension: builds the entire list in memory
-squares_list = [x**2 for x in range(10_000_000)]
-print(f"List size:      {sys.getsizeof(squares_list):>15,} bytes")  # ~80 MB
+# List comprehension: builds the entire list in memory immediately
+N = 100_000
+squares_list = [x**2 for x in range(N)]
+print(f"List ({N:,} items):      {sys.getsizeof(squares_list):>10,} bytes  ← all in memory")
 
-# Generator expression: lazy, holds state only
-squares_gen = (x**2 for x in range(10_000_000))
-print(f"Generator size: {sys.getsizeof(squares_gen):>15,} bytes")   # ~208 bytes
+# Generator expression: lazy, holds only its state (loop counter + function ref)
+squares_gen = (x**2 for x in range(N))
+print(f"Generator ({N:,} items): {sys.getsizeof(squares_gen):>10,} bytes  ← ~208 bytes always")
 
-# Both iterate identically — but generator can only go forward, once
-total_gen  = sum(squares_gen)            # consumes the generator
-total_list = sum(squares_list)           # list is reusable
-print(f"Equal totals: {total_gen == total_list}")  # True'''),
+# Both produce identical results — generator just can't be rewound
+total_gen  = sum(squares_gen)    # consumes the generator (exhausted after this)
+total_list = sum(squares_list)   # list is reusable — can iterate again
+print(f"Equal totals: {total_gen == total_list}")  # True
+
+# Demonstrate: at 10M items, list = ~80 MB, generator stays at ~208 bytes
+print("\\nAt 10M items: list ~80 MB vs generator ~208 bytes")
+print("At 1B items:  list would crash; generator still uses 208 bytes")'''),
 
 md('g04', '''## Generator Functions — `yield`
 
@@ -1376,69 +1442,104 @@ A generator function uses `yield` instead of `return`. When called, it returns a
 3. `next(gen)` → resumes from after `yield`, runs until next `yield`
 4. When function returns (or falls off the end) → raises `StopIteration`'''),
 
-code('g05', '''# Generator function — process a large file in chunks
-# Never loads more than chunk_size rows into memory
+code('g05', '''# Generator function — process a CSV in chunks (io.StringIO for demo)
+import io
 
-def read_csv_chunks(filepath: str, chunk_size: int = 1000):
+SAMPLE_CSV = """server_id,metric,value
+srv-01,cpu_pct,72.5
+srv-01,cpu_pct,73.1
+srv-02,cpu_pct,45.2
+srv-02,cpu_pct,46.0
+srv-03,cpu_pct,88.4
+srv-03,cpu_pct,91.2
+srv-04,cpu_pct,34.1
+srv-04,cpu_pct,35.0
+srv-05,cpu_pct,78.9
+srv-05,cpu_pct,80.1
+srv-06,cpu_pct,95.3
+srv-06,cpu_pct,97.1"""
+
+def read_csv_chunks(fileobj, chunk_size: int = 4):
     """Yield lists of lines in chunks. Constant memory regardless of file size."""
-    with open(filepath, encoding='utf-8') as f:
-        chunk = []
-        for line in f:
-            chunk.append(line.rstrip())
-            if len(chunk) == chunk_size:
-                yield chunk        # pause, hand chunk to caller
-                chunk = []         # reset — old chunk is GC'd
-        if chunk:
-            yield chunk            # yield the final partial chunk
+    next(fileobj)   # skip header
+    chunk = []
+    for line in fileobj:
+        line = line.rstrip()
+        if line:
+            chunk.append(line)
+        if len(chunk) == chunk_size:
+            yield chunk        # pause, hand chunk to caller
+            chunk = []         # reset — old chunk is GC\'d
+    if chunk:
+        yield chunk            # yield the final partial chunk
 
-# Usage: never more than 1000 rows in memory
-# for chunk in read_csv_chunks("telemetry_10gb.csv", chunk_size=1000):
-#     process_chunk(chunk)    # process 1000 rows, then release them
+# Use io.StringIO as the file — same interface as open()
+f = io.StringIO(SAMPLE_CSV)
+for i, chunk in enumerate(read_csv_chunks(f, chunk_size=4)):
+    print(f"Chunk {i+1}: {len(chunk)} rows → {chunk}")
 
-# Demonstrate with a simple counter generator
+# Simple counter generator to show yield/next mechanics
 def counter_gen(n):
-    """Yields 0, 1, 2, ..., n-1"""
     i = 0
     while i < n:
         yield i
         i += 1
 
 gen = counter_gen(5)
-print(next(gen))   # 0  — runs until yield, pauses
+print("\\ncounter_gen demo:")
+print(next(gen))   # 0
 print(next(gen))   # 1
-print(list(gen))   # [2, 3, 4] — consume the rest
-# next(gen)        # → StopIteration (generator exhausted)'''),
+print(list(gen))   # [2, 3, 4] — consume the rest'''),
 
-code('g06', '''# Real pipeline: generator chaining
-# Process a stream of server metrics without loading everything
+code('g06', '''# Real generator pipeline — runs against in-memory sample data
+# Each stage is lazy: data flows one record at a time
+
+SAMPLE_METRICS = """server_id,metric,value
+srv-01,cpu_pct,72.5
+srv-02,cpu_pct,91.3
+srv-03,cpu_pct,45.0
+srv-04,cpu_pct,88.7
+srv-05,cpu_pct,62.1
+srv-06,cpu_pct,95.4
+srv-07,mem_pct,70.2
+srv-08,cpu_pct,55.0"""
+
+SERVER_TIERS = {
+    'srv-01': 'production', 'srv-02': 'production', 'srv-03': 'staging',
+    'srv-04': 'production', 'srv-05': 'staging',    'srv-06': 'production',
+    'srv-07': 'production', 'srv-08': 'dev',
+}
 
 def parse_line(line: str) -> dict:
-    """Parse a CSV line into a metric dict."""
-    parts = line.split(',')
-    return {'server_id': parts[0], 'metric': parts[1], 'value': float(parts[2])}
+    """Parse CSV line into metric dict."""
+    parts = line.strip().split(\',\')
+    return {\'server_id\': parts[0], \'metric\': parts[1], \'value\': float(parts[2])}
 
-def filter_high_cpu(records, threshold=80):
-    """Generator: yield only records above threshold."""
+def filter_high_cpu(records, threshold=80.0):
+    """Generator: yield only CPU records above threshold."""
     for rec in records:
-        if rec['metric'] == 'cpu_pct' and rec['value'] > threshold:
+        if rec[\'metric\'] == \'cpu_pct\' and rec[\'value\'] > threshold:
             yield rec
 
-def enrich_with_tier(records, server_tiers: dict):
-    """Generator: add tier information to each record."""
+def enrich_with_tier(records, tiers: dict):
+    """Generator: add tier to each record."""
     for rec in records:
-        rec['tier'] = server_tiers.get(rec['server_id'], 'unknown')
+        rec[\'tier\'] = tiers.get(rec[\'server_id\'], \'unknown\')
         yield rec
 
-# Chain generators — each step lazy, zero intermediate lists
-# lines       = open("metrics.csv")              # lazy file read
-# parsed      = (parse_line(l) for l in lines)   # lazy parse
-# high_cpu    = filter_high_cpu(parsed, 80)       # lazy filter
-# enriched    = enrich_with_tier(high_cpu, tiers) # lazy enrich
-# results     = list(enriched)                    # materialize ONLY here
+# ── Build and execute the pipeline ──────────────────────────────────────────
+import io
+lines   = io.StringIO(SAMPLE_METRICS)
+next(lines)                                         # skip header
+parsed  = (parse_line(l) for l in lines)            # lazy parse
+high    = filter_high_cpu(parsed, threshold=80)     # lazy filter
+enriched = enrich_with_tier(high, SERVER_TIERS)    # lazy enrich
+results = list(enriched)                            # materialize here only
 
-# This processes a 10GB file using only ~O(1) memory at each step.
-print("Generator pipeline demo (no actual file needed)")
-print("Each step is lazy — data flows one record at a time")'''),
+print(f"High-CPU servers (>80%): {len(results)} found")
+for r in results:
+    print(f"  {r[\'server_id\']} | {r[\'value\']}% CPU | tier={r[\'tier\']}")
+print("\\nEach generator stage used O(1) memory — no intermediate lists built")'''),
 
 md('g07', '''## itertools — Production-Grade Iteration
 
@@ -1616,6 +1717,47 @@ s3.put_object(
 )
 print("Uploaded to S3 with partition path")'''),
 
+code('a03b', '''# LOCAL SIMULATION — Run this cell without AWS credentials
+# Simulates the S3 list_objects_v2 + upload pattern using local files + pandas
+
+import pandas as pd
+import io, os, json
+
+# Simulate S3 bucket as a local dict (key → bytes)
+S3_STORE = {}
+
+def s3_put(bucket, key, df):
+    """Simulate s3.put_object with a Parquet upload."""
+    buf = io.BytesIO()
+    df.to_parquet(buf, index=False)
+    S3_STORE[f"{bucket}/{key}"] = buf.getvalue()
+    print(f"  PUT s3://{bucket}/{key}  ({len(buf.getvalue()):,} bytes)")
+
+def s3_list(bucket, prefix):
+    """Simulate s3.list_objects_v2 — list matching keys."""
+    return [k for k in S3_STORE if k.startswith(f"{bucket}/{prefix}")]
+
+def s3_get(bucket, key):
+    """Simulate downloading and reading a Parquet object."""
+    data = S3_STORE[f"{bucket}/{key}"]
+    return pd.read_parquet(io.BytesIO(data))
+
+# ── Demo: upload two partitioned files ──────────────────────────────────────
+df1 = pd.DataFrame({\'server_id\': [\'srv-01\', \'srv-02\'], \'cpu_pct\': [72.5, 45.2]})
+df2 = pd.DataFrame({\'server_id\': [\'srv-03\', \'srv-04\'], \'cpu_pct\': [88.4, 34.1]})
+
+print("Simulated S3 uploads:")
+s3_put(\'telemetry-lake\', \'metrics/year=2026/month=02/day=27/batch_001.parquet\', df1)
+s3_put(\'telemetry-lake\', \'metrics/year=2026/month=02/day=28/batch_001.parquet\', df2)
+
+print("\\nList objects with prefix metrics/year=2026/month=02/:")
+for key in s3_list(\'telemetry-lake\', \'metrics/year=2026/month=02/\'):
+    print(f"  s3://{key}")
+
+print("\\nRead back day=27 data:")
+df_back = s3_get(\'telemetry-lake\', \'metrics/year=2026/month=02/day=27/batch_001.parquet\')
+print(df_back.to_string(index=False))'''),
+
 md('a04', '''## Glue — Catalog + ETL
 
 AWS Glue has two distinct functions:
@@ -1669,6 +1811,43 @@ df_filtered.write.mode("overwrite").partitionBy("year", "month", "day") \\
 job.commit()
 print(f"Glue job complete. Wrote high-CPU records to {args['target_path']}")'''),
 
+code('a05b', '''# LOCAL SIMULATION — Pandas equivalent of the Glue ETL job above
+# Run this without any AWS dependencies
+
+import pandas as pd
+
+# Sample raw telemetry data (simulates what would come from Glue Catalog)
+raw_data = pd.DataFrame({
+    \'server_id\':       [\'srv-01\',\'srv-01\',\'srv-02\',\'srv-02\',\'srv-03\',\'srv-03\',\'srv-04\'],
+    \'cpu_utilization\': [72.5,     73.1,     91.3,     92.0,     45.0,     44.8,     97.5],
+    \'year\':            [\'2026\']*7,
+    \'month\':           [\'02\']*7,
+    \'day\':             [\'27\',\'27\',\'27\',\'27\',\'27\',\'27\',\'27\'],
+})
+
+# Equivalent pandas transformation (mirrors the Glue/Spark logic in a05)
+import numpy as np
+from datetime import datetime
+
+df_filtered = (
+    raw_data[raw_data[\'cpu_utilization\'] > 80]
+    .assign(
+        processed_at=datetime.utcnow().isoformat(),
+        alert_tier=pd.cut(
+            raw_data[raw_data[\'cpu_utilization\'] > 80][\'cpu_utilization\'],
+            bins=[80, 95, float(\'inf\')],
+            labels=[\'warning\', \'critical\']
+        )
+    )
+)
+
+print("Glue ETL simulation (pandas equivalent):")
+print(f"Input rows:  {len(raw_data)}")
+print(f"Output rows: {len(df_filtered)}  (cpu_utilization > 80)")
+print()
+print(df_filtered[[\'server_id\',\'cpu_utilization\',\'alert_tier\',\'year\',\'month\',\'day\']].to_string(index=False))
+print("\\nIn production: df_filtered.write.parquet(s3_path, partitionBy=[year,month,day])")'''),
+
 md('a06', '''## Athena — Serverless SQL on S3
 
 Athena runs SQL directly on S3 files. No server, no cluster, no maintenance. **Pay per TB scanned.** This makes format and partitioning choices critical for cost.
@@ -1684,43 +1863,58 @@ Athena runs SQL directly on S3 files. No server, no cluster, no maintenance. **P
 
 **Columnar = only read the columns you SELECT.** Parquet stores each column separately. A `SELECT server_id, avg_cpu FROM ...` on a 50-column table reads only 2 columns' worth of data.'''),
 
-code('a07', '''-- Athena SQL — production patterns
+code('a07', '''# LOCAL SIMULATION — SQLite equivalent of Athena queries
+# In production, these run against S3 via Athena. Here we use SQLite + pandas.
 
--- 1. Partition pruning (critical for cost)
+import sqlite3, pandas as pd
+
+athena_conn = sqlite3.connect(\':memory:\')
+athena_conn.executescript("""
+CREATE TABLE server_metrics (
+    server_id TEXT, cpu_utilization REAL,
+    year TEXT, month TEXT, day TEXT
+);
+INSERT INTO server_metrics VALUES
+    (\'srv-01\', 72.5, \'2026\', \'02\', \'20\'),
+    (\'srv-01\', 73.1, \'2026\', \'02\', \'21\'),
+    (\'srv-02\', 91.3, \'2026\', \'02\', \'20\'),
+    (\'srv-02\', 92.0, \'2026\', \'02\', \'21\'),
+    (\'srv-03\', 45.0, \'2026\', \'02\', \'20\'),
+    (\'srv-04\', 88.7, \'2026\', \'02\', \'22\'),
+    (\'srv-05\', 55.0, \'2026\', \'02\', \'23\'),
+    (\'srv-06\', 95.4, \'2026\', \'02\', \'24\'),
+    (\'srv-07\', 60.0, \'2025\', \'12\', \'15\');
+""")
+
+# 1. Partition-pruned query (Athena skips partitions not matching WHERE)
+sql = """
 SELECT
     server_id,
     ROUND(AVG(cpu_utilization), 2) AS avg_cpu,
     MAX(cpu_utilization)           AS peak_cpu,
     COUNT(*)                       AS sample_count
-FROM telemetry_db.server_metrics
-WHERE year  = '2026'
-  AND month = '02'              -- these are partition columns
-  AND day   BETWEEN '20' AND '28'
+FROM server_metrics
+WHERE year  = \'2026\'
+  AND month = \'02\'
+  AND day   BETWEEN \'20\' AND \'28\'
   AND cpu_utilization > 80
 GROUP BY server_id
 ORDER BY avg_cpu DESC
-LIMIT 100;
+"""
 
--- 2. Repair partitions after new data lands (if no auto-update)
-MSCK REPAIR TABLE telemetry_db.server_metrics;
+print("Athena query result (partition-pruned to year=2026, month=02):")
+print(pd.read_sql_query(sql, athena_conn).to_string(index=False))
 
--- 3. Check what partitions exist
-SHOW PARTITIONS telemetry_db.server_metrics;
-
--- 4. CTAS (Create Table As Select) — materialize a derived table
-CREATE TABLE telemetry_db.high_cpu_monthly
-WITH (
-    format           = 'PARQUET',
-    parquet_compression = 'SNAPPY',
-    partitioned_by   = ARRAY['year', 'month'],
-    external_location = 's3://telemetry-lake/high-cpu-monthly/'
-) AS
-SELECT
-    server_id, year, month,
-    ROUND(AVG(cpu_utilization), 2) AS avg_cpu
-FROM telemetry_db.server_metrics
-WHERE cpu_utilization > 80
-GROUP BY server_id, year, month;'''),
+# 2. CTAS equivalent — save results as a new table
+print("\\nCTAS simulation: materializing high-cpu-monthly derived table")
+athena_conn.execute("""
+CREATE TABLE high_cpu_monthly AS
+SELECT server_id, year, month, ROUND(AVG(cpu_utilization), 2) AS avg_cpu
+FROM server_metrics WHERE cpu_utilization > 80
+GROUP BY server_id, year, month
+""")
+print(pd.read_sql_query("SELECT * FROM high_cpu_monthly", athena_conn).to_string(index=False))
+print("\\nIn Athena: this CTAS writes Parquet to S3. Pay $0.01 per query vs $5.00 for CSV.")'''),
 
 md('a08', '''## The Full Architecture: APM → Data Lake
 

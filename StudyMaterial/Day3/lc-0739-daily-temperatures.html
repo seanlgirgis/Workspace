@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #739 — Daily Temperatures — Stack</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #c47a10; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #739 — Daily Temperatures <span class="badge">medium</span></h1>
+<p class="subtitle">Stack Pattern &nbsp;|&nbsp; Day 3 Study Material</p>
+
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#c47a10;font-size:1.4em;margin:16px 0 8px;">LC #739 — Daily Temperatures</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Monotonic Stack | <strong>Difficulty:</strong> Medium | <strong>Day 3</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #f7971e;background:#fff8e1;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given array <code>temperatures</code>, for each day return how many</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">days until a warmer temperature. Return 0 if no warmer day exists.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [73, 74, 75, 71, 69, 72, 76, 73]
+Output: [ 1,  1,  4,  2,  1,  1,  0,  0]</code></pre>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><em>Day 2 (75°): next warmer day is day 6 (76°) — 4 days away.</em></p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> Maintain a <strong>monotonic decreasing stack</strong> of indices of "unresolved" days. When a warmer temperature arrives, pop and compute the gap.</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. Unresolved Days Waiting for Resolution</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Each index on the stack represents a day that hasn't yet found a warmer day. The stack holds them "in suspense." When a warmer day arrives, it resolves all waiting days that are colder than it.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Monotonic Decreasing = Never Redundant</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">We maintain the stack in decreasing order of temperatures. Why? Because if temperature[i] ≤ temperature[j] and i < j, then i will never be the answer for any day after j — j always blocks it. So i is useless once j is on the stack.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Amortized O(n)</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Each element enters the stack once and exits at most once. Despite the inner while loop, total operations ≤ 2n across all iterations.</p>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Monotonic Stack</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why O(n) despite while loop?</strong> Each index is pushed to the stack at most once and popped at most once. Total push + pop operations ≤ 2n across all iterations — amortized O(1) per element.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Stack max size:</strong> In the worst case (monotonically decreasing temperatures), all indices accumulate in the stack → O(n) space.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(n) space (amortized)
+def dailyTemperatures(temperatures: list[int]) -&gt; list[int]:
+    result = [0] * len(temperatures)
+    stack = []   # indices of unresolved days (temperatures are decreasing)
+
+    for i, temp in enumerate(temperatures):
+        # Current day is warmer — resolve all colder waiting days
+        while stack and temperatures[stack[-1]] &lt; temp:
+            prev_day = stack.pop()
+            result[prev_day] = i - prev_day
+
+        stack.append(i)   # current day is now waiting
+    # Days still in stack: no warmer day found → result stays 0
+
+    return result
+
+# Test
+temps = [73, 74, 75, 71, 69, 72, 76, 73]
+print(dailyTemperatures(temps))   # [1, 1, 4, 2, 1, 1, 0, 0]
+
+# Edge cases
+print(dailyTemperatures([30, 40, 50, 60]))   # [1, 1, 1, 0]
+print(dailyTemperatures([30, 60, 90]))        # [1, 1, 0]
+print(dailyTemperatures([90, 80, 70, 60]))   # [0, 0, 0, 0]</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why maintain a monotonic decreasing stack?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: We only keep elements that could be the answer for future days. If temperature[i] < temperature[j] and i < j, then j is "blocking" i — any day warmer than i is also warmer than j, and j is closer. So i can never be the "next warmer" for anything to the right of j. We pop it.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's amortized O(n)?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Each element is pushed exactly once and popped at most once. The inner while loop's total iterations across all i = at most n pops. So total work = O(n) pushes + O(n) pops = O(n).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What about elements still in the stack at the end?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: They represent days with no warmer day to the right. Result stays 0 (initialized value). No cleanup needed.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Data engineering application?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: "Next time a metric exceeds its current value" — first-occurrence detection. "For each day's CPU reading, how many days until a higher reading?" Same algorithm.</p>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #c47a10;padding:18px;border-radius:8px;"><h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>"Next time CPU exceeds current peak" — capacity trend detection:</strong></p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># For each day, how many days until CPU exceeds today's reading?
+# Monotonic stack: same algorithm as dailyTemperatures
+
+def days_until_higher_cpu(daily_readings: list[float]) -&gt; list[int]:
+    """For each day, days until a higher CPU reading is observed."""
+    result = [0] * len(daily_readings)
+    stack = []   # indices of unresolved days
+
+    for i, cpu in enumerate(daily_readings):
+        while stack and daily_readings[stack[-1]] &lt; cpu:
+            prev = stack.pop()
+            result[prev] = i - prev
+        stack.append(i)
+
+    return result
+
+# 8 days of srv-01 CPU readings
+readings = [72.5, 68.1, 75.3, 71.0, 69.2, 77.8, 91.3, 88.4]
+gaps = days_until_higher_cpu(readings)
+for i, (cpu, gap) in enumerate(zip(readings, gaps)):
+    note = f"→ exceeded in {gap} days" if gap else "→ no higher reading found"
+    print(f"Day {i+1}: {cpu:.1f}% {note}")</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "Daily temperatures is the 'next greater element' pattern. At Citi, I used this to find the first day a server's CPU exceeded its historical peak — an early warning signal for capacity planning."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Monotonic Stack (decreasing)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n) amortized</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Stack content</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Indices of days waiting for a warmer day</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Monotonic decreasing stack of unresolved indices. When warmer temp arrives, pop all colder days and compute gap. Amortized O(n): each element pushed and popped at most once."</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</body>
+</html>

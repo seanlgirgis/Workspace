@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #3 — Longest Substring Without Repeating Characters — Sliding Window</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #0a7a6b; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #3 — Longest Substring Without Repeating Characters <span class="badge">medium</span></h1>
+<p class="subtitle">Sliding Window Pattern &nbsp;|&nbsp; Day 2 Study Material</p>
+
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#0a7a6b;font-size:1.4em;margin:16px 0 8px;">LC #3 — Longest Substring Without Repeating Characters</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Sliding Window + HashSet | <strong>Difficulty:</strong> Medium | <strong>Day 2</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #11998e;background:#e8faf5;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given string <code>s</code>, return the length of the longest substring</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">without repeating characters.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>"abcabcbb" → 3   ("abc")
+"bbbbb"    → 1   ("b")
+"pwwkew"   → 3   ("wke")
+""         → 0</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> Two pointers. Right expands to grow the window. When a repeat is found, jump left pointer past the previous occurrence of that character — not just one step, but directly to <code>prev_index + 1</code>.</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The Valid Window</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A window <code>[left, right]</code> is valid if all characters within it are unique. Expanding right may invalidate it. Shrinking left restores validity.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Jump Left, Don't Shuffle</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">When we see a repeat at position <code>right</code>, we don't shrink left one step at a time. We jump left to <code>char_index[char] + 1</code> — past the previous occurrence. This is what makes it O(n) rather than O(n²).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Why Store Index (Not Just Membership)?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">If we only tracked whether a char is in the window (set membership), we'd have to shrink one step at a time. Storing the index lets us jump directly.</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n³)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(min(n,m))</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Build+check every substring</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sliding Window (set)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(min(n,m))</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">But shrinks one step at a time</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Sliding Window + index map</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(min(n,m))</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Jumps left directly</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Space note:</strong> <code>m</code> = size of the character set. For ASCII: 128. For Unicode: up to thousands. In practice, the map never holds more than <code>min(n, charset_size)</code> entries.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(min(n,m)) space
+# Sliding window with char→index map for O(1) jumps.
+
+def lengthOfLongestSubstring(s: str) -&gt; int:
+    char_index = {}   # char → most recent index
+    left = 0
+    max_len = 0
+
+    for right, char in enumerate(s):
+        # If char is in window (index &gt;= left), jump left past it
+        if char in char_index and char_index[char] &gt;= left:
+            left = char_index[char] + 1
+        char_index[char] = right
+        max_len = max(max_len, right - left + 1)
+
+    return max_len
+
+# Test
+print(lengthOfLongestSubstring("abcabcbb"))   # 3
+print(lengthOfLongestSubstring("bbbbb"))      # 1
+print(lengthOfLongestSubstring("pwwkew"))     # 3
+print(lengthOfLongestSubstring(""))           # 0
+print(lengthOfLongestSubstring("au"))         # 2</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why check <code>char_index[char] >= left</code>?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: A character might be in <code>char_index</code> but its stored index is to the left of the current window. We only care about repeats <em>within the current window</em>. If the stored index is before <code>left</code>, this character isn't actually in our window — it's safe to ignore.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's the difference between using a set vs a dict here?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Set gives O(1) membership testing but you'd need to shrink left one step at a time (O(n) per shrink in worst case = O(n²) total). Dict stores the index, enabling O(1) jumps.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's <code>min(n, m)</code> in the space complexity?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: <code>n</code> = string length, <code>m</code> = character set size. The map holds at most the smaller of the two — you can't have more unique chars in the window than the entire string has, and you can't exceed the alphabet size.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What changes for Unicode vs ASCII?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Only the constant in space complexity. The algorithm is the same.</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#e8faf5;border-left:5px solid #0a7a6b;padding:18px;border-radius:8px;"><h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The "longest run of unique values" pattern:</strong> In telemetry streams, you often need the longest consecutive sequence of distinct server IDs (deduplication run), distinct metric types, or distinct alert codes.</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Longest run of distinct servers in a streaming event log
+events = ["srv-01", "srv-02", "srv-01", "srv-03", "srv-04", "srv-02"]
+server_idx = {}
+left = 0
+max_run = 0
+
+for right, server in enumerate(events):
+    if server in server_idx and server_idx[server] &gt;= left:
+        left = server_idx[server] + 1
+    server_idx[server] = right
+    max_run = max(max_run, right - left + 1)
+
+print(f"Longest run of distinct servers: {max_run}")   # 3</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "The sliding window with a hash map is the pattern for any contiguous-window uniqueness problem. I've applied this to detect the longest clean sequence in a telemetry stream before a repeated alert fired."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sliding Window + HashMap (char → last index)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(min(n, charset))</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key line</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>if char in char_index and char_index[char] >= left: left = char_index[char] + 1</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"HashMap stores last index of each char. Jump left past the previous occurrence in O(1)."</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The window invariant:</strong> <code>s[left:right+1]</code> always contains unique characters.</p>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #853 — Car Fleet — Stack</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #c47a10; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #853 — Car Fleet <span class="badge">medium</span></h1>
+<p class="subtitle">Stack Pattern &nbsp;|&nbsp; Day 3 Study Material</p>
+
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#c47a10;font-size:1.4em;margin:16px 0 8px;">LC #853 — Car Fleet</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Stack / Sorting | <strong>Difficulty:</strong> Medium | <strong>Day 3</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #f7971e;background:#fff8e1;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> <code>n</code> cars head to <code>target</code> miles away.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given <code>position[]</code> and <code>speed[]</code>. Cars that catch up to a car ahead</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">form a fleet (the faster car slows to the slower car's speed). Return the number of fleets.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>target=12, position=[10,8,0,5,3], speed=[2,4,1,1,3] → 3</code></pre>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><em>Car at 10 arrives at t=1. Car at 8 arrives at t=1 too — same fleet. Others form 2 separate fleets.</em></p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> Sort by position descending. Calculate time to target for each car. If a car's arrival time is ≤ the car ahead's, they join the same fleet (the slower car's time dominates).</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. Arrival Time is the Key</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><code>time = (target - position) / speed</code> — how long to reach target at constant speed.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">If car B (behind) arrives before or at the same time as car A (ahead): B catches up → same fleet. B's actual arrival time is then A's (it slows to A's speed).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Sort Descending = Process Closest First</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Process cars from closest to target to furthest. A car can only join the fleet ahead of it (closer to target). It cannot "jump over" a car.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Stack = Fleet Representatives</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The stack holds arrival times of distinct fleets. If the current car arrives after the fleet ahead (top of stack), it forms a new fleet. Otherwise it joins the existing one.</p>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Step</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Dominates</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Stack scan</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Single pass</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Total</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n log n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Sort bound</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Space:</strong> O(n) — the stack holds at most n fleet arrival times.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why sorting by position descending matters:</strong> A car can only catch up to cars closer to the target. Processing closest-first ensures we evaluate each car's ability to catch the car immediately ahead.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n log n) time (sort dominates), O(n) space
+
+def carFleet(target: int, position: list[int], speed: list[int]) -&gt; int:
+    pairs = sorted(zip(position, speed), reverse=True)  # closest to target first
+    stack = []   # arrival times of distinct fleets
+
+    for pos, spd in pairs:
+        time = (target - pos) / spd
+        # New fleet if: stack empty OR arrives AFTER the fleet ahead
+        if not stack or time &gt; stack[-1]:
+            stack.append(time)
+        # else: joins the fleet ahead (slower car determines fleet arrival)
+
+    return len(stack)
+
+# Test
+print(carFleet(12, [10, 8, 0, 5, 3], [2, 4, 1, 1, 3]))   # 3
+print(carFleet(10, [3], [3]))                               # 1
+print(carFleet(100, [0, 2, 4], [4, 2, 1]))                # 1  — all join same fleet
+print(carFleet(10, [6, 8], [3, 2]))                        # 2  — separate fleets</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why sort by position descending?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Cars can only catch up to cars ahead (closer to target). Processing closest-to-target first means when we evaluate a car, we can immediately compare it to the fleet it would join.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why is arrival time the deciding factor?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: If car B (behind) arrives before or at the same time as car A (ahead): B physically catches A before the target, joins A's fleet, and slows to A's speed. B's arrival time becomes A's time.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What if two cars start at the same position?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: The problem states all positions are unique.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: When does time > stack[-1] form a new fleet?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: When a car arrives <em>after</em> the fleet ahead — it can never catch up. It forms its own fleet with all cars behind it that join it.</p>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #c47a10;padding:18px;border-radius:8px;"><h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The "merging groups" pattern:</strong> Batch jobs or service requests that start at different times but converge on the same resource.</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># How many distinct "batches" will reach the database given staggered starts?
+# Jobs that arrive within the same second merge into one batch
+
+def count_db_batches(submissions: list[tuple]) -&gt; int:
+    """
+    submissions: list of (ready_time, processing_rate) pairs.
+    Jobs that "catch up" to the job ahead merge into one batch.
+    """
+    # Sort by ready_time descending (most ready first)
+    jobs = sorted(submissions, reverse=True)
+    batch_arrivals = []
+
+    db_capacity = 1.0   # 1 unit of work per second
+    for ready_time, rate in jobs:
+        arrival = ready_time + (1.0 / rate)   # time to complete 1 unit
+        if not batch_arrivals or arrival &gt; batch_arrivals[-1]:
+            batch_arrivals.append(arrival)
+
+    return len(batch_arrivals)
+
+# 4 jobs at different ready times with different processing rates
+submissions = [(0, 2), (1, 1), (2, 3), (5, 1)]
+print(f"Distinct DB batches: {count_db_batches(submissions)}")</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "Car Fleet maps to any resource contention problem — multiple requestors converging on a shared bottleneck. The stack tracks distinct arrival groups, which equals distinct load spikes on the resource."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#c47a10;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#c47a10;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort + Stack</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key step</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort descending by position; compare arrival times</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Sort closest-to-target first. For each car, compute arrival time. If it arrives after the fleet ahead, it's a new fleet. Stack length = fleet count."</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</body>
+</html>

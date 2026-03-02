@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #121 — Best Time to Buy and Sell Stock — Sliding Window</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #0a7a6b; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #121 — Best Time to Buy and Sell Stock <span class="badge">easy</span></h1>
+<p class="subtitle">Sliding Window Pattern &nbsp;|&nbsp; Day 2 Study Material</p>
+
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#0a7a6b;font-size:1.4em;margin:16px 0 8px;">LC #121 — Best Time to Buy and Sell Stock</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Sliding Window / Two Pointers | <strong>Difficulty:</strong> Easy | <strong>Day 2</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #11998e;background:#e8faf5;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given array <code>prices</code> where <code>prices[i]</code> is the stock price on day i,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">return the maximum profit from one buy and one sell. Return 0 if no profit is possible.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>[7, 1, 5, 3, 6, 4] → 5   (buy at 1, sell at 6)
+[7, 6, 4, 3, 1]    → 0   (prices only fall — no profit)
+[1, 2]             → 1</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> For each potential sell day, the best buy is the <em>minimum price to its left</em>. Track the running minimum as you scan left-to-right. At each price, the potential profit is <code>current - min_so_far</code>.</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The Running Minimum</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">As you scan left-to-right, maintain the lowest price seen so far. At each new price, calculate potential profit = <code>current - min_so_far</code>. Update the running max profit if higher.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Sliding Window View</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The "window" implicitly spans from <code>min_price_index</code> to <code>current_index</code>. You never explicitly track the left pointer — the minimum tracks it for you.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Time Series Analogy</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Identical pattern to: "For each day's CPU reading, what's the maximum improvement over any prior baseline?" Rolling maximum of (current - historical_min) is the same calculation.</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (nested)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Check every pair</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>One-Pass (Optimal)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(1)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Track running min</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why O(1) space?</strong> Only two variables: <code>min_price</code> and <code>max_profit</code>. No data structure needed.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Key constraint:</strong> You must buy before you sell. Scanning left-to-right respects this — <code>min_price</code> is always from a prior day.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(1) space
+# One pass: track min price and max profit simultaneously.
+
+def maxProfit(prices: list[int]) -&gt; int:
+    min_price  = float('inf')
+    max_profit = 0
+
+    for price in prices:
+        if price &lt; min_price:
+            min_price = price
+        elif price - min_price &gt; max_profit:
+            max_profit = price - min_price
+
+    return max_profit
+
+# Test
+print(maxProfit([7, 1, 5, 3, 6, 4]))   # 5
+print(maxProfit([7, 6, 4, 3, 1]))       # 0
+print(maxProfit([1, 2]))                # 1
+print(maxProfit([2, 4, 1]))             # 2</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why is this categorized as sliding window?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: The window is the range [buy_day, sell_day]. The left boundary is the running minimum index (implicitly). The right boundary is the current day. Unlike explicit two-pointer sliding windows, we don't need to track both pointers — the min does it.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: How would you modify this for "buy and sell multiple times"?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: LC #122 — Greedy: add all positive day-over-day differences. <code>sum(max(0, prices[i] - prices[i-1]) for i in range(1, len(prices)))</code>.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: How would you modify for "at most 2 transactions"?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: LC #123 — Track four states with DP: after first buy, after first sell, after second buy, after second sell.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's the data engineering analog of this problem?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: "Find the maximum metric improvement over any prior baseline." Same algorithm — track rolling minimum, compute delta at each point.</p>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#e8faf5;border-left:5px solid #0a7a6b;padding:18px;border-radius:8px;"><h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Direct capacity planning analog:</strong> "What is the maximum performance headroom we ever had compared to our worst baseline in the past 30 days?"</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Real pattern: rolling max improvement from historical low
+readings = [72, 68, 75, 71, 80, 65, 88]   # daily avg CPU readings
+baseline = float('inf')
+max_headroom = 0
+
+for cpu in readings:
+    baseline = min(baseline, cpu)
+    headroom = cpu - baseline   # how much headroom above historical low
+    max_headroom = max(max_headroom, headroom)
+
+print(f"Max usage swing from baseline: {max_headroom}%")</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "The buy-sell pattern is identical to finding the maximum metric delta from a rolling baseline — a capacity planning calculation I did regularly at Citi to understand usage volatility."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#0a7a6b;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#0a7a6b;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sliding Window / Running Minimum</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key insight</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>profit = current_price - min_price_so_far</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"One pass: track running minimum and max profit. O(n) time, O(1) space."</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The 3-line core:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>for price in prices:
+    min_price = min(min_price, price)
+    max_profit = max(max_profit, price - min_price)</code></pre>
+</div>
+</div>
+</body>
+</html>
