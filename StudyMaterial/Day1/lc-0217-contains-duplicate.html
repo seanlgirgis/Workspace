@@ -1,143 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Guide - Contains Duplicate</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: #f9f9f9;
-        }
-
-        h1,
-        h2 {
-            color: #2c3e50;
-        }
-
-        .diagram-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 2rem 0;
-            overflow-x: auto;
-        }
-
-        .step {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .array-box {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            text-align: center;
-            border: 2px solid #3498db;
-            margin: 0 5px;
-            font-weight: bold;
-            border-radius: 4px;
-            background: #e8f4f8;
-        }
-
-        .array-box.active {
-            background: #f39c12;
-            color: white;
-            border-color: #e67e22;
-        }
-
-        .set-container {
-            border: 2px dashed #9b59b6;
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            min-height: 40px;
-            background: #fdfaf6;
-        }
-
-        .set-item {
-            display: inline-block;
-            padding: 5px 10px;
-            margin: 5px;
-            background: #8e44ad;
-            color: white;
-            border-radius: 12px;
-            font-weight: bold;
-        }
-
-        code {
-            background: #eee;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-
-        .insight {
-            background: #d4edda;
-            color: #155724;
-            padding: 1rem;
-            border-left: 4px solid #28a745;
-            margin: 1rem 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #217 — Contains Duplicate — HashMap</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
 </head>
-
 <body>
-    <h1>Visual Guide: Contains Duplicate (Hash Set)</h1>
-    <p>Array: <code>[1, 2, 3, 1]</code></p>
+<div class="container">
+<h1>LC #217 — Contains Duplicate <span class="badge">easy</span></h1>
+<p class="subtitle">HashMap Pattern &nbsp;|&nbsp; Day 1 Study Material</p>
 
-    <div class="insight">
-        <strong>The "Aha!" Moment:</strong> A Hash Set lets you track what you've seen with near-instant $O(1)$ lookups.
-        If the element is already in the set, you know immediately there's a duplicate.
-    </div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#5a4f8f;font-size:1.4em;margin:16px 0 8px;">LC #217 — Contains Duplicate</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> HashSet | <strong>Difficulty:</strong> Easy | <strong>Day 1</strong></p>
 
-    <div class="diagram-container">
-        <div class="step">
-            <h3>Step 1: Inspect Index 0 (Value = 1)</h3>
-            <div>
-                <span class="array-box active">1</span><span class="array-box">2</span><span
-                    class="array-box">3</span><span class="array-box">1</span>
-            </div>
-            <p>Is '1' in the Set? No. Add it.</p>
-            <div class="set-container">
-                <span class="set-item">1</span>
-            </div>
-        </div>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
 
-        <div class="step">
-            <h3>Step 2: Inspect Index 1 (Value = 2)</h3>
-            <div>
-                <span class="array-box">1</span><span class="array-box active">2</span><span
-                    class="array-box">3</span><span class="array-box">1</span>
-            </div>
-            <p>Is '2' in the Set? No. Add it.</p>
-            <div class="set-container">
-                <span class="set-item">1</span> <span class="set-item">2</span>
-            </div>
-        </div>
+<div style="padding:15px;border-left:8px solid #667eea;background:#f0f0ff;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given an integer array <code>nums</code>, return <code>true</code> if</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">any value appears at least twice. Return <code>false</code> if every element is distinct.</p>
+</div>
 
-        <div class="step">
-            <h3>Step 3: Inspect Index 3 (Value = 1)</h3>
-            <div>
-                <span class="array-box">1</span><span class="array-box">2</span><span class="array-box">3</span><span
-                    class="array-box active">1</span>
-            </div>
-            <p>Is '1' in the Set? <strong>YES!</strong></p>
-            <p style="color:red; font-weight:bold;">Return True. Duplicate found.</p>
-            <div class="set-container" style="border-color:red; background:#ffe6e6;">
-                <span class="set-item">1</span> <span class="set-item">2</span> <span class="set-item">3</span>
-            </div>
-        </div>
-    </div>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input: [1, 2, 3, 1]  → true   (1 appears twice)
+Input: [1, 2, 3, 4]  → false  (all distinct)
+Input: [1, 1, 1, 3]  → true</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> You need O(1) membership testing as you scan. A HashSet is exactly that — add each element, and if it's already there, you found a duplicate. Exit immediately (early termination).</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The Seen Set</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Maintain a set of everything encountered so far. For each new element: "Have I seen you before?" If yes — duplicate found. If no — add to the set, continue. The set is your memory.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Early Termination</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">You don't need to process the entire array. The moment you find a duplicate, return <code>True</code>. This matters in practice — duplicates near the front of large arrays mean very fast execution.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Set vs HashMap</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A set is a hashmap where you only care about keys, not values. Use a set when you only need membership testing (is X in the collection?). Use a dict when you also need to store data alongside each key (Two Sum stores the index).</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (nested loops)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Compare every pair</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort + adjacent check</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Mutates input</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>len(nums) != len(set(nums))</code></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">No early exit</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>HashSet with early exit</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Stops on first dup</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Space note:</strong> In the worst case (no duplicates), the set holds all n elements. O(n) space.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Practical note:</strong> For very large arrays with early duplicates, the expected runtime is much better than O(n). The O(n) is the worst case (no duplicate or duplicate at the very end).</p>
+</div></div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(n) space
+# HashSet with early termination.
+
+def containsDuplicate(nums: list[int]) -&gt; bool:
+    seen = set()
+    for num in nums:
+        if num in seen:
+            return True   # found duplicate — exit immediately
+        seen.add(num)
+    return False
+
+# One-liner alternative (no early exit, but clean):
+# return len(nums) != len(set(nums))
+
+# Test
+print(containsDuplicate([1, 2, 3, 1]))    # True
+print(containsDuplicate([1, 2, 3, 4]))    # False
+print(containsDuplicate([1, 1, 1, 3, 3])) # True</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: When would you prefer the sort approach over the hashset?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: When memory is extremely constrained — O(1) extra space vs O(n). In embedded systems or when the array is nearly sorted already. Sorting in-place (<code>.sort()</code> in Python) uses O(log n) stack space for Timsort, essentially O(1) extra.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why does <code>len(nums) != len(set(nums))</code> work?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: A set only keeps unique elements. If any duplicates exist, <code>set(nums)</code> has fewer elements than <code>nums</code>. If lengths are equal, all elements are unique.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's the difference between a Python <code>set</code> and <code>frozenset</code>?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: <code>set</code> is mutable (you can add/remove). <code>frozenset</code> is immutable and hashable — you can use it as a dict key or store it inside another set.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Could this problem appear in a data engineering context?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Constantly. Deduplication is a core ETL operation — ensuring metric IDs are unique, detecting double-counted events, validating primary keys before loading to a data warehouse. The HashSet pattern is fundamental.</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #5a4f8f;padding:18px;border-radius:8px;"><h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>ETL deduplication:</strong> At Citi, telemetry agents sometimes sent duplicate metric records (network retries, agent restarts). Before aggregating, we needed to detect and drop duplicates.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Direct analogy:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Checking for duplicate server_id in a batch before inserting
+seen_ids = set()
+for record in batch:
+    if record['server_id'] in seen_ids:
+        log_duplicate(record)
+        continue
+    seen_ids.add(record['server_id'])
+    insert(record)</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "Deduplication before aggregation was a daily concern at Citi — 6,000 endpoints with retry logic meant we saw duplicate metric records. The HashSet pattern — add and check — is exactly what prevents double-counting in capacity utilization reports."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">HashSet — membership testing with early exit</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n) worst case, much better average</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key line</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>if num in seen: return True</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"HashSet for O(1) membership testing. Early exit on first duplicate."</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>When to choose which:</strong></p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Need early exit + no mutation → HashSet loop (this solution)</li>
+<li>Memory constrained → Sort approach</li>
+<li>Idiomatic Python, no early exit needed → <code>len(nums) != len(set(nums))</code></li>
+</ul>
+</div>
+</div>
 </body>
-
 </html>

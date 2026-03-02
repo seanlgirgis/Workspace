@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #347 — Top K Frequent Elements — HashMap</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #347 — Top K Frequent Elements <span class="badge">medium</span></h1>
+<p class="subtitle">HashMap Pattern &nbsp;|&nbsp; Day 1 Study Material</p>
+
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#5a4f8f;font-size:1.4em;margin:16px 0 8px;">LC #347 — Top K Frequent Elements</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> HashMap + Heap (or Bucket Sort) | <strong>Difficulty:</strong> Medium | <strong>Day 1</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #667eea;background:#f0f0ff;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given an integer array <code>nums</code> and integer <code>k</code>,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">return the <code>k</code> most frequent elements. Answer may be in any order.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>nums = [1, 1, 1, 2, 2, 3],  k = 2  → [1, 2]
+nums = [1],                  k = 1  → [1]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> Always decompose Top-K into two steps: (1) count frequencies with a hashmap, (2) find the top k by frequency. Step 2 can be done with a min-heap in O(n log k) or bucket sort in O(n) — know both.</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. Count First, Rank Second</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Never try to do both in one pass. Build the frequency map. Then find the top k from it. This clean separation makes both problems simple.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. Min-Heap of Size K</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Maintain a min-heap with exactly k elements (by frequency). For each new element: if its frequency > the min in the heap, pop the min and push the new one. At the end, the heap contains the top k. O(n log k) — better than O(n log n) sort when k << n.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Bucket Sort Insight (O(n))</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Frequency is bounded: it can't exceed <code>len(nums)</code>. Use frequency as an array index: <code>buckets[freq].append(num)</code>. Iterate buckets from high to low, collecting elements until you have k. No comparisons needed — O(n) total.</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">HashMap + full sort</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Overkill — sorting all unique elements</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>heapq.nlargest(k, ...)</code></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log k)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n + k)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Good when k << n</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Bucket sort</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Bounded frequency = linear</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why heap is O(n log k) not O(n log n):</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A min-heap of fixed size k: each push/pop is O(log k). We do at most n heap operations. Total: O(n log k). When k = 1, this is O(n). When k = n, it's O(n log n) — same as sort.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Bucket sort intuition:</strong> Counting sort is O(n + range). Here range = n (max frequency ≤ array length), so O(n + n) = O(n). The key is that the range is bounded.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — Bucket Sort, O(n) time, O(n) space
+# Frequency bounded by len(nums) — use as array index.
+
+from collections import Counter
+
+def topKFrequent(nums: list[int], k: int) -&gt; list[int]:
+    count = Counter(nums)
+
+    # buckets[freq] = list of numbers with that frequency
+    # max possible frequency = len(nums)
+    buckets = [[] for _ in range(len(nums) + 1)]
+    for num, freq in count.items():
+        buckets[freq].append(num)
+
+    # Collect from highest frequency down until we have k elements
+    result = []
+    for freq in range(len(buckets) - 1, 0, -1):
+        result.extend(buckets[freq])
+        if len(result) &gt;= k:
+            return result[:k]
+
+    return result  # shouldn't reach here if k &lt;= len(unique elements)
+
+# Test
+print(topKFrequent([1, 1, 1, 2, 2, 3], 2))    # [1, 2]
+print(topKFrequent([1], 1))                    # [1]
+print(topKFrequent([4, 1, -1, 2, -1, 2, 3], 2))  # [-1, 2]</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: When would you use heap over bucket sort in production?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: When memory matters — heap uses O(k) extra space vs O(n) for buckets. When k is very small (top 3 of 1 million), heap is the right call. When k is large or you need O(n), use buckets.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What is <code>Counter</code> under the hood?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: A subclass of <code>dict</code>. <code>Counter(nums)</code> iterates once, incrementing counts. Time: O(n). Access pattern: <code>count[key]</code> = 0 for missing keys (doesn't raise KeyError).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why does <code>heapq.nlargest</code> outperform a full sort?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: <code>nlargest(k, ...)</code> uses a min-heap of size k. It processes all n elements in O(n log k) instead of sorting all n in O(n log n). Python's implementation is especially efficient for small k — it switches to a simple scan when k=1.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: How is Top-K relevant in data engineering?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Everywhere. Top-K slow queries (query optimization). Top-K error codes (alert prioritization). Top-K resource consumers (capacity planning). At Citi: which 10 servers out of 6,000 are consistently the highest CPU consumers? Exactly this pattern.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What if there are ties at position k?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: The problem says any valid answer is acceptable. In practice for Top-K problems in production, you'd sort by secondary key (name, ID) to make results deterministic.</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #5a4f8f;padding:18px;border-radius:8px;"><h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Top-K is a capacity planning primitive.</strong> At Citi, out of 6,000 monitored endpoints:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Which 10 servers have the highest average CPU over 30 days? → Top-K by average.</li>
+<li>Which 5 servers trigger the most alerts? → Top-K by alert count.</li>
+<li>Which application tier consumes the most memory? → Top-K by aggregate consumption.</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Direct code analogy:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Top 10 servers by average CPU (last 30 days)
+from collections import Counter
+# cpu_readings: {server_id: [list of cpu_pct values]}
+avg_cpu = {sid: sum(vals)/len(vals) for sid, vals in cpu_readings.items()}
+
+# heapq approach for large fleet:
+import heapq
+top_10 = heapq.nlargest(10, avg_cpu, key=avg_cpu.get)</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "Top-K queries are one of the most common patterns in monitoring and observability. At Citi, weekly capacity reports always started with: 'Show me the top 10 most stressed servers.' That's exactly this problem — count, then rank."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Count frequencies (HashMap), then find top K</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Heap approach</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log k) time, O(n + k) space — use when k << n</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Bucket approach</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n) time, O(n) space — use when you need true linear</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key insight</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Frequency ≤ len(nums) → use frequency as array index</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Two-step: count with Counter, then heap of size k. Or bucket sort for O(n)."</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Two templates:</strong></p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Template A: Heap (O(n log k))
+count = Counter(nums)
+return heapq.nlargest(k, count, key=count.get)
+
+# Template B: Bucket Sort (O(n))
+count = Counter(nums)
+buckets = [[] for _ in range(len(nums) + 1)]
+for num, freq in count.items(): buckets[freq].append(num)
+result = []
+for freq in range(len(buckets)-1, 0, -1):
+    result.extend(buckets[freq])
+    if len(result) &gt;= k: return result[:k]</code></pre>
+</div>
+</div>
+</body>
+</html>

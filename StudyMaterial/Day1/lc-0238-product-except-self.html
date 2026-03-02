@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #238 — Product of Array Except Self — HashMap</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #238 — Product of Array Except Self <span class="badge">medium</span></h1>
+<p class="subtitle">HashMap Pattern &nbsp;|&nbsp; Day 1 Study Material</p>
+
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#5a4f8f;font-size:1.4em;margin:16px 0 8px;">LC #238 — Product of Array Except Self</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> Array / Prefix Products | <strong>Difficulty:</strong> Medium | <strong>Day 1</strong></p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding:15px;border-left:8px solid #667eea;background:#f0f0ff;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given an integer array <code>nums</code>, return an array <code>output</code></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">where <code>output[i]</code> is the product of all elements in <code>nums</code> except <code>nums[i]</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>No division allowed. Must run in O(n).</strong></p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [1, 2, 3, 4]
+Output: [24, 12, 8, 6]
+
+Check: output[0] = 2*3*4 = 24 ✓
+       output[1] = 1*3*4 = 12 ✓
+       output[2] = 1*2*4 = 8  ✓
+       output[3] = 1*2*3 = 6  ✓</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> <code>output[i] = product of everything LEFT of i × product of everything RIGHT of i</code>. Build each half in a single pass. Two passes total = O(n).</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. Left × Right Decomposition</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Any position <code>i</code> has exactly two "contributions" — everything to its left, and everything to its right. Compute a left-products array and a right-products array, then multiply element-wise. This is the conceptual foundation.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. The Running Product Trick</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">You don't need two extra arrays. Use one result array. First pass: fill result[i] with the left product. Second pass: maintain a running right product and multiply into result[i] in-place. O(1) extra space.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Why No Division?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">If you could divide: <code>total_product / nums[i]</code>. But — what if nums[i] = 0? Division by zero is undefined. The prefix/suffix approach handles zeros naturally with no special cases. This is why the constraint exists: it forces the elegant solution.</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Product for each position</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Left + Right arrays</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Two extra arrays</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Left + Running suffix</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(1)</strong>*</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>In-place on result</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">*The output array <code>result</code> doesn't count as extra space per the problem statement — you must return an array anyway.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Handles zeros:</strong> If nums = [0, 1, 2]:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>prefix pass:  result = [1, 0, 0]</li>
+<li>suffix pass:  result = [1<em>2, 0</em>2, 0*1] = [2, 0, 0]</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The zero propagates naturally — no special casing needed.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Multiple zeros:</strong> If nums = [0, 0, 1], all products are 0 (two zeros → neither side can avoid having a zero). The algorithm handles this correctly without any branches.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(1) extra space
+# Left pass fills result with left products.
+# Right pass multiplies in right products using running suffix.
+
+def productExceptSelf(nums: list[int]) -&gt; list[int]:
+    n = len(nums)
+    result = [1] * n
+
+    # Left pass: result[i] = product of nums[0..i-1]
+    prefix = 1
+    for i in range(n):
+        result[i] = prefix
+        prefix *= nums[i]
+
+    # Right pass: multiply result[i] by product of nums[i+1..n-1]
+    suffix = 1
+    for i in range(n - 1, -1, -1):
+        result[i] *= suffix
+        suffix *= nums[i]
+
+    return result
+
+# Test
+print(productExceptSelf([1, 2, 3, 4]))         # [24, 12, 8, 6]
+print(productExceptSelf([-1, 1, 0, -3, 3]))    # [0, 0, 9, 0, 0]
+print(productExceptSelf([0, 0]))               # [0, 0]</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why is division not allowed?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Division by zero is undefined. If <code>nums[i] = 0</code>, you'd divide by zero. The prefix/suffix approach handles zero naturally — no special cases needed.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's the extra space in your O(1) solution?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Just two scalar variables — <code>prefix</code> and <code>suffix</code>. The output array <code>result</code> is required (the problem asks for it), so it doesn't count as extra space.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What happens with two zeros in the array?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Every output value becomes 0. If two elements are 0, every subarray "except self" contains at least one 0. The algorithm computes this correctly without any special handling.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: How is this pattern useful in data engineering?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Running products appear in cumulative calculations — compounding growth rates, probability chains (joint probability of a sequence of events), or building prefix-product lookup tables for O(1) range product queries. Once you have the prefix products array, <code>product(nums[i..j]) = prefix[j+1] / prefix[i]</code> — but with division, so pre-compute for zero-safe arrays.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Can you solve this with a single pass?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: No — to know the right product at index <code>i</code>, you need to have seen everything to the right. Single-pass isn't possible without extra space. Two passes is the theoretical minimum for this approach.</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #5a4f8f;padding:18px;border-radius:8px;"><h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Running products in capacity planning:</strong> At Citi, compound growth calculations were common — if a server's CPU grows 2% per week, what is the cumulative utilization after k weeks? This is a prefix product computation.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>More directly:</strong> When computing a rolling efficiency score across a chain of pipeline stages, you multiply stage efficiencies together. If any stage has 0% efficiency (is down), the entire pipeline product is 0. The prefix/suffix decomposition handles this correctly.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "The 'no division' constraint is a proxy for zero-robustness — and in telemetry data, zeros are common (servers that are off, metrics that aren't reporting). The prefix/suffix pattern handles zeros without special-casing, which matters in production."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Prefix + Suffix products</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1) extra</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key insight</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>result[i] = left_product × right_product</code> — build each in one pass</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Decompose into left product and right product. Two passes, O(1) extra space."</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Template to memorize:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>result = [1] * n
+prefix = 1
+for i in range(n):
+    result[i] = prefix; prefix *= nums[i]
+
+suffix = 1
+for i in range(n-1, -1, -1):
+    result[i] *= suffix; suffix *= nums[i]</code></pre>
+</div>
+</div>
+</body>
+</html>

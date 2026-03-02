@@ -1,145 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Guide - Two Sum</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: #f9f9f9;
-        }
-
-        h1,
-        h2 {
-            color: #2c3e50;
-        }
-
-        .diagram-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 2rem 0;
-            overflow-x: auto;
-        }
-
-        .step {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .array-box {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            text-align: center;
-            border: 2px solid #3498db;
-            margin: 0 5px;
-            font-weight: bold;
-            border-radius: 4px;
-            background: #e8f4f8;
-        }
-
-        .array-box.active {
-            background: #f39c12;
-            color: white;
-            border-color: #e67e22;
-        }
-
-        .hash-table {
-            display: inline-table;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .hash-table th,
-        .hash-table td {
-            border: 1px solid #bdc3c7;
-            padding: 5px 15px;
-            text-align: left;
-        }
-
-        .hash-table th {
-            background-color: #ecf0f1;
-        }
-
-        code {
-            background: #eee;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-
-        .insight {
-            background: #d4edda;
-            color: #155724;
-            padding: 1rem;
-            border-left: 4px solid #28a745;
-            margin: 1rem 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #1 — Two Sum — HashMap</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
 </head>
-
 <body>
-    <h1>Visual Guide: Two Sum (Hash Map Ledger)</h1>
-    <p>Target: <strong>9</strong> | Array: <code>[2, 7, 11, 15]</code></p>
+<div class="container">
+<h1>LC #1 — Two Sum <span class="badge">easy</span></h1>
+<p class="subtitle">HashMap Pattern &nbsp;|&nbsp; Day 1 Study Material</p>
 
-    <div class="insight">
-        <strong>The "Aha!" Moment:</strong> Don't look for pairs. Look for the <em>complement</em> (target - current) in
-        a reverse-lookup hash map representing everything you've already seen.
-    </div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#5a4f8f;font-size:1.4em;margin:16px 0 8px;">LC #1 — Two Sum</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> HashMap | <strong>Difficulty:</strong> Easy | <strong>Day 1</strong></p>
 
-    <div class="diagram-container">
-        <div class="step">
-            <h3>Step 1: Inspect Index 0 (Value = 2)</h3>
-            <div>
-                <span class="array-box active">2</span><span class="array-box">7</span><span
-                    class="array-box">11</span><span class="array-box">15</span>
-            </div>
-            <p>Target (9) - Current (2) = <strong>Need 7</strong>.<br>Is 7 in the ledger? No.<br>Add 2 to ledger at
-                index 0.</p>
-            <table class="hash-table">
-                <tr>
-                    <th>Value (Key)</th>
-                    <th>Index (Val)</th>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>0</td>
-                </tr>
-            </table>
-        </div>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
 
-        <div class="step">
-            <h3>Step 2: Inspect Index 1 (Value = 7)</h3>
-            <div>
-                <span class="array-box">2</span><span class="array-box active">7</span><span
-                    class="array-box">11</span><span class="array-box">15</span>
-            </div>
-            <p>Target (9) - Current (7) = <strong>Need 2</strong>.<br>Is 2 in the ledger? <strong>YES!</strong> It is at
-                index 0.</p>
-            <p>We found our pair! Return <code>[0, 1]</code>.</p>
-            <table class="hash-table">
-                <tr>
-                    <th>Value (Key)</th>
-                    <th>Index (Val)</th>
-                </tr>
-                <tr>
-                    <td style="background-color:#ffeeba">2</td>
-                    <td style="background-color:#ffeeba">0</td>
-                </tr>
-            </table>
-        </div>
-    </div>
+<div style="padding:15px;border-left:8px solid #667eea;background:#f0f0ff;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given an integer array <code>nums</code> and an integer <code>target</code>,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">return the indices of two numbers that add up to <code>target</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Exactly one solution exists. Each element may only be used once.</p>
+</div>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Example:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  nums = [2, 7, 11, 15], target = 9
+Output: [0, 1]   (nums[0] + nums[1] = 2 + 7 = 9)
+
+Input:  nums = [3, 2, 4], target = 6
+Output: [1, 2]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> For each number <code>x</code>, you need <code>target - x</code>. Instead of scanning for it (O(n) per lookup = O(n²) total), store every number you've seen in a hashmap. Then each lookup is O(1).</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The Complement Store</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Every number has a "partner" it needs: <code>partner = target - num</code>. Before checking the current number, ask: "Is my partner already in the store?" If yes — done. If no — add yourself to the store and keep going.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. One-Pass Building</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">You don't need to build the entire hashmap first and then search. Build and search simultaneously. The moment you find a pair, return. This makes it genuinely O(n) — not O(n) + O(n).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Space for Time Tradeoff</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The classic optimization pattern: spend O(n) extra space (the hashmap) to buy O(n) total time instead of O(n²). At scale — 6,000 servers, millions of data points — this difference is enormous.</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute Force (two loops)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">n*(n-1)/2 comparisons</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort + Two Pointers</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Loses original indices</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>HashMap (Optimal)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">One pass, O(1) lookup</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why O(1) lookup?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Python <code>dict</code> is a hash table. Average case O(1) for <code>in</code> and <code>[]</code> operations. Worst case O(n) with pathological hash collisions — doesn't happen with integers in practice.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Space note:</strong> We store at most n entries in the hashmap — one per element. O(n) space.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(n) space
+# One pass: check complement, then store current number.
+
+def twoSum(nums: list[int], target: int) -&gt; list[int]:
+    seen = {}  # maps value → index
+
+    for i, num in enumerate(nums):
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], i]
+        seen[num] = i
+
+    # Guaranteed to find a solution (problem states exactly one exists)
+
+# Test
+print(twoSum([2, 7, 11, 15], 9))   # [0, 1]
+print(twoSum([3, 2, 4], 6))         # [1, 2]
+print(twoSum([3, 3], 6))            # [0, 1]  ← works: checks seen before adding self</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why check complement before adding to the map?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Prevents using the same element twice. If <code>nums = [3, 3]</code> and target = 6: when we process the second 3, the first 3 is already in seen at index 0. We return [0, 1]. If we added first and then checked, we'd look up index 0 for both — but the problem says same index can't be used twice.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's <code>seen</code> storing — keys or values?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Keys are the <strong>values</strong> from <code>nums</code>, values in the dict are the <strong>indices</strong>. <code>seen = {value: index}</code>. This is the reverse of what you might expect — we look up by number to get its position.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What if the array had multiple valid pairs?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Return on the first found. To return all pairs: collect into a list instead, skip returning early.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What data structure is Python <code>{}</code> (dict) under the hood?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: A hash table. The CPython implementation uses open addressing with pseudo-random probing. Average O(1) for insert/lookup/delete. Guaranteed O(n) worst case (very rare with integers).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Could you solve this with O(1) space?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Yes — sort a copy (keeping original indices), then use two pointers. But sorting loses index info, so you'd need to track original indices separately. And it's O(n log n) time, not O(n).</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #5a4f8f;padding:18px;border-radius:8px;"><h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Pattern recognition:</strong> At Citi, monitoring 6,000+ endpoints, I frequently needed to find pairs or groups of resources with complementary behavior — servers where one's CPU spike was offset by another's idle period (capacity balancing).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Direct application:</strong> If you have a list of server CPU readings and want to find two servers whose combined utilization equals exactly 100% (for load-balancing pairing):</p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>cpu_readings = {server_id: cpu_pct for server_id in servers}
+# Two Sum pattern: complement = 100 - cpu_pct</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "The HashMap pattern is foundational to data engineering. At Citi, fast lookup against growing datasets was constant — whether matching alert IDs, deduplicating metric keys, or joining telemetry streams. O(1) lookup vs O(n) lookup on 6,000 servers per collection cycle is the difference between milliseconds and seconds."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">HashMap — complement lookup</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key line</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>if complement in seen: return [seen[complement], i]</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"This is a complement-store problem. O(n) time by trading O(n) space for O(1) lookup."</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The one-liner to memorize:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>seen = {}
+for i, num in enumerate(nums):
+    if target - num in seen: return [seen[target-num], i]
+    seen[num] = i</code></pre>
+</div>
+</div>
 </body>
-
 </html>

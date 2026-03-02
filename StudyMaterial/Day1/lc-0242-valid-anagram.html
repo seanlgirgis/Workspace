@@ -1,161 +1,206 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Guide - Valid Anagram</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            background-color: #f9f9f9;
-        }
-
-        h1,
-        h2,
-        h3 {
-            color: #2c3e50;
-        }
-
-        .diagram-container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 2rem 0;
-            overflow-x: auto;
-        }
-
-        .step {
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .char-box {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            line-height: 30px;
-            text-align: center;
-            border: 1px solid #7f8c8d;
-            margin: 0 2px;
-            font-weight: bold;
-            background: #ecf0f1;
-            border-radius: 3px;
-        }
-
-        .tally-table {
-            border-collapse: collapse;
-            margin-top: 10px;
-            min-width: 200px;
-        }
-
-        .tally-table th,
-        .tally-table td {
-            border: 1px solid #bdc3c7;
-            padding: 8px;
-            text-align: center;
-            font-family: monospace;
-        }
-
-        .tally-table th {
-            background-color: #34495e;
-            color: white;
-        }
-
-        .zero-state {
-            color: #27ae60;
-            font-weight: bold;
-        }
-
-        code {
-            background: #eee;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-family: monospace;
-        }
-
-        .insight {
-            background: #d4edda;
-            color: #155724;
-            padding: 1rem;
-            border-left: 4px solid #28a745;
-            margin: 1rem 0;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #242 — Valid Anagram — HashMap</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
 </head>
-
 <body>
-    <h1>Visual Guide: Valid Anagram (Frequency Tally)</h1>
-    <p>String S: <code>"rat"</code> | String T: <code>"car"</code></p>
+<div class="container">
+<h1>LC #242 — Valid Anagram <span class="badge">easy</span></h1>
+<p class="subtitle">HashMap Pattern &nbsp;|&nbsp; Day 1 Study Material</p>
 
-    <div class="insight">
-        <strong>The "Aha!" Moment:</strong> Don't sort. Create an array of 26 zeros. For each letter in String A, add 1.
-        For each letter in String B, subtract 1. If the final array is all zeros, it's an anagram.
-    </div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h2 style="color:#5a4f8f;font-size:1.4em;margin:16px 0 8px;">LC #242 — Valid Anagram</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Category:</strong> HashMap / Counter | <strong>Difficulty:</strong> Easy | <strong>Day 1</strong></p>
 
-    <div class="diagram-container">
-        <div class="step">
-            <h3>Initial State (Array of 26 zeros)</h3>
-            <p>Representing letters a-z:<br>
-                <code>[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0... ]</code>
-            </p>
-        </div>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
 
-        <div class="step">
-            <h3>Process "rat" (Add 1)</h3>
-            <div>
-                <span class="char-box">+r</span> <span class="char-box">+a</span> <span class="char-box">+t</span>
-            </div>
-            <table class="tally-table">
-                <tr>
-                    <th>a</th>
-                    <th>c</th>
-                    <th>r</th>
-                    <th>t</th>
-                </tr>
-                <tr>
-                    <td>+1</td>
-                    <td>0</td>
-                    <td>+1</td>
-                    <td>+1</td>
-                </tr>
-            </table>
-        </div>
+<div style="padding:15px;border-left:8px solid #667eea;background:#f0f0ff;border-radius:4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> Given two strings <code>s</code> and <code>t</code>, return <code>true</code></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">if <code>t</code> is an anagram of <code>s</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">An anagram uses the same characters in any order.</p>
+</div>
 
-        <div class="step">
-            <h3>Process "car" (Subtract 1)</h3>
-            <div>
-                <span class="char-box">-c</span> <span class="char-box">-a</span> <span class="char-box">-r</span>
-            </div>
-            <table class="tally-table">
-                <tr>
-                    <th>a</th>
-                    <th>c</th>
-                    <th>r</th>
-                    <th>t</th>
-                </tr>
-                <tr>
-                    <td class="zero-state">0</td>
-                    <td style="color:red;font-weight:bold">-1</td>
-                    <td class="zero-state">0</td>
-                    <td style="font-weight:bold">+1</td>
-                </tr>
-            </table>
-        </div>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Examples:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>"anagram", "nagaram"  → true   (same letters, rearranged)
+"rat",     "car"      → false  (different letters)
+"listen",  "silent"   → true</code></pre>
 
-        <div class="step">
-            <h3>Final Check</h3>
-            <p>Are all numbers zero? <strong>NO.</strong> (c is -1, t is 1).</p>
-            <p><strong>Return False.</strong> Not an anagram.</p>
-        </div>
-    </div>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Core Insight:</strong> Two strings are anagrams if and only if they have <strong>identical character frequency maps</strong>. Build the frequency map for both and compare — or build one and cancel-out with the other.</p>
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Mental Models</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1. The Frequency Fingerprint</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Every string has a unique fingerprint: a map of <code>{char: count}</code>. Two strings are anagrams iff their fingerprints are identical. This is the most direct mental model — build both maps, compare.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>2. The Cancel-Out Pattern</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">More elegant: increment counts for <code>s</code>, decrement for <code>t</code>. If they're anagrams, every character added by <code>s</code> is cancelled by <code>t</code>. Any non-zero count at the end means they differ. This works in a single combined map.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>3. Bounded Space Observation</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For lowercase English letters: at most 26 distinct keys in the hashmap, regardless of string length. This makes space complexity O(1) — not O(n). This is a key interview insight: "bounded alphabet = O(1) space."</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Complexity Analysis</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort comparison</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Creates sorted copies</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>Counter(s) == Counter(t)</code></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)*</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Pythonic, two passes</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Manual cancel-out</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(1)</strong>*</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Early exit on mismatch</strong></td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">*O(1) because the alphabet is bounded: at most 26 keys for lowercase English. If the alphabet were unbounded (Unicode), space would be O(k) where k = unique characters.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Why early length check matters:</strong> Strings of different lengths can never be anagrams. This check costs O(1) and avoids building the entire frequency map for clearly non-anagram inputs.</p>
+</div></div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code># Optimal — O(n) time, O(1) space (26-letter bounded hashmap)
+# Manual cancel-out — most instructive for interviews.
+
+def isAnagram(s: str, t: str) -&gt; bool:
+    if len(s) != len(t):
+        return False          # early exit — different lengths can't be anagrams
+
+    count = {}
+    for c in s:
+        count[c] = count.get(c, 0) + 1   # build frequency map for s
+    for c in t:
+        count[c] = count.get(c, 0) - 1   # cancel out with t
+        if count[c] &lt; 0:
+            return False                   # t has a char not in s (or more of it)
+
+    return True   # all counts cancelled to 0 (or 0 remaining)
+
+# Pythonic one-liner:
+# return Counter(s) == Counter(t)
+
+# Test
+print(isAnagram("anagram", "nagaram"))  # True
+print(isAnagram("rat", "car"))          # False
+print(isAnagram("a", "ab"))             # False  (length check catches this instantly)</code></pre>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Interview Q&A</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What if the input contains Unicode characters?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Counter and the hashmap approach both still work — keys are just Unicode code points instead of letters. Space complexity becomes O(k) where k is the number of unique characters, not O(1).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Why is <code>Counter</code> O(1) space for lowercase letters?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: At most 26 unique keys regardless of string length. <code>Counter("aaaaaaaaaaaa")</code> has one key: <code>{'a': 12}</code>. The map size is bounded by the alphabet, not the string length.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: Your early exit checks <code>count[c] < 0</code>. Why not <code>!= 0</code>?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: We're cancelling as we go. A count of 0 is fine (character balanced). Negative means <code>t</code> has more of this character than <code>s</code> — that's a mismatch. Positive counts remaining at the end would also mean mismatch, but the length check prevents that case (equal lengths + no negatives = all counts are 0).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q: What's the difference between <code>Counter</code> and a plain <code>dict</code> for this problem?</strong></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A: Functionally equivalent here. <code>Counter</code> handles missing keys gracefully (returns 0 for unseen keys), subtraction of two Counters drops negative/zero counts automatically. <code>Counter</code> is cleaner but knowing the manual approach shows you understand what's happening.</p>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #5a4f8f;padding:18px;border-radius:8px;"><h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">The Citi Angle</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Character frequency = data fingerprinting.</strong> The same mental model applies to data integrity checks: if you expect a set of metric names from 6,000 servers and want to verify no names changed between collection cycles, you compare frequency fingerprints.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Practical analogy:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Verify expected vs actual metric keys in telemetry batch
+expected = Counter(["cpu_pct", "mem_pct", "disk_read", "disk_write"])
+actual   = Counter([m["metric_name"] for m in batch])
+if expected != actual:
+    alert(f"Metric schema drift: {expected - actual} missing, {actual - expected} unexpected")</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview tie-in:</strong> "The frequency map pattern generalizes beyond characters — at Citi I used it to fingerprint metric schemas and catch schema drift between APM tool upgrades. Same O(n) build, O(1) comparison."</p></div>
+</div>
+<div class="card">
+<h2 style="color:#5a4f8f;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#5a4f8f;font-size:1.15em;margin:16px 0 8px;">Summary</h3>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;"></th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Value</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Pattern</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">HashMap — frequency fingerprint</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Time</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Space</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1) for lowercase English (bounded alphabet)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Key line</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>if count[c] < 0: return False</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Say in interview</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Frequency map. O(n) time, O(1) space because the alphabet is bounded at 26 characters."</td>
+</tr>
+</tbody></table>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The two patterns to know:</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code># Pattern A: Counter comparison (Pythonic)
+return Counter(s) == Counter(t)
+
+# Pattern B: Manual cancel-out (shows understanding)
+count = {}
+for c in s: count[c] = count.get(c, 0) + 1
+for c in t:
+    count[c] = count.get(c, 0) - 1
+    if count[c] &lt; 0: return False
+return True</code></pre>
+</div>
+</div>
 </body>
-
 </html>
