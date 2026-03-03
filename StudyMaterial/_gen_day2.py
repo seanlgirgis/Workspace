@@ -1089,17 +1089,24 @@ gen_html('lc-0076-minimum-window', f'{BASE}/lc-0076-minimum-window.ipynb',
 
 SQL_WINDOW_CELLS = [
 
-code('w00-setup', '''import sqlite3
+code('w00-setup', '''# Setup: DuckDB — full window function support including PERCENT_RANK, CUME_DIST
+# pip install duckdb
+import duckdb
 import pandas as pd
 
-conn = sqlite3.connect(':memory:')
-conn.executescript("""
+con = duckdb.connect()
+
+def sql_executer(sql):
+    con.execute(sql)
+
+def sql_executer_printer(sql):
+    print(con.execute(sql).df().to_string(index=False))
+
+sql_executer("""
 CREATE TABLE server_daily_summary (
-    server_id TEXT,
-    collection_date TEXT,
-    avg_cpu REAL,
-    region TEXT
-);
+    server_id VARCHAR, collection_date DATE, avg_cpu DOUBLE, region VARCHAR)
+""")
+sql_executer("""
 INSERT INTO server_daily_summary VALUES
     ('srv-01','2026-02-01',72.5,'us-east'),
     ('srv-01','2026-02-02',74.1,'us-east'),
@@ -1128,12 +1135,12 @@ INSERT INTO server_daily_summary VALUES
     ('srv-04','2026-02-04',38.2,'us-west'),
     ('srv-04','2026-02-05',36.9,'us-west'),
     ('srv-04','2026-02-06',34.4,'us-west'),
-    ('srv-04','2026-02-07',37.1,'us-west');
+    ('srv-04','2026-02-07',37.1,'us-west')
 """)
-print("Sample database ready!")
+print("DuckDB database ready!")
 print("Table: server_daily_summary (28 rows, 4 servers, 7 days)")
 print()
-print(pd.read_sql_query("SELECT * FROM server_daily_summary LIMIT 6", conn).to_string(index=False))'''),
+sql_executer_printer("SELECT * FROM server_daily_summary LIMIT 6")'''),
 
 md('w01', '''# SQL — Advanced Window Functions
 **Day 2 — SQL Module**
@@ -1167,9 +1174,8 @@ GROUP BY server_id
 ORDER BY avg_cpu_overall DESC
 """
 
-result = pd.read_sql_query(sql_ntile, conn)
 print("Server CPU Quartile Analysis (Q1=highest, Q4=lowest):")
-print(result.to_string(index=False))
+sql_executer_printer(sql_ntile)
 print()
 print("NTILE(4): divides rows into 4 equal buckets. With 4 servers, each gets 1.")
 print("With 10 servers and NTILE(4): buckets would be 3,3,2,2 rows each.")'''),
@@ -1179,36 +1185,27 @@ md('w04', '''## PERCENT_RANK and CUME_DIST
 **PERCENT_RANK:** `(rank - 1) / (total_rows - 1)` — always 0 for first row, 1 for last
 **CUME_DIST:** `rows_leq_current / total_rows` — fraction of rows ≤ current value
 
-> **Note:** PERCENT_RANK and CUME_DIST require SQLite 3.44.0+ (Nov 2023).
-> The cell below uses pandas to simulate these for maximum compatibility.'''),
+Both are fully supported in DuckDB (and PostgreSQL, Snowflake, BigQuery).
+PERCENT_RANK first row is always 0; CUME_DIST is always > 0.'''),
 
-code('w05', '''# PERCENT_RANK and CUME_DIST simulation using pandas
-# (equivalent to what you would write in production SQL)
+code('w05', '''# PERCENT_RANK and CUME_DIST — native DuckDB SQL (no pandas simulation needed)
 
-df = pd.read_sql_query("""
-    SELECT server_id, ROUND(AVG(avg_cpu),2) AS avg_cpu
-    FROM server_daily_summary GROUP BY server_id ORDER BY avg_cpu
-""", conn)
+sql_pct = """
+SELECT
+    server_id,
+    ROUND(AVG(avg_cpu), 2) AS avg_cpu,
+    ROUND(PERCENT_RANK() OVER (ORDER BY AVG(avg_cpu)) * 100, 1) AS percentile,
+    ROUND(CUME_DIST()    OVER (ORDER BY AVG(avg_cpu)) * 100, 1) AS cumulative_pct
+FROM server_daily_summary
+GROUP BY server_id
+ORDER BY avg_cpu
+"""
 
-n = len(df)
-df = df.sort_values('avg_cpu').reset_index(drop=True)
-df['rank'] = df['avg_cpu'].rank(method='min').astype(int)
-df['percent_rank'] = ((df['rank'] - 1) / (n - 1)).round(3)
-df['cume_dist'] = (df['avg_cpu'].rank(method='max') / n).round(3)
-
-print("PERCENT_RANK and CUME_DIST simulation:")
-print(df.to_string(index=False))
+print("PERCENT_RANK and CUME_DIST (native DuckDB):")
+sql_executer_printer(sql_pct)
 print()
-print("PERCENT_RANK: (rank-1)/(n-1) — first=0, last=1")
-print("CUME_DIST:    rows<=current/n — always > 0")
-print()
-print("In SQL (requires SQLite 3.44+ or PostgreSQL/Snowflake/DuckDB):")
-print("""
-SELECT server_id, avg_cpu,
-    ROUND(PERCENT_RANK() OVER (ORDER BY avg_cpu) * 100, 1) AS percentile,
-    ROUND(CUME_DIST()    OVER (ORDER BY avg_cpu) * 100, 1) AS cumulative_pct
-FROM server_daily_summary;
-""")'''),
+print("PERCENT_RANK: (rank-1)/(n-1) — srv-04 (lowest CPU) = 0%, srv-03 (highest) = 100%")
+print("CUME_DIST:    rows<=current/n — always > 0; srv-04 = 25% (1 of 4 rows)")'''),
 
 md('w06', '''## FIRST_VALUE / LAST_VALUE — Baseline Comparison
 
@@ -1237,9 +1234,8 @@ WHERE server_id IN ('srv-01','srv-03')
 ORDER BY server_id, collection_date
 """
 
-result = pd.read_sql_query(sql_first, conn)
 print("FIRST_VALUE: CPU delta from each server's day-1 baseline:")
-print(result.to_string(index=False))
+sql_executer_printer(sql_first)
 print()
 print("Positive delta_from_baseline = CPU trending up vs baseline.")
 print("srv-03 shows consistently high usage — capacity risk.")'''),
@@ -1262,7 +1258,7 @@ WINDOW w AS (
 );
 ```
 
-The `WINDOW` clause requires SQLite 3.28.0+. Supported in PostgreSQL, Snowflake, BigQuery, DuckDB.'''),
+The `WINDOW` clause is supported in DuckDB, PostgreSQL, Snowflake, BigQuery, and SQLite 3.28+.'''),
 
 code('w09', '''# Named WINDOW clause: rolling 3-day stats per server
 # Uses WINDOW w AS (...) to define once, reference multiple times
@@ -1284,9 +1280,8 @@ WINDOW w AS (
 ORDER BY collection_date
 """
 
-result = pd.read_sql_query(sql_window, conn)
 print("Named WINDOW clause: rolling 3-day stats for srv-01:")
-print(result.to_string(index=False))
+sql_executer_printer(sql_window)
 print()
 print("WINDOW w defined once, referenced 3 times (AVG, MAX, MIN).")
 print("Without WINDOW clause: copy the full OVER() 3 times — error-prone.")'''),

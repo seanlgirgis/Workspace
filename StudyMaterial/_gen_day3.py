@@ -954,29 +954,38 @@ gen_html('lc-0853-car-fleet', f'{BASE}/lc-0853-car-fleet.ipynb',
 
 SQL_JOIN_CELLS = [
 
-code('j00-setup', '''import sqlite3
+code('j00-setup', '''# Setup: DuckDB — zero config, runs in-process, full SQL dialect
+# pip install duckdb
+import duckdb
 import pandas as pd
 
-conn = sqlite3.connect(':memory:')
-conn.executescript("""
+con = duckdb.connect()
+
+def sql_executer(sql):
+    con.execute(sql)
+
+def sql_executer_printer(sql):
+    print(con.execute(sql).df().to_string(index=False))
+
+sql_executer("""
 CREATE TABLE servers (
-    server_id TEXT PRIMARY KEY,
-    region TEXT,
-    tier TEXT
-);
+    server_id VARCHAR PRIMARY KEY, region VARCHAR, tier VARCHAR)
+""")
+sql_executer("""
 INSERT INTO servers VALUES
     ('srv-01','us-east','gold'),
     ('srv-02','us-east','silver'),
     ('srv-03','us-west','gold'),
     ('srv-04','us-west','bronze'),
     ('srv-05','us-east','silver'),
-    ('srv-06','eu-west','gold');
+    ('srv-06','eu-west','gold')
+""")
 
+sql_executer("""
 CREATE TABLE daily_metrics (
-    server_id TEXT,
-    report_date TEXT,
-    avg_cpu REAL
-);
+    server_id VARCHAR, report_date DATE, avg_cpu DOUBLE)
+""")
+sql_executer("""
 INSERT INTO daily_metrics VALUES
     ('srv-01','2026-02-26',72.5),
     ('srv-01','2026-02-27',74.1),
@@ -985,14 +994,15 @@ INSERT INTO daily_metrics VALUES
     ('srv-03','2026-02-26',91.3),
     ('srv-03','2026-02-27',89.7),
     ('srv-04','2026-02-26',33.1),
-    ('srv-05','2026-02-26',55.0);
+    ('srv-05','2026-02-26',55.0)
     -- srv-06 has NO metrics (gap detection test)
     -- srv-04 and srv-05 missing 2026-02-27 (partial gap)
 """)
-print("Sample database ready!")
+
+print("DuckDB database ready!")
 print("Servers: 6 rows | daily_metrics: 8 rows")
 print()
-print(pd.read_sql_query("SELECT * FROM servers", conn).to_string(index=False))'''),
+sql_executer_printer("SELECT * FROM servers")'''),
 
 md('j01', '''# SQL — Complex JOINs
 **Day 3 — SQL Module**
@@ -1036,9 +1046,8 @@ WHERE sa.region = sb.region             -- same region
 ORDER BY cpu_gap DESC
 """
 
-result = pd.read_sql_query(sql_self, conn)
 print("Server pairs in same region with CPU gap > 20% (date: 2026-02-26):")
-print(result.to_string(index=False))
+sql_executer_printer(sql_self)
 print()
 print("Note: 'a.server_id < b.server_id' prevents (srv-01,srv-02) and (srv-02,srv-01) both appearing.")
 
@@ -1054,13 +1063,13 @@ SELECT
 FROM daily_metrics a
 JOIN daily_metrics b
     ON a.server_id = b.server_id
-    AND b.report_date = date(a.report_date, '-1 day')
+    AND b.report_date = a.report_date - INTERVAL '1 day'
 ORDER BY ABS(a.avg_cpu - b.avg_cpu) DESC
 """
 
 print()
 print("Day-over-day CPU delta (self join on server_id + date offset):")
-print(pd.read_sql_query(sql_dod, conn).to_string(index=False))'''),
+sql_executer_printer(sql_dod)'''),
 
 md('j04', '''## Anti-Join — Find Missing Records (Data Gap Detection)
 
@@ -1087,9 +1096,8 @@ LEFT JOIN daily_metrics m
 WHERE m.server_id IS NULL
 ORDER BY s.server_id
 """
-result1 = pd.read_sql_query(sql_antijoin1, conn)
 print("Anti-join (LEFT JOIN + IS NULL): servers missing 2026-02-27 data:")
-print(result1.to_string(index=False))
+sql_executer_printer(sql_antijoin1)
 
 # Method 2: NOT EXISTS (readable, safe with NULLs)
 sql_antijoin2 = """
@@ -1102,10 +1110,9 @@ WHERE NOT EXISTS (
 )
 ORDER BY server_id
 """
-result2 = pd.read_sql_query(sql_antijoin2, conn)
 print()
 print("Anti-join (NOT EXISTS): same result, different approach:")
-print(result2.to_string(index=False))
+sql_executer_printer(sql_antijoin2)
 print()
 print("Both return the same servers: those with no row in daily_metrics for 2026-02-27.")
 print("srv-06 has NO data at all. srv-04, srv-05 only have 2026-02-26 data.")'''),
@@ -1137,7 +1144,7 @@ CROSS JOIN (
 ) d
 ORDER BY s.server_id, d.report_date
 """
-all_combos = pd.read_sql_query(sql_cross, conn)
+all_combos = con.execute(sql_cross).df()
 print(f"Cross join: {len(all_combos)} (server, date) combinations")
 print(all_combos.head(8).to_string(index=False))
 
@@ -1154,7 +1161,7 @@ WHERE NOT EXISTS (
 )
 ORDER BY d.report_date, s.server_id
 """
-gaps = pd.read_sql_query(sql_gaps, conn)
+gaps = con.execute(sql_gaps).df()
 print()
 print(f"Missing data gaps ({len(gaps)} server-date combinations):")
 print(gaps.to_string(index=False))'''),

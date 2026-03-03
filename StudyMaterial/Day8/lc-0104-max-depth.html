@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #104 — Maximum Depth of Binary Tree — Trees</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #104 — Maximum Depth of Binary Tree <span class="badge">easy</span></h1>
+<p class="subtitle">Trees Pattern &nbsp;|&nbsp; Day 8 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🌳 LeetCode 104: Maximum Depth of Binary Tree</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #1a8a5a; background-color: #e8f5e9; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Depth is recursive by nature. The depth of a tree is 1 (the root)</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">plus the depth of its deeper subtree. The base case: an empty node has depth 0.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">DFS recursive solves this in 3 lines.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given the root of a binary tree, return its <strong>maximum depth</strong> — the number of nodes along</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">the longest path from the root down to the farthest leaf node.</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>    3          maxDepth = 3
+   / \
+  9  20        (path: 3 → 20 → 15 or 3 → 20 → 7)
+    /  \
+   15   7</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 0 ≤ nodes ≤ 10⁴ | -100 ≤ Node.val ≤ 100</p>
+
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Russian Dolls</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I'm a doll. My depth is 1 + the depth of my bigger half." Each call returns depth for its subtree, plus 1.</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Recursive: <code>1 + max(left, right)</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>DFS Floor Counter</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I'm exploring a cave. I count steps as I go down. At every dead-end (leaf), I report how deep I am."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Count levels on the way back up</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>BFS Level Counter</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I process the tree floor by floor. Each time I clear a floor, I increment the floor counter."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Queue + level snapshot</td>
+</tr>
+</tbody></table>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: Brute Force vs Optimal</h3>
+
+<div style="padding: 15px; border-left: 8px solid #1a8a5a; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Both approaches are O(n) time — we must visit every node.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The difference is space: brute force stores all paths (O(n × h)), while optimal DFS</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">only stores the call stack (O(h)), and BFS stores at most one level (O(w)).</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">📉 Why Brute Force Uses More Space</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Collecting all root-to-leaf paths:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>A balanced tree of depth h has ~n/2 leaves</li>
+<li>Each path has length h</li>
+<li>Total space: O(n × h) = O(n log n) for balanced, O(n²) for skewed</li>
+</ul>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute force (collect paths)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n × h)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Stores every path</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>DFS Recursive (optimal)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(h)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Call stack only</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS Iterative</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(w)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">w = max level width</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Skewed tree space comparison</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Brute force: O(n²) — each of n leaves has a path of length n</li>
+<li>DFS: O(n) — call stack grows to depth n</li>
+<li>BFS: O(1) — only 1 node per level → queue never exceeds size 1</li>
+</ul>
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Summary:</strong> Use DFS recursive for clean code (O(h) space).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Prefer BFS iterative when stack overflow is a concern (very deep unbalanced trees).</p>
+</div>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>from collections import deque
+
+def maxDepth(root: TreeNode) -&gt; int:
+    """
+    Optimal DFS Recursive — 3 lines.
+    Time: O(n)  |  Space: O(h) — recursion call stack
+    h = O(log n) balanced, O(n) worst case (skewed tree)
+    """
+    if not root:
+        return 0
+    return 1 + max(maxDepth(root.left), maxDepth(root.right))
+
+
+def maxDepth_bfs(root: TreeNode) -&gt; int:
+    """
+    BFS Iterative — counts levels explicitly.
+    Time: O(n)  |  Space: O(w) — w = max width of tree
+    Preferred when tree may be highly skewed (avoids deep recursion).
+    """
+    if not root:
+        return 0
+    queue = deque([root])
+    depth = 0
+
+    while queue:
+        depth += 1
+        for _ in range(len(queue)):      # process entire current level
+            node = queue.popleft()
+            if node.left:  queue.append(node.left)
+            if node.right: queue.append(node.right)
+
+    return depth
+
+
+# Tests
+root = build_tree([3, 9, 20, None, None, 15, 7])
+print("DFS:", maxDepth(root))       # 3
+print("BFS:", maxDepth_bfs(root))   # 3
+
+root2 = build_tree([1, None, 2])
+print("DFS:", maxDepth(root2))      # 2
+print("BFS:", maxDepth_bfs(root2))  # 2
+
+root3 = None
+print("DFS empty:", maxDepth(root3))   # 0
+</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: What is the space complexity of the recursive DFS solution?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> O(h) where h is the tree height. In the worst case (a completely skewed tree —</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">every node has only one child), h = n, giving O(n) space. For a balanced binary tree,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">h = log n, giving O(log n) space. The space is the call stack — one frame per level of recursion.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: When is BFS preferred over DFS for finding max depth?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> When the tree might be highly skewed and you're worried about stack overflow from</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">deep recursion. Python's default recursion limit is ~1,000. A skewed tree with 10,000 nodes</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">would cause a RecursionError with DFS. BFS uses an explicit queue and has no recursion limit.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">In practice, for balanced trees, DFS is more concise and equally performant.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: Why does <code>1 + max(left, right)</code> work? Walk me through the recursion.</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> For a leaf node: <code>left = maxDepth(None) = 0</code>, <code>right = maxDepth(None) = 0</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">So leaf depth = <code>1 + max(0, 0) = 1</code>. ✓</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For an internal node: it returns <code>1 (for itself) + max(depth of left subtree, depth of right subtree)</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">This correctly propagates depth bottom-up. The recursion bottoms out at None → 0.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: What's the difference between height and depth?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Often used interchangeably, but technically:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Depth of a node</strong> = distance from root to that node (root has depth 0)</li>
+<li><strong>Height of a node</strong> = length of longest path from that node to a leaf</li>
+<li><strong>Height of tree</strong> = height of root = maximum depth of any leaf</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">LeetCode #104 asks for the height of the root, which equals the maximum depth of any leaf.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The recursive formula <code>1 + max(left, right)</code> computes this correctly.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: How would you find the minimum depth of a binary tree?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> NOT <code>1 + min(left, right)</code> — that's wrong for nodes with only one child</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">(it would return the depth of the None child = 0, making everything depth 1).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Correct approach: if a node has no left child, recurse only into the right. If no right,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">only into left. If both exist, take the min. Or use BFS — the first leaf you encounter</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">is at minimum depth, so return as soon as you process a leaf.</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>def minDepth(root):
+    if not root: return 0
+    if not root.left: return 1 + minDepth(root.right)
+    if not root.right: return 1 + minDepth(root.left)
+    return 1 + min(minDepth(root.left), minDepth(root.right))</code></pre>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #1a8a5a;padding:18px;border-radius:8px;"><h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> Citi's APM infrastructure had a microservices call chain for trade processing.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Each service depended on downstream services — forming a dependency tree rooted at the</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">trade submission API. Incidents often cascaded down deep call chains.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> "What is the deepest dependency chain in our critical trading path?"</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Chains longer than 6 hops were flagged for re-architecture — deep chains increase latency</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">and make failure isolation harder.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How Max Depth Applied:</strong> The service dependency graph was a tree (after cycle detection).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The <code>maxDepth</code> algorithm ran nightly on the service registry to compute max call chain depth.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Any chain exceeding 6 was reported to the architecture team.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Practical extension:</strong> Instead of depth, compute the <strong>critical path latency</strong> —</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">each node had a <code>p99_latency_ms</code> attribute. The "depth" became the maximum sum of latencies</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">along any root-to-leaf path. This is a simple extension: <code>max_latency(node) = node.p99 + max(left, right)</code>.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview Line:</strong> *"At Citi, we modeled the microservices call graph as a tree. The max depth</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">algorithm ran nightly — chains deeper than 6 services were escalated. We later extended it to</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">sum p99 latencies instead of counting hops, which is just replacing 1 with node.latency in the</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">recursion. Same algorithm, richer signal."*</p>
+</div>
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>DFS Recursive:</strong> <code>maxDepth(root) = 0 if not root else 1 + max(left, right)</code></p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">When to Use Each Approach</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>✅ <strong>DFS Recursive</strong> — clean, 3 lines, default choice for balanced trees</li>
+<li>✅ <strong>BFS Iterative</strong> — preferred for skewed trees to avoid recursion depth limit</li>
+<li>❌ <strong>Collect all paths</strong> — O(n × h) space — never in production</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS Recursive</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(h)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS Iterative</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(w)</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Extensions (know these for follow-ups)</h4>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li><strong>Minimum depth:</strong> handle single-child nodes explicitly</li>
+<li><strong>Diameter:</strong> track <code>left_depth + right_depth</code> as a side effect</li>
+<li><strong>Path with max sum:</strong> replace 1 with node.val, handle negatives carefully</li>
+</ul>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can write DFS solution from memory in 60 seconds</li>
+<li style="margin:4px 0;">&#9744; Can explain O(h) space complexity with skewed vs balanced example</li>
+<li style="margin:4px 0;">&#9744; Can write BFS iterative version with level snapshot</li>
+<li style="margin:4px 0;">&#9744; Can connect to Citi: service dependency chain depth</li>
+<li style="margin:4px 0;">&#9744; Can extend to diameter (most common follow-up)</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>"Simplicity and clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+
+</div>
+</div>
+</body>
+</html>

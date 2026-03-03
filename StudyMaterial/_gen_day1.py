@@ -1105,24 +1105,39 @@ gen_html('lc-0347-top-k-frequent', f'{BASE}/lc-0347-top-k-frequent.ipynb',
 
 SQL_CTES_CELLS = [
 
-code('c00-setup', '''import sqlite3
+code('c00-setup', '''# Setup: DuckDB — zero config, runs in-process, full SQL dialect
+# pip install duckdb
+import duckdb
 import pandas as pd
 
-# In-memory SQLite database for all SQL cells in this notebook
-conn = sqlite3.connect(':memory:')
-conn.executescript("""
+con = duckdb.connect()   # in-memory database
+
+def sql_executer(sql):
+    """Execute DDL/DML (no result returned)."""
+    con.execute(sql)
+
+def sql_executer_printer(sql):
+    """Execute SELECT and print as formatted table."""
+    print(con.execute(sql).df().to_string(index=False))
+
+# ── Seed data: Citi-style server telemetry ───────────────────────────────────
+sql_executer("""
 CREATE TABLE employees (
-    employee_id INTEGER PRIMARY KEY, name TEXT, department_id INTEGER, salary REAL
-);
+    employee_id INTEGER PRIMARY KEY, name VARCHAR, department_id INTEGER, salary DOUBLE)
+""")
+sql_executer("""
 INSERT INTO employees VALUES
     (1,'Alice',1,95000),(2,'Bob',1,72000),(3,'Carol',1,88000),
     (4,'Dave',2,105000),(5,'Eve',2,98000),(6,'Frank',2,67000),
     (7,'Grace',3,82000),(8,'Hank',3,79000),(9,'Iris',3,91000),
-    (10,'Jack',3,55000);
+    (10,'Jack',3,55000)
+""")
 
+sql_executer("""
 CREATE TABLE telemetry_raw (
-    server_id TEXT, collection_date TEXT, cpu_utilization REAL
-);
+    server_id VARCHAR, collection_date DATE, cpu_utilization DOUBLE)
+""")
+sql_executer("""
 INSERT INTO telemetry_raw VALUES
     ('srv-01','2026-02-01',72.5),('srv-01','2026-02-01',73.1),
     ('srv-01','2026-02-02',85.2),('srv-01','2026-02-03',91.0),
@@ -1131,21 +1146,25 @@ INSERT INTO telemetry_raw VALUES
     ('srv-02','2026-02-03',50.1),('srv-02','2026-02-04',48.8),
     ('srv-02','2026-02-05',46.5),('srv-03','2026-02-01',78.0),
     ('srv-03','2026-02-02',82.3),('srv-03','2026-02-03',85.1),
-    ('srv-03','2026-02-04',88.9),('srv-03','2026-02-05',92.4);
+    ('srv-03','2026-02-04',88.9),('srv-03','2026-02-05',92.4)
+""")
 
+sql_executer("""
 CREATE TABLE employees_org (
-    employee_id INTEGER, name TEXT, manager_id INTEGER
-);
+    employee_id INTEGER, name VARCHAR, manager_id INTEGER)
+""")
+sql_executer("""
 INSERT INTO employees_org VALUES
     (1,'CEO',NULL),(2,'CTO',1),(3,'CFO',1),
     (4,'VP Engineering',2),(5,'VP Data',2),
-    (6,'Senior DE',4),(7,'Data Engineer',5),(8,'Analyst',5);
+    (6,'Senior DE',4),(7,'Data Engineer',5),(8,'Analyst',5)
 """)
-print("Sample database ready!")
+
+print("DuckDB in-memory database ready!")
 print("Tables: employees (10 rows), telemetry_raw (16 rows), employees_org (8 rows)")
 print()
 print("Preview — employees table:")
-print(pd.read_sql_query("SELECT * FROM employees LIMIT 4", conn).to_string(index=False))'''),
+sql_executer_printer("SELECT * FROM employees LIMIT 4")'''),
 
 md('c01', '''# SQL — Common Table Expressions (CTEs)
 **Day 1 — SQL Module**
@@ -1185,7 +1204,7 @@ FROM second_cte;
 - Reference earlier CTEs by name in later CTEs
 - The final `SELECT` is the actual query that returns results — it's not part of the CTE'''),
 
-code('c03', '''# Run against our sample SQLite database (conn from c00-setup)
+code('c03', '''# Run against DuckDB (con from c00-setup)
 
 sql_above_avg = """
 WITH dept_averages AS (
@@ -1206,9 +1225,8 @@ WHERE e.salary > d.avg_salary
 ORDER BY above_avg_by DESC
 """
 
-result = pd.read_sql_query(sql_above_avg, conn)
 print("Employees earning above their department average (CTE version):")
-print(result.to_string(index=False))
+sql_executer_printer(sql_above_avg)
 
 # Same result using a nested subquery — much harder to read:
 sql_subquery = """
@@ -1222,14 +1240,14 @@ ORDER BY e.salary DESC
 """
 
 print("\\nSame result, subquery version (harder to read and reuse):")
-print(pd.read_sql_query(sql_subquery, conn).to_string(index=False))'''),
+sql_executer_printer(sql_subquery)'''),
 
 md('c04', '''## Chained CTEs — Multi-Step Pipeline
 
 This is where CTEs shine: expressing a data pipeline as sequential, named steps.'''),
 
-code('c05', '''# Capacity planning pipeline — chained CTEs (conn from c00-setup)
-# SQLite-compatible: uses date('now', '-365 days') instead of INTERVAL
+code('c05', '''# Capacity planning pipeline — chained CTEs (con from c00-setup)
+# DuckDB supports INTERVAL natively
 
 sql_pipeline = """
 WITH deduped AS (
@@ -1239,7 +1257,7 @@ WITH deduped AS (
         collection_date,
         cpu_utilization
     FROM telemetry_raw
-    WHERE collection_date >= date('now', '-365 days')
+    WHERE collection_date >= CURRENT_DATE - INTERVAL '365 days'
 ),
 daily_avg AS (
     -- One row per server per day
@@ -1273,17 +1291,16 @@ FROM monthly_stats
 ORDER BY peak_30d DESC
 """
 
-result = pd.read_sql_query(sql_pipeline, conn)
 print("Capacity planning pipeline result:")
-print(result.to_string(index=False))
+sql_executer_printer(sql_pipeline)
 print("\\nTip: Test any step in isolation — replace final SELECT with: SELECT * FROM daily_avg")'''),
 
 md('c06', '''## Recursive CTEs — Walk a Hierarchy
 
 Use when data has a parent-child relationship: org charts, folder trees, alert escalation chains, network topology.'''),
 
-code('c07', '''# Recursive CTE: Walk org chart from CEO down (conn from c00-setup)
-# SQLite supports RECURSIVE CTEs. Uses substr() for indent (no LPAD in SQLite).
+code('c07', '''# Recursive CTE: Walk org chart from CEO down (con from c00-setup)
+# DuckDB supports RECURSIVE CTEs and REPEAT() for indentation
 
 sql_recursive = """
 WITH RECURSIVE org_chart AS (
@@ -1311,16 +1328,15 @@ WITH RECURSIVE org_chart AS (
     WHERE oc.org_level < 10
 )
 SELECT
-    substr('                ', 1, (org_level - 1) * 4) || name AS org_tree,
+    REPEAT(' ', (org_level - 1) * 4) || name AS org_tree,
     org_level,
     path
 FROM org_chart
 ORDER BY path
 """
 
-result = pd.read_sql_query(sql_recursive, conn)
 print("Org chart traversal (recursive CTE):")
-print(result.to_string(index=False))
+sql_executer_printer(sql_recursive)
 print("\\nNote: WHERE org_level < 10 prevents infinite loops from data cycles")'''),
 
 md('c08', '''## Interview Q&A

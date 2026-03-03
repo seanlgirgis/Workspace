@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #226 — Invert Binary Tree — Trees</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #226 — Invert Binary Tree <span class="badge">easy</span></h1>
+<p class="subtitle">Trees Pattern &nbsp;|&nbsp; Day 8 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🌳 LeetCode 226: Invert Binary Tree</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #1a8a5a; background-color: #e8f5e9; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> At every node, swap its left and right children.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Then recursively invert both subtrees. The swap at each node is independent —</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">children can be inverted in any order. 4 lines total.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Mirror a binary tree. Return its root.</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:       Output:
+    4            4
+   / \          / \
+  2   7        7   2
+ / \ / \      / \ / \
+1  3 6  9    9  6 3  1</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 0 ≤ nodes ≤ 100 | -100 ≤ Node.val ≤ 100</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">> *"Google: 90% of our engineers use the software you wrote (Homebrew),</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">> but you can't invert a binary tree on a whiteboard so f*** off." — @mxcl (Max Howell, 2015)*</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">> <em>This problem became famous because of that tweet.</em></p>
+
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Mirror Flip</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Place a vertical mirror at the root. Every node's left child becomes its right child and vice versa. This transformation applies at every node simultaneously."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Swap children, recurse both subtrees</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>DFS Post-Order</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Visit left, visit right, THEN swap. After both subtrees are inverted, swap the root's children."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Post-order: process children before action at node</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>DFS Pre-Order</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Swap first, then visit children. The swap at the root doesn't affect the recursion into children — they get correctly inverted regardless."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Pre-order: swap at node, then recurse</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>BFS Level-by-Level</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Go floor by floor. On each floor, swap every node's left and right children."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Queue, swap children on dequeue</td>
+</tr>
+</tbody></table>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis</h3>
+
+<div style="padding: 15px; border-left: 8px solid #1a8a5a; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Every approach is O(n) time — we must visit every node.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Space differs: DFS uses call stack O(h), BFS uses queue O(w).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For this problem, both are equivalent — choose based on style preference.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Style</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS Recursive</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(h)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Most concise — 4 lines</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS Iterative</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(w)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Explicit, no recursion limit concern</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS Iterative (stack)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(h)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Manual stack, avoids Python recursion</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Why O(n) is the lower bound</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;">You must visit every node to swap its children.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">A node you don't visit won't get its children swapped — producing an incorrect result.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Therefore no algorithm can do better than O(n).</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Space: h vs w</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For a balanced binary tree: h ≈ log n, w ≈ n/2 (leaf level).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">So DFS (O(log n)) is better than BFS (O(n)) for balanced trees.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For a skewed tree: h = n, w = 1. BFS (O(1)) beats DFS (O(n)).</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Default choice:</strong> DFS recursive — 4 lines, natural for trees.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Fallback to BFS if recursion depth is a concern (skewed tree with n > 1000).</p>
+</div>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def invertTree(root: TreeNode) -&gt; TreeNode:
+    """
+    DFS Recursive — the canonical solution.
+    Time: O(n)  |  Space: O(h) — call stack
+    4 lines. The swap before recursion is fine because Python evaluates
+    the right-hand side first: root.right, root.left = root.left, root.right
+    is computed as a tuple swap, then assigned.
+    """
+    if not root:
+        return None
+
+    root.left, root.right = root.right, root.left   # swap
+
+    invertTree(root.left)    # recurse into (previously right) subtree
+    invertTree(root.right)   # recurse into (previously left) subtree
+
+    return root
+
+
+def invertTree_iterative(root: TreeNode) -&gt; TreeNode:
+    """
+    DFS Iterative using explicit stack — avoids Python recursion limit.
+    Time: O(n)  |  Space: O(h)
+    """
+    if not root:
+        return None
+    stack = [root]
+    while stack:
+        node = stack.pop()
+        node.left, node.right = node.right, node.left
+        if node.left:  stack.append(node.left)
+        if node.right: stack.append(node.right)
+    return root
+
+
+# Tests
+root = build_tree([4, 2, 7, 1, 3, 6, 9])
+inverted = invertTree(build_tree([4, 2, 7, 1, 3, 6, 9]))
+print("DFS recursive:", tree_values(inverted))     # [4, 7, 2, 9, 6, 3, 1]
+
+inverted2 = invertTree_iterative(build_tree([4, 2, 7, 1, 3, 6, 9]))
+print("DFS iterative:", tree_values(inverted2))    # [4, 7, 2, 9, 6, 3, 1]
+
+# Edge cases
+print("Single node:", tree_values(invertTree(build_tree([1]))))    # [1]
+print("Two nodes:", tree_values(invertTree(build_tree([1, 2]))))   # [1, None, 2]
+</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Does the order of the recursive calls matter (left then right vs right then left)?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> No. Both calls independently invert their subtrees. When we do <code>invertTree(root.left)</code>,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">we've already swapped, so <code>root.left</code> points to what was previously <code>root.right</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Both subtrees get inverted regardless of call order. The result is identical.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Can you do this iteratively? Walk me through the stack approach.</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes — use an explicit stack instead of the call stack:</p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>stack = [root]
+while stack:
+    node = stack.pop()
+    node.left, node.right = node.right, node.left
+    if node.left:  stack.append(node.left)
+    if node.right: stack.append(node.right)</code></pre>
+<p style="color:#555;line-height:1.7;margin:8px 0;">This is DFS with an explicit stack. For BFS, use a queue and <code>popleft()</code> instead of <code>pop()</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Both produce a correctly inverted tree.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the space complexity for a perfectly balanced tree vs a skewed tree?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> For DFS recursive, space = O(h) = call stack depth.</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Balanced tree: h = log₂n → O(log n) space</li>
+<li>Skewed tree (all nodes go right): h = n → O(n) space</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For BFS: space = O(w) = max queue size = max level width.</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Balanced tree: widest level has n/2 nodes → O(n) space</li>
+<li>Skewed tree: widest level has 1 node → O(1) space</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">So DFS wins for balanced trees; BFS wins for skewed trees.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: If you invert a tree twice, do you get the original back?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes — inverting twice is a self-inverse operation (like XOR with the same value).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><code>invert(invert(tree)) == original</code>. Proof: inverting swaps left↔right at every node.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Inverting again swaps right↔left (restoring original). The operation is its own inverse.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What real-world problem does inverting a tree model?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Mirror transformations in graphics (flip a scene graph left↔right).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Reversing precedence in decision trees (swap which branch is "preferred").</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">At Citi: inverting a region priority tree — if the primary region fails, we want the</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">secondary region to take priority, which can be modeled as inverting the tree and</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">processing it the same way.</p>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #1a8a5a;padding:18px;border-radius:8px;"><h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> Citi's monitoring system had a hierarchical alert routing tree:</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">alerts started at the root (global alert manager) and routed to regions, then datacenters,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">then teams. For disaster recovery drills, the team needed to reverse the routing:</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">instead of routing FROM global TO local, they needed to route FROM local TO global</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">(escalation testing — see if the escalation path works in reverse).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How Invert Tree Applied:</strong> The routing tree was inverted so that each node's primary</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">route became its secondary, and vice versa. This was used in DR mode: local teams</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">became the decision-makers, escalating up to global only for catastrophic failures.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Implementation:</strong> The <code>invertTree</code> logic was applied to a Python dataclass tree</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">representing the alert router configuration. Each <code>RouterNode</code> had <code>primary</code> and <code>fallback</code></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">children — inverting the tree made fallbacks primary and vice versa.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview Line:</strong> *"At Citi we ran DR drills where we inverted the alert routing tree —</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">making the fallback paths primary for testing. It's the same algorithm: swap primary and</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">fallback at every node, recurse. 4 lines of code, tested quarterly."*</p>
+</div>
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Swap at every node, recurse into both children.</strong> Pre-order or post-order — both work.</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The 4-Line Solution</h4>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>def invertTree(root):
+    if not root: return None
+    root.left, root.right = root.right, root.left
+    invertTree(root.left)
+    invertTree(root.right)
+    return root</code></pre>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Related Problems (same "mirror" insight)</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Problem</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Connection</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Symmetric Tree (101)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Is the tree a mirror of itself? Use same <code>is_mirror(left, right)</code> helper</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Same Tree (100)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Are two trees identical? Same recursive structure</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Subtree of Another Tree (572)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Is tree t a subtree of s? Use "same tree" check at each node</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS Recursive</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(h)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS Iterative</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(w)</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can write the 4-line DFS solution from memory in 90 seconds</li>
+<li style="margin:4px 0;">&#9744; Can explain why call order (left before right) doesn't matter</li>
+<li style="margin:4px 0;">&#9744; Can write the BFS iterative version</li>
+<li style="margin:4px 0;">&#9744; Can extend to Symmetric Tree (same mirror logic, compare two trees)</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>"Simplicity and clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+
+</div>
+</div>
+</body>
+</html>

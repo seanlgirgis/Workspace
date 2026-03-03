@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #102 — Binary Tree Level Order Traversal — Trees</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #102 — Binary Tree Level Order Traversal <span class="badge">medium</span></h1>
+<p class="subtitle">Trees Pattern &nbsp;|&nbsp; Day 8 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🌳 LeetCode 102: Binary Tree Level Order Traversal</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #1a8a5a; background-color: #e8f5e9; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> BFS processes nodes level by level naturally.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The trick: before the inner loop, snapshot <code>level_size = len(queue)</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">This freezes the count for the current level — children added during this level</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">are counted separately next iteration.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given the root of a binary tree, return its <strong>level-order traversal</strong> as a list of lists —</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">each inner list contains the values at that depth.</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [3, 9, 20, null, null, 15, 7]
+Output: [[3], [9, 20], [15, 7]]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 0 ≤ nodes ≤ 2000 | -1000 ≤ Node.val ≤ 1000</p>
+
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Floor-by-Floor Inspection</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I inspect a building one floor at a time. Before I start a floor, I count how many doors (nodes) are on it — that count comes from how many doors I added to my list when I finished the floor above."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>level_size = len(queue)</code> before inner loop</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Wave Propagation</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Dropping a stone in water. Each ripple ring = one level. Process all nodes in the current ring before expanding the next ring."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Queue grows outward, level boundary = <code>len(queue)</code> snapshot</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>DFS + Depth Tag</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Visit every node, tag it with its depth. Group by depth tag at the end."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Slower O(n log n), but shows the relationship between DFS depth and BFS levels</td>
+</tr>
+</tbody></table>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis</h3>
+
+<div style="padding: 15px; border-left: 8px solid #1a8a5a; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> BFS is O(n) because it processes each node exactly once.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The DFS approach is O(n log n) because it sorts all (depth, val) pairs — unnecessary extra cost</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">when BFS naturally delivers nodes in level order.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">📊 Why BFS is Natural for Level Order</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">After sorting by depth (brute force), each node at depth d was already in level-order</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">within that depth IF we used left-first DFS. But we still pay O(n log n) for the sort.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">BFS avoids this: the queue maintains left-to-right order within each level automatically.</p>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Order guarantee</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS + sort</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort-dependent</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>BFS (optimal)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Natural left-to-right</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Level Snapshot Trick</h4>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Queue at start:      [3]
+After level 1:       [9, 20]     → level_size was 1, result = [[3]]
+After level 2:       [15, 7]     → level_size was 2, result = [[3],[9,20]]
+After level 3:       []          → level_size was 2, result = [[3],[9,20],[15,7]]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><code>level_size = len(queue)</code> freezes the count BEFORE the inner loop adds children.</p>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Key Rule:</strong> Snapshot len(queue) before the inner loop.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">This is the entire secret to BFS level separation.</p>
+</div>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>from collections import deque
+
+def levelOrder(root: TreeNode) -&gt; list[list[int]]:
+    """
+    BFS with level snapshot.
+    Time: O(n)  |  Space: O(n) — queue holds at most one full level
+    The critical line: level_size = len(queue) BEFORE the inner loop.
+    """
+    if not root:
+        return []
+
+    result = []
+    queue = deque([root])
+
+    while queue:
+        level_size = len(queue)     # ← snapshot: nodes at THIS level
+        level = []
+
+        for _ in range(level_size):
+            node = queue.popleft()
+            level.append(node.val)
+
+            if node.left:  queue.append(node.left)
+            if node.right: queue.append(node.right)
+
+        result.append(level)
+
+    return result
+
+
+# Tests
+root = build_tree([3, 9, 20, None, None, 15, 7])
+print("Level order:", levelOrder(root))   # [[3], [9, 20], [15, 7]]
+
+root2 = build_tree([1])
+print("Single node:", levelOrder(root2))  # [[1]]
+
+print("Empty:", levelOrder(None))         # []
+
+# Extension: return values in reverse level order (bottom-up)
+# Just return result[::-1]
+print("Reversed:", levelOrder(root)[::-1])  # [[15, 7], [9, 20], [3]]
+</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: What is the key to separating levels in BFS?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> <code>level_size = len(queue)</code> — snapshot the queue size BEFORE the inner loop.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">This tells you exactly how many nodes belong to the current level.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Children added during this loop are at the next level and get counted in the next iteration.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Without this snapshot, you cannot distinguish where one level ends and the next begins.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: What is the space complexity and what determines it?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> O(n) — the queue holds at most one full level at a time.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The widest level of a perfect binary tree of depth h contains n/2 nodes (the leaf level).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">So worst-case queue size = O(n/2) = O(n). The result list also takes O(n) total.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: BFS vs DFS for level order — when would you choose DFS?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> In languages without a built-in queue (rare). Or when recursion is required</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">by the problem's API (e.g., a tree visitor pattern). The DFS approach needs depth tracking</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">and produces O(n log n) due to sorting. In practice: always use BFS for level order.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: How do you modify this to get the RIGHT side view (LC #199)?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Capture only the LAST element of each level:</p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>if i == level_size - 1:
+    result.append(node.val)</code></pre>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Or keep the existing structure and return <code>[level[-1] for level in levelOrder(root)]</code>.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: Real-world use case for level-order traversal?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Many. Tree serialization (the format LeetCode uses is level-order).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Finding the minimum depth (first level with a leaf node).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Printing an org chart or category hierarchy tier by tier.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">At Citi: processing all servers in the same network tier together before moving to the next tier.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Any "breadth-first" problem: shortest path in an unweighted graph is BFS.</p>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #1a8a5a;padding:18px;border-radius:8px;"><h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> Citi's server fleet was organized in a hierarchy: Region → DataCenter → Rack → Server.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">This formed a tree structure. Monthly capacity reviews processed servers tier-by-tier:</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">first all regions, then all datacenters within each region, then racks, then individual servers.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How Level Order Applied:</strong> The capacity review report was essentially a level-order traversal</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">of the infrastructure tree. Each "level" in the report corresponded to a tier in the hierarchy.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Processing level-by-level enabled parallel workload distribution: all servers at the same tier</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">could be processed simultaneously (no dependency on each other).</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Practical Extension:</strong> Instead of collecting values, the algorithm collected <code>(server_id, avg_cpu)</code></p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">pairs per tier. If any tier had average CPU above 80%, the review flagged that tier before</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">drilling into the individual server level.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>SQL Equivalent:</strong> Level-order traversal of hierarchical data in SQL is a <strong>recursive CTE</strong>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The "level" in BFS corresponds to the depth column in a recursive CTE:</p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>WITH RECURSIVE hierarchy AS (
+    SELECT id, name, parent_id, 0 AS depth FROM infrastructure WHERE parent_id IS NULL
+    UNION ALL
+    SELECT c.id, c.name, c.parent_id, h.depth + 1
+    FROM infrastructure c JOIN hierarchy h ON c.parent_id = h.id
+)
+SELECT depth, name FROM hierarchy ORDER BY depth, name;</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview Line:</strong> *"At Citi, the infrastructure hierarchy was a tree. Monthly reviews</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">processed it level-by-level — all datacenters first, then racks, then servers.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">That's exactly level-order traversal. The BFS queue made it natural:</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">snapshot level size, process that tier, then the next."*</p>
+</div>
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Pattern</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>BFS + Level Snapshot:</strong> <code>level_size = len(queue)</code> before the inner loop.</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The One Rule</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Process exactly <code>level_size</code> nodes in the inner loop. The children they enqueue belong to the NEXT level.</p>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Common Variants (all use the same skeleton)</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Problem</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Change</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Level order (this)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Collect full level</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Right side view</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Take <code>level[-1]</code> only</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Zigzag level order</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Alternate append/appendleft</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Average of levels</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>sum(level) / len(level)</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Max width</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>max(max_w, level_size)</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Minimum depth</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Stop at first level with a leaf</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Complexity</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS + sort</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n log n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>BFS (optimal)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can write BFS level order from memory in 4 minutes</li>
+<li style="margin:4px 0;">&#9744; Can explain why <code>level_size = len(queue)</code> BEFORE the loop</li>
+<li style="margin:4px 0;">&#9744; Can name 3 variants that use the same skeleton</li>
+<li style="margin:4px 0;">&#9744; Can connect to Citi: tier-by-tier infrastructure processing</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>"Simplicity and clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+
+</div>
+</div>
+</body>
+</html>

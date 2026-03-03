@@ -19,12 +19,17 @@ PROBLEMS = {
     'lc-0435-non-overlapping':        (435,  'Non-overlapping Intervals',           'medium', 'Intervals', 6),
     'lc-0253-meeting-rooms-ii':       (253,  'Meeting Rooms II',                    'medium', 'Intervals', 6),
     'lc-0986-interval-intersections': (986,  'Interval List Intersections',         'medium', 'Intervals', 6),
+    'lc-0104-max-depth':              (104,  'Maximum Depth of Binary Tree',         'easy',   'Trees', 8),
+    'lc-0102-level-order':            (102,  'Binary Tree Level Order Traversal',    'medium', 'Trees', 8),
+    'lc-0226-invert-tree':            (226,  'Invert Binary Tree',                   'easy',   'Trees', 8),
+    'lc-0199-right-side-view':        (199,  'Binary Tree Right Side View',          'medium', 'Trees', 8),
 }
 
 THEMES = {
     'Binary Search': ('#f093fb', '#f5576c', '#d94f8a'),
     'Heap':          ('#fa709a', '#fee140', '#e05b85'),
     'Intervals':     ('#a18cd1', '#fbc2eb', '#8a5cc4'),
+    'Trees':         ('#43e97b', '#38f9d7', '#1a8a5a'),
 }
 
 def join_source(source):

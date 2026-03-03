@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #199 — Binary Tree Right Side View — Trees</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #fff3cd; color: #856404; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #199 — Binary Tree Right Side View <span class="badge">medium</span></h1>
+<p class="subtitle">Trees Pattern &nbsp;|&nbsp; Day 8 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🌳 LeetCode 199: Binary Tree Right Side View</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #1a8a5a; background-color: #e8f5e9; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Two equivalent approaches:</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">(1) BFS — take the LAST node at each level.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">(2) DFS right-first — the FIRST node encountered at each depth is the rightmost.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">BFS is more intuitive. DFS is more space-efficient for balanced trees.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Imagine standing to the right of a tree and looking left.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Return the values of the nodes you can see (one per level).</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input:  [1, 2, 3, null, 5, null, 4]
+Output: [1, 3, 4]
+
+    1         ← see 1
+   / \
+  2   3       ← see 3 (rightmost)
+   \   \
+    5   4     ← see 4 (rightmost)</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 0 ≤ nodes ≤ 100 | -100 ≤ Node.val ≤ 100</p>
+
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Building from the Right</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I'm standing at the right end of the building. On each floor, the rightmost office's window is the only one I can see."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS: take <code>level[-1]</code> (last per level)</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Right-First Explorer</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I always go right before left. The FIRST node I see at any depth is the rightmost one at that depth — nothing to its right was visited yet."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS right-first: <code>depth == len(result)</code> → append</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Obstructed View</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"A node is hidden if there's another node at the same depth to its right — it's blocked from view."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Equivalent to: rightmost node at each depth</td>
+</tr>
+</tbody></table>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis</h3>
+
+<div style="padding: 15px; border-left: 8px solid #1a8a5a; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Both BFS and DFS are O(n) time.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The tradeoff is space: BFS is O(w) (max level width), DFS is O(h) (tree height).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For a balanced tree: O(n) vs O(log n) — DFS wins on space.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For a skewed tree: O(1) vs O(n) — BFS wins on space.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The DFS Right-Side-View Insight</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">When traversing right-first DFS:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>The FIRST time we reach depth d, it's the rightmost node at that depth</li>
+<li>"First time at depth d" = <code>depth == len(result)</code> (result has entries 0..d-1)</li>
+</ul>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>depth=0: result=[], append 1  → result=[1]
+depth=1: result=[1], we go RIGHT first → reach 3 first → append 3 → result=[1,3]
+depth=1: then go left → reach 2, but depth 1 already in result → skip
+depth=2: result=[1,3], right subtree of 3 has 4 → append 4 → result=[1,3,4]
+depth=2: right subtree of 2 has 5 → but depth 2 already in result → skip</code></pre>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS full level order → take last</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(w)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Builds all levels</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>BFS — capture on last node</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(w)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Optimal BFS</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS right-first</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(h)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Better space for balanced trees</td>
+</tr>
+</tbody></table>
+
+<div style="padding: 10px; border-left: 8px solid #4CAF50; background-color: #f1f8f4; color: #1b5e20; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>✅ Default answer:</strong> BFS (more intuitive). Mention DFS right-first as the follow-up.</p>
+</div>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>from collections import deque
+
+def rightSideView_bfs(root: TreeNode) -&gt; list[int]:
+    """
+    BFS: capture the LAST node at each level.
+    Time: O(n)  |  Space: O(w) — max level width
+    The critical condition: i == level_size - 1 (last node at this level).
+    """
+    if not root:
+        return []
+
+    result = []
+    queue = deque([root])
+
+    while queue:
+        level_size = len(queue)
+        for i in range(level_size):
+            node = queue.popleft()
+            if i == level_size - 1:       # last node at this level — visible from right
+                result.append(node.val)
+            if node.left:  queue.append(node.left)
+            if node.right: queue.append(node.right)
+
+    return result
+
+
+def rightSideView_dfs(root: TreeNode) -&gt; list[int]:
+    """
+    DFS right-first: first node seen at each depth is the rightmost.
+    Time: O(n)  |  Space: O(h) — call stack depth
+    More space-efficient for balanced trees.
+    """
+    result = []
+
+    def dfs(node, depth):
+        if not node:
+            return
+        if depth == len(result):         # first time at this depth = rightmost node
+            result.append(node.val)
+        dfs(node.right, depth + 1)       # ← RIGHT first (critical)
+        dfs(node.left,  depth + 1)
+
+    dfs(root, 0)
+    return result
+
+
+# Tests
+root = build_tree([1, 2, 3, None, 5, None, 4])
+print("BFS:", rightSideView_bfs(root))    # [1, 3, 4]
+print("DFS:", rightSideView_dfs(root))    # [1, 3, 4]
+
+# Left side view = same code, DFS LEFT-first OR BFS take first element per level
+def leftSideView(root):
+    result = []
+    def dfs(node, depth):
+        if not node: return
+        if depth == len(result):
+            result.append(node.val)
+        dfs(node.left, depth + 1)    # LEFT first for left side view
+        dfs(node.right, depth + 1)
+    dfs(root, 0)
+    return result
+
+print("Left:", leftSideView(root))   # [1, 2, 5]
+</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: In the DFS solution, why do we traverse right BEFORE left?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> We want the FIRST node we see at each depth to be the rightmost one.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">If we go right first, at any depth d, the first node we encounter is the one farthest to the right</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">(no unvisited nodes to its right). The condition <code>depth == len(result)</code> catches only</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">the first visit to each depth — so it captures the rightmost node.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">If we went left first, we'd get the left side view instead.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: How would you modify this to get the LEFT side view?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Two changes for DFS: traverse LEFT before right (swap the two recursive calls).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">For BFS: take the FIRST element of each level instead of the last:</p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>if i == 0:           # first node = leftmost
+    result.append(node.val)</code></pre>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the space complexity of DFS vs BFS for a balanced tree of n nodes?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong></p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>DFS: O(h) = O(log n) — call stack depth equals tree height</li>
+<li>BFS: O(w) = O(n) — worst case, the leaf level has n/2 nodes in the queue</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">So DFS is more space-efficient for balanced trees. For a skewed tree (all nodes to the right),</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">DFS space becomes O(n) while BFS stays O(1). The choice depends on expected tree shape.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: What if a node exists only on the left subtree — does the right side view capture it?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes, if it's the only node at its depth. Example: root with only a left child.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The left child IS the rightmost node at depth 1, so it appears in the right side view.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">"Right side view" means the last node at each depth in BFS — if the only node at a depth</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">is on the left, it's still visible from the right.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: How does this relate to the problem of finding the "boundary" of a binary tree?</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The right side view is the right boundary of the tree.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The full boundary = left boundary (top-down, left-first, no leaves) +</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">all leaves (left to right) + right boundary (bottom-up, right-first, no leaves).</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The right side view is a simpler version: just the rightmost node at each level</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">including the root and all rightmost nodes, collected top-down.</p>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #1a8a5a;padding:18px;border-radius:8px;"><h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> Citi's network topology was a tree: Core Switch → Distribution Switches → Access Switches → Servers.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The "right side view" of this tree represented the edge-most devices at each tier —</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">the servers and switches at the outermost boundary of the network.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Practical Application:</strong> Security team needed to identify all "edge-facing" devices —</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">those at the outermost position in each network tier. These required the strictest firewall rules.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">The right side view algorithm identified exactly these devices: one per tier, the rightmost</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">(highest-index) device at each network depth.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Extended Version:</strong> Instead of just the rightmost value, the team needed all boundary devices</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">(left boundary + all leaves + right boundary). This maps to the "Binary Tree Boundary" problem —</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">but started with the right side view as the building block.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Real data:</strong> The network tree had:</p>
+<ul style="margin-left:20px;color:#555;line-height:1.8;">
+<li>Depth 0: 1 core switch</li>
+<li>Depth 1: 8 distribution switches</li>
+<li>Depth 2: 64 access switches</li>
+<li>Depth 3: ~6,000 server ports</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Right side view returned 4 values (one per depth). Security reviewed these 4 "most exposed"</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">devices as the starting point for network audit.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview Line:</strong> *"At Citi the network was a tree. The security audit started with</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">the 'rightmost device at each tier' — that's the right side view. BFS, take last element</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">per level. 10 lines of code, then extend to full boundary traversal."*</p>
+</div>
+</div>
+<div class="card" style="">
+<h2 style="color:#1a8a5a;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<h3 style="color:#1a8a5a;font-size:1.15em;margin:16px 0 8px;">🎯 Summary: Key Takeaways</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">The Two Patterns</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>BFS (intuitive):</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>if i == level_size - 1:    # last node at this level
+    result.append(node.val)</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>DFS right-first (space-efficient for balanced trees):</strong></p>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>if depth == len(result):   # first time at this depth = rightmost
+    result.append(node.val)
+dfs(node.right, depth+1)   # RIGHT before LEFT
+dfs(node.left,  depth+1)</code></pre>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Variants Using the Same Skeleton</h4>
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Problem</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Change</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Right side view (this)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS last OR DFS right-first</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Left side view</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS first OR DFS left-first</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Largest value per row</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS: track max per level</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Average per level</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS: sum/count per level</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Level order traversal</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">BFS: collect all per level</td>
+</tr>
+</tbody></table>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Interview Confidence Checklist</h4>
+<ul style="list-style:none;margin-left:10px;color:#555;">
+<li style="margin:4px 0;">&#9744; Can write BFS solution from memory in 3 minutes</li>
+<li style="margin:4px 0;">&#9744; Can write DFS right-first solution from memory</li>
+<li style="margin:4px 0;">&#9744; Can explain why right-first DFS captures rightmost node</li>
+<li style="margin:4px 0;">&#9744; Can extend to left side view (just swap left/right)</li>
+<li style="margin:4px 0;">&#9744; Can name the Citi context: edge-facing network devices</li>
+</ul>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>"Simplicity and clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+
+</div>
+</div>
+</body>
+</html>
