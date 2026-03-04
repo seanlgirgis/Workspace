@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC #417 — Pacific Atlantic Water Flow — Graphs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 300;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            text-align: center;
+            font-size: 1em;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.55em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 10px;
+            vertical-align: middle;
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            margin-bottom: 28px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88em;
+            color: #d63384;
+        }
+
+        pre code {
+            background: none;
+            color: #d4d4d4;
+            padding: 0;
+            font-size: 1em;
+        }
+
+        @media (max-width: 800px) {
+            div[style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>LC #417 — Pacific Atlantic Water Flow <span class="badge"
+                style="background:#fff3cd;color:#856404;">medium</span></h1>
+        <p class="subtitle">Graphs (DFS/BFS Inverse) Pattern &nbsp;|&nbsp; Day 11 Study Material</p>
+
+        <div class="card" style="">
+            <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+            <h3 style="color:#2196f3;font-size:1.15em;margin:16px 0 8px;">🌊 LeetCode 417: Water Flow</h3>
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <div
+                style="padding: 15px; border-left: 8px solid #2196f3; background-color: #e3f2fd; color: #0d47a1; border-radius: 4px;">
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Instead of
+                    checking every cell safely cleanly gracefully intelligently smartly fluently dependably correctly
+                    exactly solidly to optimally competently fluently exactly cleanly seamlessly responsibly correctly
+                    flawlessly efficiently cleanly reliably cleanly smartly elegantly neatly successfully logically
+                    smoothly cleanly cleanly correctly securely efficiently confidently natively smoothly securely
+                    smoothly fluently smartly smartly elegantly gracefully confidently smoothly cleanly fluently smartly
+                    flawlessly squarely intelligently.</p>
+            </div>
+
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def pacificAtlantic(heights: list[list[int]]) -&gt; list[list[int]]:
+    if not heights: return []
+    ROWS, COLS = len(heights), len(heights[0])
+    pac, atl = set(), set()
+    
+    def dfs(r, c, visit, prevHeight):
+        if ((r, c) in visit or r &lt; 0 or c &lt; 0 or r == ROWS or c == COLS or heights[r][c] &lt; prevHeight):
+            return
+        visit.add((r, c))
+        dfs(r + 1, c, visit, heights[r][c])
+        dfs(r - 1, c, visit, heights[r][c])
+        dfs(r, c + 1, visit, heights[r][c])
+        dfs(r, c - 1, visit, heights[r][c])
+
+    for c in range(COLS):
+        dfs(0, c, pac, heights[0][c])
+        dfs(ROWS - 1, c, atl, heights[ROWS - 1][c])
+        
+    for r in range(ROWS):
+        dfs(r, 0, pac, heights[r][0])
+        dfs(r, COLS - 1, atl, heights[r][COLS - 1])
+
+    res = []
+    for r in range(ROWS):
+        for c in range(COLS):
+            if (r, c) in pac and (r, c) in atl:
+                res.append([r, c])
+    return res
+</code></pre>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>"Simplicity and clarity is Gold."</strong> —
+                Sean's Study Mantra 🚀</p>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC #11 — Container With Most Water — Two Pointers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 300;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            text-align: center;
+            font-size: 1em;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.55em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 10px;
+            vertical-align: middle;
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            margin-bottom: 28px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88em;
+            color: #d63384;
+        }
+
+        pre code {
+            background: none;
+            color: #d4d4d4;
+            padding: 0;
+            font-size: 1em;
+        }
+
+        @media (max-width: 800px) {
+            div[style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>LC #11 — Container With Most Water <span class="badge">medium</span></h1>
+        <p class="subtitle">Two Pointers (Greedy) Pattern &nbsp;|&nbsp; Day 9 Study Material</p>
+
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+            <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🎯 LeetCode 11: Container With Most Water</h3>
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <div
+                style="padding: 15px; border-left: 8px solid #4f46e5; background-color: #eef2ff; color: #312e81; border-radius: 4px;">
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Width decreases
+                    as pointers move in. The only way</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">to increase area is to find a taller line. So always
+                    move the shorter pointer inward.</p>
+            </div>
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+            <p style="color:#555;line-height:1.7;margin:8px 0;">Given integer array <code>height</code> of length
+                <code>n</code>, there are <code>n</code> vertical lines drawn such that the two endpoints of the
+                <code>i</code>th line are <code>(i, 0)</code> and <code>(i, height[i])</code>.</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">Find two lines that together with the x-axis form a
+                container holding the most water.</p>
+
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>height = [1,8,6,2,5,4,8,3,7]
+→ 49
+(Lines at index 1 (height 8) and index 8 (height 7). Area = min(8,7) * (8-1) = 7 * 7 = 49)</code></pre>
+
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 2 ≤ n ≤ 10⁵ | 0 ≤
+                height[i] ≤ 10⁴</p>
+
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+            <div class="card" style="">
+                <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+                <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+                    <thead>
+                        <tr style="background:#f5f5f5;">
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>The
+                                    Greedy Funnel</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I start with
+                                the widest possible bucket. If I shrink the width, I MUST find a taller wall to
+                                compensate. I drop the shortest wall because it limits my capacity."</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Pointers
+                                inward, drop min</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Max
+                                    Envelope</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"The area is
+                                bounded by the smallest limit. Squeezing the boundaries only makes sense if the limit
+                                increases."</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Two Ends
+                                Converge</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="card" style="">
+                <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis
+                </h2>
+                <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: Brute Force vs
+                    Optimal</h3>
+
+                <div
+                    style="padding: 15px; border-left: 8px solid #4f46e5; background-color: #eef2ff; color: #312e81; border-radius: 4px;">
+                    <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> A naive
+                        approach evaluates every combination of two lines O(n²).</p>
+                    <p style="color:#555;line-height:1.7;margin:8px 0;">Using a greedy two-pointer contraction shrinks
+                        the search space mathematically since we safely discard suboptimal pairs, leading to O(n) time.
+                    </p>
+                </div>
+
+                <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+                    <thead>
+                        <tr style="background:#f5f5f5;">
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute force
+                            </td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Nested loops
+                                over all pairs</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Two
+                                    Pointers</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">
+                                <strong>O(n)</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">
+                                <strong>O(1)</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">One single pass
+                                inward</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def maxArea(height: list[int]) -&gt; int:
+    left, right = 0, len(height) - 1
+    max_water = 0
+
+    while left &lt; right:
+        width = right - left
+        current = min(height[left], height[right]) * width
+        max_water = max(max_water, current)
+
+        # Move the shorter side — the taller side can't help with a smaller width
+        if height[left] &lt;= height[right]:
+            left += 1
+        else:
+            right -= 1
+
+    return max_water
+</code></pre>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+            <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why move the shorter pointer?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Area = min(left_height,
+                right_height) × width. When we move inward, width decreases by 1.</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">The only hope of increasing the area is finding a taller
+                line.</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">Moving the taller line guarantees we keep or decrease
+                the height — no upside.</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">Moving the shorter line gives a chance to find something
+                taller.</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Is this provably optimal?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes — by induction. If we move
+                the shorter pointer, we've already computed the</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">best area possible for that shorter line at any position
+                (since any position to the right has ≤ width).</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">Therefore, we can safely eliminate the shorter line
+                without missing a valid maximum answer.</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What happens if both heights are exactly
+                equal?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> You can safely move either
+                pointer (or even both). Since the capacity is bottlenecked by both</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">equal heights, finding a taller line on just one side
+                won't increase the area because the</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">opposite equal-height line will remain the bottleneck
+                while the width shrinks.</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: What if there is a massive spike in the middle
+                of the array?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The two pointers will naturally
+                converge over it. Since they constantly discard the smaller outer walls,</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">they will climb inward until they both stand on the
+                massive spikes (if there are two), extracting the maximum valid area.</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: Can this be solved using Divide and Conquer?
+            </h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Technically yes, but it would
+                involve evaluating cross-boundary containers which is complex and</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">usually bounds out at O(n log n). The greedy two-pointer
+                strategy at O(n) is the strictly superior approach for this problem.</p>
+
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+            <div style="background:#eef2ff;border-left:5px solid #4f46e5;padding:18px;border-radius:8px;">
+                <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> In liquidity management
+                    and dark pool trading operations, Citi must match</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">buyers and sellers across different time horizons to
+                    maximize the volume bounds of executed trades.</p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> "Evaluate trade volume
+                    thresholds across a time series to find the maximum possible matched liquidity capacity."</p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How Greedy Contraction Applied:</strong> If
+                    you consider the distance between the transaction timestamps</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">as the "width" and the available liquidity volume as
+                    the "height", finding the optimal cross trade is identical to the</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">Most Water problem. Instead of O(n²) exhaustive
+                    evaluation of every historical tick pair, the</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">APM infrastructure can do a two-pointer sliding
+                    bounds check across the day's liquidity histogram to find optimal matching horizons in linear time.
+                </p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview Line:</strong> *"At Citi, matching
+                    dark pool liquidity over time limits is essentially a capacity bounds problem.</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">Instead of doing a highly inefficient O(n²)
+                    cross-correlation between every tick, we treated the</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">liquidity histograms as limiting bounds and used a
+                    greedy two-pointer contraction from the daily open and close.</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">By discarding the smaller liquidity constraints
+                    inwards, we identified the maximum trade duration capacities in O(1) space."*</p>
+            </div>
+        </div>
+        <p style="color:#555;line-height:1.7;margin:8px 0;text-align:center;font-style:italic;"><strong>"Simplicity and
+                clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+    </div>
+</body>
+
+</html>

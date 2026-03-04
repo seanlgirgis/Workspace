@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #167 — Two Sum II — Two Pointers</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #e0e7ff; color: #3730a3; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #167 — Two Sum II <span class="badge">medium</span></h1>
+<p class="subtitle">Two Pointers Pattern &nbsp;|&nbsp; Day 9 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🎯 LeetCode 167: Two Sum II (Input Array is Sorted)</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #4f46e5; background-color: #eef2ff; color: #312e81; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Two pointers is the pattern for problems on sorted arrays</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">where you need pairs. The trick: sorting creates structure. From a sorted array,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">you can move pointers intelligently — left moves right to increase sum, right moves left to decrease.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">Given a <strong>sorted</strong> array <code>numbers</code> (1-indexed), find two numbers that add to <code>target</code>.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Return <code>[index1, index2]</code> (1-indexed). Use only O(1) extra space.</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>numbers = [2, 7, 11, 15]
+target = 9
+→ [1, 2]</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 2 ≤ numbers.length ≤ 3 * 10⁴ | -1000 ≤ numbers[i] ≤ 1000</p>
+
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>The Squeeze</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I start at the extremes. If the pairing is too heavy, I shrink the max. If too light, I raise the min."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Two Ends Converge</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Hash Map Fallback</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I record what I've seen. If the complement exists in my record, I found the pair."</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Store complements in map O(n) space</td>
+</tr>
+</tbody></table>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: Brute Force vs Optimal</h3>
+
+<div style="padding: 15px; border-left: 8px solid #4f46e5; background-color: #eef2ff; color: #312e81; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> A sorted structure eliminates the need to look back.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Instead of O(n) space for a HashMap, we use two variables for pointers getting O(1) space.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute force</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Nested loops</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Hash Map</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Suboptimal memory</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Two Pointers</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(1)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Leverages sorted order</td>
+</tr>
+</tbody></table>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def twoSum(numbers: list[int], target: int) -&gt; list[int]:
+    """
+    Optimal Two Pointers
+    Time: O(n)  |  Space: O(1)
+    """
+    left, right = 0, len(numbers) - 1
+
+    while left &lt; right:
+        total = numbers[left] + numbers[right]
+        if total == target:
+            return [left + 1, right + 1]    # 1-indexed
+        elif total &lt; target:
+            left += 1    # need bigger sum → move left right
+        else:
+            right -= 1   # need smaller sum → move right left
+
+    return []   # guaranteed to have solution per problem
+</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why does this work?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The array is sorted. If sum < target, the only option to increase the sum is to use</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">a larger value, so we move the left pointer to the right. If sum > target, we need a smaller value,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">so we move the right pointer to the left. We never skip a valid pair.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Why is this O(n) instead of O(n²)?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Each pointer moves at most n steps total. There are no nested loops — every</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">iteration eliminates at least one element from consideration. The loop runs at most <i>n/2</i> times.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What if the array has duplicates?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The problem states there is exactly one solution. If duplicates existed and we needed</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">all unique pairs, we would just loop while <code>numbers[left] == numbers[left - 1]</code> to skip duplicates</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">after finding a match, maintaining O(n) runtime.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: Can we use a HashMap instead of Two Pointers?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes, the standard Two Sum O(n) time/space works perfectly fine here.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">However, the Two Pointers approach achieves O(1) space, making it strictly better</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">for already sorted arrays. We want to avoid allocating extra memory when possible.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What happens if the array is not sorted?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The Two Pointers approach relies on the monotonic property of the array.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">If unsorted, we would have to sort it (O(n log n) time) or fallback to a HashMap</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">(O(n) time, O(n) space). Sorting destroys the original relative indices unless stored.</p>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#eef2ff;border-left:5px solid #4f46e5;padding:18px;border-radius:8px;"><h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> In a high-frequency trading desk at Citi, risk exposure metrics</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">are constantly calculated. When evaluating risk offset opportunities, the APM system</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">maintained sorted vectors of specific derivatives exposures.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> "Find specific asset pairs that exactly offset a target risk margin."</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How Two Pointers Applied:</strong> Given millions of sorted exposure margins, using a</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">HashMap to find offsetting pairs (<code>x + y = target</code>) consumed massive ephemeral memory</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">and triggered garbage collection pauses. Changing the search algorithm to a two-pointer</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">scan dynamically collapsed the memory overhead to zero, making it 10x faster mechanically.</p>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview Line:</strong> *"At Citi, we often dealt with sorted arrays of risk bounds.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">When searching for complementary off-setting positions, instead of hashing millions of</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">entries and taking an O(n) memory hit, we used a two-pointer sweep to achieve O(1) memory,</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">substantially reducing GC latency spikes on critical trading infrastructure."*</p>
+</div>
+</div>
+<p style="color:#555;line-height:1.7;margin:8px 0;text-align:center;font-style:italic;"><strong>"Simplicity and clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC #42 — Trapping Rain Water — Two Pointers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 300;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            text-align: center;
+            font-size: 1em;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.55em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 10px;
+            vertical-align: middle;
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            margin-bottom: 28px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88em;
+            color: #d63384;
+        }
+
+        pre code {
+            background: none;
+            color: #d4d4d4;
+            padding: 0;
+            font-size: 1em;
+        }
+
+        @media (max-width: 800px) {
+            div[style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>LC #42 — Trapping Rain Water <span class="badge">hard</span></h1>
+        <p class="subtitle">Two Pointers (Prefix Max) Pattern &nbsp;|&nbsp; Day 9 Study Material</p>
+
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+            <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🎯 LeetCode 42: Trapping Rain Water</h3>
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <div
+                style="padding: 15px; border-left: 8px solid #4f46e5; background-color: #eef2ff; color: #312e81; border-radius: 4px;">
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Water at each
+                    position = min(max height to the left, max height to the right) - height at position.</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">Instead of computing full prefix arrays, use Two
+                    pointers to track these maximums inward in O(1) space.</p>
+            </div>
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+            <p style="color:#555;line-height:1.7;margin:8px 0;">Given <code>n</code> non-negative integers representing
+                an elevation map</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">where the width of each bar is <code>1</code>, compute
+                how much water it can trap after raining.</p>
+
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>height = [0,1,0,2,1,0,1,3,2,1,2,1]
+→ 6</code></pre>
+
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 ≤ n ≤ 2 * 10⁴ | 0 ≤
+                height[i] ≤ 10⁵</p>
+
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+            <div class="card" style="">
+                <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+                <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+                    <thead>
+                        <tr style="background:#f5f5f5;">
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>The
+                                    Safe Bet</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"If I know
+                                there's a huge wall somewhere on my right, my water level is entirely bottlenecked by
+                                the tallest wall I've seen on my left. I don't need to know exactly how tall the right
+                                wall is, just that it's taller than my left cap."</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Two Pointers
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">
+                                <strong>Prefix/Suffix Bounds</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Create a map
+                                of the absolute highest peak looking left, and the highest looking right. The water
+                                above me is the minimum of those two peaks minus my ground elevation."</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Dynamic
+                                Programming (Arrays)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="card" style="">
+                <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis
+                </h2>
+                <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: DP Array vs Two
+                    Pointers</h3>
+
+                <div
+                    style="padding: 15px; border-left: 8px solid #4f46e5; background-color: #eef2ff; color: #312e81; border-radius: 4px;">
+                    <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Precomputing
+                        <code>left_max</code> and <code>right_max</code> arrays takes O(n) space.</p>
+                    <p style="color:#555;line-height:1.7;margin:8px 0;">By using two pointers advancing inward, we track
+                        the running maximums on the fly, reducing memory overhead essentially to zero.</p>
+                </div>
+
+                <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+                    <thead>
+                        <tr style="background:#f5f5f5;">
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Prefix/Suffix
+                                Max (DP)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Requires 3
+                                complete array scans</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Two
+                                    Pointers</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">
+                                <strong>O(n)</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">
+                                <strong>O(1)</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">One scan
+                                inward, highly efficient</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def trap(height: list[int]) -&gt; int:
+    left, right = 0, len(height) - 1
+    left_max = right_max = 0
+    water = 0
+
+    while left &lt; right:
+        if height[left] &lt;= height[right]:
+            # Right side is at least as tall \u2014 left_max determines water level
+            left_max = max(left_max, height[left])
+            water += left_max - height[left]
+            left += 1
+        else:
+            # Left side is taller \u2014 right_max determines water level
+            right_max = max(right_max, height[right])
+            water += right_max - height[right]
+            right -= 1
+
+    return water
+</code></pre>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+            <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why does the two-pointer approach work?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> When
+                <code>height[left] <= height[right]</code>, the right boundary is guaranteed ≥ <code>left_max</code>.
+            </p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">So water at <code>left</code> is exactly
+                <code>left_max - height[left]</code>. We don't need to know the actual right max — just that it's ≥
+                left_max.</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: What's the O(n) space solution?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Precompute
+                <code>prefix_max</code> (left max at each index) and <code>suffix_max</code> (right max) into full
+                arrays,</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">then iterate once doing
+                <code>min(prefix_max, suffix_max) - height</code>. Two pointers does the exact same logic in O(1) space.
+            </p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: How does this relate to data engineering?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> "Windowed capacity headroom" —
+                for each time period, what is the effective available capacity</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">bounded by upstream and downstream constraints? The
+                algorithm isolates the true restricting bottleneck.</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: What happens if the array is continuously
+                increasing or decreasing?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> No water is trapped. The
+                pointer on the shorter side will just continually move inward,</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">updating its max but never finding a valley. For
+                example, in <code>[1,2,3,4]</code>, left moves rightward, <code>left_max</code> updates, but difference
+                is always 0.</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: Could you solve this with a Monotonic Stack
+                instead?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes. A decreasing monotonic
+                stack can catch valleys and compute horizontally-bounded water pools</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">when a taller wall is encountered. However, it takes
+                O(n) space for the stack, making the Two Pointers approach strictly better for space.</p>
+
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+            <div style="background:#eef2ff;border-left:5px solid #4f46e5;padding:18px;border-radius:8px;">
+                <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> In data engineering for
+                    global transaction routing, message queues often suffer</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">from bottleneck constraints generated by upstream
+                    ingestion bursts and downstream processing caps.</p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> "Calculate the
+                    Windowed Capacity Headroom — how much temporary buffer memory</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">is actually required safely absorb spikes between
+                    variable structural limits."</p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How Two Pointers Applied:</strong>
+                    Evaluating "water trapped" is physically equivalent to measuring trapped buffer</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">states. By knowing that the left-side ingestion
+                    firewall (`left_max`) is smaller than the right-side processing limit,</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">we definitively know the queue will only fill up to
+                    the `left_max`. A two-pointer approach</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">traverses millions of queue metrics in real-time
+                    O(n) without allocating heavy O(n) metric arrays, saving enormous memory overhead on the APM nodes.
+                </p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview Line:</strong> *"When building
+                    monitoring systems for Citi's transaction queues, we needed to calculate</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">the effective buffer backpressure (like trapping
+                    water between highs and lows). Allocating full prefix maps for millions</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">of nodes was crashing our observability agents. I
+                    implemented an inward two-pointer pass that tracked</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">the definitive bottlenecks at the edges, calculating
+                    the exact capacity headroom in O(1) space."*</p>
+            </div>
+        </div>
+        <p style="color:#555;line-height:1.7;margin:8px 0;text-align:center;font-style:italic;"><strong>"Simplicity and
+                clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+    </div>
+</body>
+
+</html>

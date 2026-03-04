@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC #15 — 3Sum — Two Pointers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 300;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            text-align: center;
+            font-size: 1em;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.55em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 10px;
+            vertical-align: middle;
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            margin-bottom: 28px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88em;
+            color: #d63384;
+        }
+
+        pre code {
+            background: none;
+            color: #d4d4d4;
+            padding: 0;
+            font-size: 1em;
+        }
+
+        @media (max-width: 800px) {
+            div[style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>LC #15 — 3Sum <span class="badge">medium</span></h1>
+        <p class="subtitle">Two Pointers + Sort Pattern &nbsp;|&nbsp; Day 9 Study Material</p>
+
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+            <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🎯 LeetCode 15: 3Sum</h3>
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <div
+                style="padding: 15px; border-left: 8px solid #4f46e5; background-color: #eef2ff; color: #312e81; border-radius: 4px;">
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Fix one element
+                    with a for loop. Then solve Two Sum</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">for the remaining two elements with two pointers. By
+                    sorting the array first,</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">you can cleanly skip duplicate values and maintain
+                    an internal structure to easily converge on 0.</p>
+            </div>
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+            <p style="color:#555;line-height:1.7;margin:8px 0;">Given integer array <code>nums</code>, return all
+                triplets <code>[nums[i], nums[j], nums[k]]</code> where</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><code>i != j != k</code> and
+                <code>nums[i] + nums[j] + nums[k] == 0</code>. No duplicate triplets.</p>
+
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>[-1, 0, 1, 2, -1, -4]
+→ [[-1,-1,2], [-1,0,1]]</code></pre>
+
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 3 ≤ nums.length ≤ 3000 |
+                -10⁵ ≤ nums[i] ≤ 10⁵</p>
+
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+            <div class="card" style="">
+                <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+                <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+                    <thead>
+                        <tr style="background:#f5f5f5;">
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>The
+                                    Fixed Anchor</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"I pick one
+                                number. Then I tell my two friends (pointers) to find the remaining sum that offsets my
+                                piece."</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Loop + Two
+                                Pointers</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Hash
+                                    Map Fallback</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">"Fix one, hash
+                                the rest. But returning unique triplets gets incredibly messy and memory-intensive."
+                            </td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n) space
+                                overhead</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="card" style="">
+                <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis
+                </h2>
+                <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: Brute Force vs
+                    Optimal</h3>
+
+                <div
+                    style="padding: 15px; border-left: 8px solid #4f46e5; background-color: #eef2ff; color: #312e81; border-radius: 4px;">
+                    <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> A naive
+                        three-loop approach takes O(n³).</p>
+                    <p style="color:#555;line-height:1.7;margin:8px 0;">By sorting the array (O(n log n)), we can fix
+                        the first number and use a linear O(n) scan for the remaining two. This bounds total time to
+                        O(n²).</p>
+                </div>
+
+                <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+                    <thead>
+                        <tr style="background:#f5f5f5;">
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute force
+                            </td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n³)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(1)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Triple nested
+                                loops</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Hash Map + Set
+                            </td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n²)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Deduplicating
+                                takes extra space</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Two
+                                    Pointers + Sort</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">
+                                <strong>O(n²)</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">
+                                <strong>O(1)</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sort space is
+                                O(1) or O(log n)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def threeSum(nums: list[int]) -&gt; list[list[int]]:
+    nums.sort()
+    result = []
+
+    for i in range(len(nums) - 2):
+        # Skip duplicate values for the fixed element
+        if i &gt; 0 and nums[i] == nums[i - 1]:
+            continue
+        if nums[i] &gt; 0:      # sorted: if nums[i] &gt; 0, no triplet sums to 0
+            break
+
+        left, right = i + 1, len(nums) - 1
+        while left &lt; right:
+            total = nums[i] + nums[left] + nums[right]
+            if total == 0:
+                result.append([nums[i], nums[left], nums[right]])
+                # Skip duplicates for left and right
+                while left &lt; right and nums[left] == nums[left + 1]:  left += 1
+                while left &lt; right and nums[right] == nums[right - 1]: right -= 1
+                left += 1
+                right -= 1
+            elif total &lt; 0:
+                left += 1
+            else:
+                right -= 1
+
+    return result
+</code></pre>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+            <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: Why sort first?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Sorting lets us use two
+                pointers (sorted structure) AND skip duplicates easily (equal adjacent values).</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Why O(n²) and not O(n)?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The outer loop is O(n); the
+                inner two-pointer scan is O(n). So O(n) × O(n) = O(n²).</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">Cannot do better without hashing which increases space.
+            </p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: What is the "early exit" optimization?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong>
+                <code>if nums[i] > 0: break</code> — if the smallest remaining element is positive,</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">the sum can only be positive. No valid triplet possible.
+            </p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: How does the algorithm avoid returning
+                duplicate triplets?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> It skips duplicates at three
+                points: when choosing the first fixed element <code>nums[i]</code>,</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">and when moving the <code>left</code> and
+                <code>right</code> pointers after finding a valid triplet by checking</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">if the next element equals the previous element.</p>
+
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What happens if all elements in the array are
+                zeroes?</h4>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> The array is sorted to
+                <code>[0,0,0,...]</code>. The first iteration finds `0+0+0 = 0`, adds `[0,0,0]`,</p>
+            <p style="color:#555;line-height:1.7;margin:8px 0;">then skips all the remaining zeroes using the duplicate
+                skipping logic, returning exactly one `[0,0,0]`.</p>
+
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#4f46e5;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+            <div style="background:#eef2ff;border-left:5px solid #4f46e5;padding:18px;border-radius:8px;">
+                <h3 style="color:#4f46e5;font-size:1.15em;margin:16px 0 8px;">💼 The Citi Narrative</h3>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> In a global settlement
+                    system, a transaction often involves</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">tripartite reconciliation — checking client fiat,
+                    broker margin, and clearinghouse ledgers.</p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Problem:</strong> "Find specific
+                    erroneous three-way transactions that exactly sum to 0 balance."</p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>How Two Pointers Applied:</strong> A
+                    reconciliation engine faced with resolving unexplainable</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">balance deviations must scan massive logs. By
+                    sorting daily cash ledgers, selecting an anchor,</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">and doing an O(n) sweep for the corresponding
+                    missing offsets, it reduces processing from O(n³) brute-force</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">combinatorics down to O(n²), making it feasible to
+                    finish before the morning market opens.</p>
+
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Interview Line:</strong> *"At Citi, solving
+                    missing multi-leg transactions required combinatorial</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">record searches. Rather than grinding the server
+                    down with O(n³) SQL joins on millions of</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">rows, we sorted isolated discrepancy logs in-memory
+                    and used fixed anchors with two point sweeps to</p>
+                <p style="color:#555;line-height:1.7;margin:8px 0;">find all triplicate combinations summing to zero.
+                    This prevented scaling bottlenecks during audits."*</p>
+            </div>
+        </div>
+        <p style="color:#555;line-height:1.7;margin:8px 0;text-align:center;font-style:italic;"><strong>"Simplicity and
+                clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+    </div>
+</body>
+
+</html>

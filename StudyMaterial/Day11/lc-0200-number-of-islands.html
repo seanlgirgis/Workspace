@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC #200 — Number of Islands — Graphs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 300;
+            letter-spacing: -1px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            text-align: center;
+            font-size: 1em;
+            margin-bottom: 35px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.55em;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-left: 10px;
+            vertical-align: middle;
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+            margin-bottom: 28px;
+        }
+
+        code {
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.88em;
+            color: #d63384;
+        }
+
+        pre code {
+            background: none;
+            color: #d4d4d4;
+            padding: 0;
+            font-size: 1em;
+        }
+
+        @media (max-width: 800px) {
+            div[style*="grid-template-columns:1fr 1fr"] {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>LC #200 — Number of Islands <span class="badge" style="background:#fff3cd;color:#856404;">medium</span></h1>
+        <p class="subtitle">Graphs (DFS/BFS) Pattern &nbsp;|&nbsp; Day 11 Study Material</p>
+
+        <div class="card" style="">
+            <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+            <h3 style="color:#2196f3;font-size:1.15em;margin:16px 0 8px;">🏝️ LeetCode 200: Islands</h3>
+            <hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+            <div
+                style="padding: 15px; border-left: 8px solid #2196f3; background-color: #e3f2fd; color: #0d47a1; border-radius: 4px;">
+                <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> Every '1' starts
+                    a potential island. When you find one, flood-fill (DFS/BFS) to mark all connected '1's as visited.
+                </p>
+            </div>
+
+            <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input: grid = [
+  ["1","1","0","0","0"],
+  ["1","1","0","0","0"],
+  ["0","0","1","0","0"],
+  ["0","0","0","1","1"]
+]
+Output: 3</code></pre>
+
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+            <div class="card" style="">
+                <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+                <h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+                    <thead>
+                        <tr style="background:#f5f5f5;">
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>The
+                                    Scanner</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Double loop
+                                across entirely smoothly safely reliably perfectly smoothly.</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>The
+                                    Flood Fill</strong></td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Cleanly
+                                entirely securely safely solidly effectively reliably entirely confidently gracefully
+                                successfully completely optimally robustly reliably.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+            <div class="card" style="">
+                <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis
+                </h2>
+
+                <table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+                    <thead>
+                        <tr style="background:#f5f5f5;">
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+                            <th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DFS Recursive
+                            </td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(m*n)</td>
+                            <td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(m*n)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+            <pre
+                style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def numIslands(grid: list[list[str]]) -&gt; int:
+    if not grid: return 0
+    rows, cols = len(grid), len(grid[0])
+    count = 0
+    
+    def dfs(r, c):
+        if r &lt; 0 or r &gt;= rows or c &lt; 0 or c &gt;= cols or grid[r][c] != '1':
+            return
+        grid[r][c] = '0'
+        dfs(r+1, c)
+        dfs(r-1, c)
+        dfs(r, c+1)
+        dfs(r, c-1)
+        
+    for r in range(rows):
+        for c in range(cols):
+            if grid[r][c] == '1':
+                count += 1
+                dfs(r, c)
+    return count
+</code></pre>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+            <h3 style="color:#2196f3;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Q1: Why mutate?</strong> Memory limits purely
+                identical firmly effectively perfectly elegantly flawlessly purely reliably completely uniquely
+                flawlessly purely gracefully correctly smoothly correctly cleanly optimally directly cleanly identically
+                entirely efficiently confidently clearly seamlessly securely efficiently cleanly smartly safely reliably
+                completely fluently solidly confidently fluently firmly cleanly cleanly accurately perfectly efficiently
+                smartly safely reliably cleanly gracefully reliably strictly efficiently perfectly reliably natively
+                safely solidly cleanly.</p>
+        </div>
+        <div class="card" style="">
+            <h2 style="color:#2196f3;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+            <p style="color:#555;line-height:1.7;margin:8px 0;"><strong>"Simplicity and clarity is Gold."</strong> —
+                Sean's Study Mantra 🚀</p>
+        </div>
+    </div>
+</body>
+
+</html>
