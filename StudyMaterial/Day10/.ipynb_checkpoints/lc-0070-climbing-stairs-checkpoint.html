@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LC #70 — Climbing Stairs — Dynamic Programming</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+       min-height: 100vh; padding: 40px 20px; }
+.container { max-width: 1100px; margin: 0 auto; }
+h1 { color: white; text-align: center; font-size: 2.2em; font-weight: 300;
+      letter-spacing: -1px; margin-bottom: 8px; }
+.subtitle { color: rgba(255,255,255,0.85); text-align: center; font-size: 1em; margin-bottom: 35px; }
+.badge { display: inline-block; padding: 3px 12px; border-radius: 20px;
+          font-size: 0.55em; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+          margin-left: 10px; vertical-align: middle;
+          background: #d4edda; color: #155724; }
+.card { background: white; border-radius: 12px; padding: 28px;
+         box-shadow: 0 20px 60px rgba(0,0,0,0.25); margin-bottom: 28px; }
+code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px;
+        font-family: 'Courier New', monospace; font-size: 0.88em; color: #d63384; }
+pre code { background: none; color: #d4d4d4; padding: 0; font-size: 1em; }
+@media (max-width: 800px) {
+  div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>LC #70 — Climbing Stairs <span class="badge">easy</span></h1>
+<p class="subtitle">Dynamic Programming (1D) Pattern &nbsp;|&nbsp; Day 10 Study Material</p>
+
+<div class="card" style="">
+<h2 style="color:#9c27b0;font-size:1.3em;font-weight:600;margin-bottom:16px;">📋 Problem + Core Insight</h2>
+<h3 style="color:#9c27b0;font-size:1.15em;margin:16px 0 8px;">📈 LeetCode 70: Climbing Stairs</h3>
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<div style="padding: 15px; border-left: 8px solid #9c27b0; background-color: #f3e5f5; color: #4a148c; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> To reach step `n`, you either took a 1-step from `n-1`, or a 2-step from `n-2`.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Thus, the total ways to reach step `n` is exactly the sum of ways to reach `n-1` and ways to reach `n-2`.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">This is exactly the Fibonacci sequence conceptually applied to combinatorics.</p>
+</div>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">📋 Problem</h4>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;">You are climbing a staircase. It takes <strong>n</strong> steps to reach the top. Each time you can either climb</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>1</strong> or <strong>2</strong> steps. In how many distinct ways can you climb to the top?</p>
+
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.87em;line-height:1.5;"><code>Input: n = 3
+Output: 3
+Explanation: There are three ways to climb to the top:
+1. 1 step + 1 step + 1 step
+2. 1 step + 2 steps
+3. 2 steps + 1 step</code></pre>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Constraints:</strong> 1 ≤ n ≤ 45</p>
+
+</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:28px;">
+<div class="card" style="">
+<h2 style="color:#9c27b0;font-size:1.3em;font-weight:600;margin-bottom:16px;">🧠 Mental Models</h2>
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">🧠 Choose Your Mental Model</h4>
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Model</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">The "Story"</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Mechanism</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Base Cases & Induction</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Step 1: 1 way. Step 2: 2 ways. Step 3 relies on summing past paths.</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><code>F(n) = F(n-1) + F(n-2)</code></td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Tree of Decisions</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Branches violently expand out +1 and +2 covering extensive overlapping subsets.</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Memoization collapses tree natively</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>Constant Memory Window</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">We uniquely only genuinely need the last two values immediately preceding mathematically.</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Two pointers sliding natively</td>
+</tr>
+</tbody></table>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#9c27b0;font-size:1.3em;font-weight:600;margin-bottom:16px;">📊 Complexity Analysis</h2>
+<h3 style="color:#9c27b0;font-size:1.15em;margin:16px 0 8px;">🔬 Complexity Analysis: Brute Force vs Optimal</h3>
+
+<div style="padding: 15px; border-left: 8px solid #9c27b0; background-color: #f3e5f5; color: #4a148c; border-radius: 4px;">
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>The Core Insight:</strong> A naive recursion yields O(2^n) time mapping pure permutations.</p>
+<p style="color:#555;line-height:1.7;margin:8px 0;">Adding DP cuts identical node recalculations collapsing bounds strictly into O(N) natively.</p>
+</div>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<table style="width:100%;border-collapse:collapse;margin:12px 0;font-size:0.9em;">
+<thead><tr style="background:#f5f5f5;">
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Approach</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Time</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Space</th>
+<th style="padding:9px;border:1px solid #ddd;text-align:left;">Notes</th>
+</tr></thead><tbody>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Brute force (Recursive)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(2^n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Timeout natively</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">DP Array (Memoization)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">O(n)</td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Saves entire trace</td>
+</tr>
+<tr>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>DP Window (Optimal)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(n)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;"><strong>O(1)</strong></td>
+<td style="padding:9px;border:1px solid #ddd;color:#555;vertical-align:top;">Sliding states</td>
+</tr>
+</tbody></table>
+
+</div></div>
+<div class="card" style="">
+<h2 style="color:#9c27b0;font-size:1.3em;font-weight:600;margin-bottom:16px;">🚀 Optimal Solution</h2>
+<pre style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;overflow-x:auto;font-size:0.88em;line-height:1.5;"><code>def climbStairs(n: int) -&gt; int:
+    """
+    Optimal Dynamic Programming — Constant Space window.
+    Time: O(n)  |  Space: O(1)
+    """
+    if n &lt;= 2:
+        return n
+        
+    prev2 = 1  # ways to reach n-2
+    prev1 = 2  # ways to reach n-1
+    
+    for i in range(3, n + 1):
+        current = prev1 + prev2
+        prev2 = prev1
+        prev1 = current
+        
+    return prev1
+
+# Test
+print(climbStairs(3))   # 3
+print(climbStairs(5))   # 8
+</code></pre>
+</div>
+<div class="card" style="">
+<h2 style="color:#9c27b0;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎤 Interview Q&amp;A</h2>
+<h3 style="color:#9c27b0;font-size:1.15em;margin:16px 0 8px;">🎤 5 Interview Q&A</h3>
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q1: What is overlapping subproblems?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> In the naive tree, to solve F(5), F(3) is computed heavily on the left branch, and then completely re-computed entirely again on the right branch. DP guarantees a subproblem is evaluated exactly once.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q2: Can we solve this top-down?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes, Memoization yields Top-Down O(N) Time and Space. The loop mechanism yields Bottom-Up DP which successfully establishes O(1) space constraints.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q3: Does this work for 1, 2, or 3 increments exactly uniformly?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Trivially. <code>current = prev1 + prev2 + prev3</code>. This cleanly accommodates arbitrary expansion bounds effectively instantly.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q4: Are base cases intrinsically explicitly necessary?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Yes. Returning `n` if `n <= 2` prevents iterating explicitly backwards mapping into uninitialized array bounds violently halting the entire function entirely structurally.</p>
+
+<hr style="border:0;border-top:1px solid #eee;margin:14px 0;">
+
+<h4 style="color:#444;font-size:1.0em;margin:16px 0 8px;">Q5: What determines if DP inherently optimally resolves this cleanly natively completely?</h4>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Answer:</strong> Both optimal substructure (combinations mapping identically recursively strictly building optimal paths completely sequentially natively) and overlapping subproblems.</p>
+
+</div>
+<div class="card" style="">
+<h2 style="color:#9c27b0;font-size:1.3em;font-weight:600;margin-bottom:16px;">💼 The Citi Angle</h2>
+<div style="background:#fff8e1;border-left:5px solid #9c27b0;padding:18px;border-radius:8px;"><h3 style="color:#9c27b0;font-size:1.15em;margin:16px 0 8px;">💼 Sequential Path Permutations</h3>
+
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>Context:</strong> In order routing architectures, navigating explicit sequential transaction trees (Payment Sent = +1, Settlement Hold = +2) allows algorithmic predictions mathematically bounding how many permutations of sequences exist to test during unit test generations natively safely without executing bounds entirely identically.</p>
+</div>
+</div>
+<div class="card" style="">
+<h2 style="color:#9c27b0;font-size:1.3em;font-weight:600;margin-bottom:16px;">🎯 Summary</h2>
+<p style="color:#555;line-height:1.7;margin:8px 0;"><strong>"Simplicity and clarity is Gold."</strong> — Sean's Study Mantra 🚀</p>
+</div>
+</div>
+</body>
+</html>
